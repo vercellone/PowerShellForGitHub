@@ -27,7 +27,7 @@ Import-Module .\GitHubAnalytics.psm1
 $issues = Get-GitHubIssuesForRepository -repositoryUrl @('https://github.com/PowerShell/DscResources')
 ```
 
-## Runnig tests
+## Running tests
 1) Install [Pester](http://www.powershellgallery.com/packages/Pester/3.4.0) 
 
 ```powershell
