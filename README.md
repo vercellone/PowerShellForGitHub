@@ -19,7 +19,7 @@ Install-Module -Name PowerShellForGitHub
 1) Rename ApiTokensTemplate.psm1 to ApiTokens.psm1 and update value of $global:gitHubApiToken with GitHub token for your account
   * You can obtain it from https://github.com/settings/tokens). 
   * If you don't provide GitHub token, you can still use this module, but you will be limited to 60 queries per hour. 
-  * You can't achieve this with Notepad.exe due to permission restrictions. Run PowerShell ISE as Administrator instead. 
+  * You will need to edit this file from an elevated context. 
  
 2) Import module you want to use and call it's function, e.g.
 
