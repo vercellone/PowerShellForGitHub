@@ -37,6 +37,7 @@ Install-Module -Name Pester
 
 2) Start test pass
 
+Go to the Tests folder and run:
 ```powershell
 Invoke-Pester
 ```
