@@ -17,7 +17,7 @@ Install-Module -Name PowerShellForGitHub
 
 ## Usage
 1) Rename ApiTokensTemplate.psm1 to ApiTokens.psm1 and update value of $global:gitHubApiToken with GitHub token for your account
-  * You can obtain it from https://github.com/settings/tokens). 
+  * You can obtain it from https://github.com/settings/tokens. 
   * If you don't provide GitHub token, you can still use this module, but you will be limited to 60 queries per hour. 
   * You will need to edit this file from an elevated context. 
  
