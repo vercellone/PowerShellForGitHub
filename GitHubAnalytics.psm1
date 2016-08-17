@@ -971,6 +971,19 @@ function Get-GitHubOrganizationRepository
     return $resultToReturn
 }
 
+<#
+    .SYNOPSIS Function which gets a list of branches for a given repository
+    .PARAM
+        owner The name of the repository owner
+    .PARAM
+        repository The name of the repository
+    .PARAM
+        gitHubAccessToken GitHub API Access Token.
+            Get github token from https://github.com/settings/tokens 
+            If you don't provide it, you can still use this script, but you will be limited to 60 queries per hour.
+    .EXAMPLE
+        $branches = Get-GitHubRepositoryBranch -owner PowerShell -repository PowerShellForGitHub
+#>
 function Get-GitHubRepositoryBranch
 {
     param
