@@ -971,6 +971,54 @@ function Get-GitHubOrganizationRepository
     return $resultToReturn
 }
 
+function Get-GitHubRepositoryBranch
+{
+    param
+    (
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [String] $owner,
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [String] $repository,
+        $gitHubAccessToken = $script:gitHubToken
+    )
+
+    $resultToReturn = @()
+
+    $query = "$script:gitHubApiUrl/repos/$owner/$repository/branches?"
+
+    if (![string]::IsNullOrEmpty($gitHubAccessToken))
+    {
+        $query += "&access_token=$gitHubAccessToken"
+    }    
+
+    do
+    {
+        try
+        {
+            $jsonResult = Invoke-WebRequest $query
+            $branches = (ConvertFrom-Json -InputObject $jsonResult.content)
+        }    
+        catch [System.Net.WebException] {
+            Write-Error "Failed to execute query with exception: $($_.Exception)`nHTTP status code: $($_.Exception.Response.StatusCode)"
+            return $null
+        }
+        catch {
+            Write-Error "Failed to execute query with exception: $($_.Exception)"
+            return $null
+        }
+
+        foreach($branch in $branches)
+        {
+            $resultToReturn += $branch
+        }
+        $query = Get-NextResultPage -jsonResult $jsonResult
+    } while ($query -ne $null)
+
+    return $resultToReturn
+}
+
 <#
     .SYNOPSIS Function to get next page with results from query to GitHub API
 
