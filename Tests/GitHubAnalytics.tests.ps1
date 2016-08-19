@@ -218,3 +218,14 @@ Describe 'Getting repository owner from url' {
         $owner | Should be "KarolKaczmarek"
     }
 }
+
+Describe 'Getting branches for repository' {
+    $branches = Get-GitHubRepositoryBranch -owner $script:organizationName -repository $script:repositoryName
+
+    It 'Should return expected number of repository branches' {
+        @($branches).Count | Should be 1
+    }
+     It 'Should return the name of the branches' {
+        @($branches[0].name) | Should be "master"
+    }
+}

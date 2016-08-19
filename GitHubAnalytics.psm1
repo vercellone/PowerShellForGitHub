@@ -972,6 +972,67 @@ function Get-GitHubOrganizationRepository
 }
 
 <#
+    .SYNOPSIS Function which gets a list of branches for a given repository
+    .PARAM
+        owner The name of the repository owner
+    .PARAM
+        repository The name of the repository
+    .PARAM
+        gitHubAccessToken GitHub API Access Token.
+            Get github token from https://github.com/settings/tokens 
+            If you don't provide it, you can still use this script, but you will be limited to 60 queries per hour.
+    .EXAMPLE
+        $branches = Get-GitHubRepositoryBranch -owner PowerShell -repository PowerShellForGitHub
+#>
+function Get-GitHubRepositoryBranch
+{
+    param
+    (
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [String] $owner,
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [String] $repository,
+        $gitHubAccessToken = $script:gitHubToken
+    )
+
+    $resultToReturn = @()
+
+    $query = "$script:gitHubApiUrl/repos/$owner/$repository/branches?"
+
+    if (![string]::IsNullOrEmpty($gitHubAccessToken))
+    {
+        $query += "&access_token=$gitHubAccessToken"
+    }    
+
+    do
+    {
+        try
+        {
+            $jsonResult = Invoke-WebRequest $query
+            $branches = (ConvertFrom-Json -InputObject $jsonResult.content)
+        }    
+        catch [System.Net.WebException] {
+            Write-Error "Failed to execute query with exception: $($_.Exception)`nHTTP status code: $($_.Exception.Response.StatusCode)"
+            return $null
+        }
+        catch {
+            Write-Error "Failed to execute query with exception: $($_.Exception)"
+            return $null
+        }
+
+        foreach($branch in $branches)
+        {
+            $resultToReturn += $branch
+        }
+        $query = Get-NextResultPage -jsonResult $jsonResult
+    } while ($query -ne $null)
+
+    return $resultToReturn
+}
+
+<#
     .SYNOPSIS Function to get next page with results from query to GitHub API
 
     .PARAM
