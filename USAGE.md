@@ -35,7 +35,13 @@
         *   [Check assignee permission](#check-assignee-permission)
         *   [Add assignee to an issue](#add-assignee-to-an-issue)
         *   [Remove assignee from an issue](#remove-assignee-from-an-issue)
-
+    *   [Comments](#comments)
+        *   [Get comments from an issue](#get-comments-from-an-issue)
+        *   [Get comments from a repository](#get-comments-from-a-repository)
+        *   [Get a single comment](#get-a-single-comment)
+        *   [Adding a new comment to an issue](#adding-a-new-comment-to-an-issue)
+        *   [Editing an existing comment](#editing-an-existing-comment)
+        *   [Removing a comment](#removing-a-comment)
 ----------
 
 ## Logging
@@ -370,4 +376,38 @@ New-GithubAssignee -OwnerName Powershell -RepositoryName PowerShellForGitHub -As
 #### Remove assignee from an issue
 ```powershell
 Remove-GithubAssignee -OwnerName Powershell -RepositoryName PowerShellForGitHub -Assignees $assignees -Issue 1
+```
+
+----------
+
+### Comments
+
+#### Get comments from an issue
+```powershell
+Get-GitHubIssueComment -OwnerName Powershell -RepositoryName PowerShellForGitHub -Issue 1
+```
+
+#### Get comments from a repository
+```powershell
+Get-GitHubRepositoryComment -OwnerName Powershell -RepositoryName PowerShellForGitHub -Sort created -Direction asc -Since '2011-04-14T16:00:49Z'
+```
+
+#### Get a single comment
+```powershell
+Get-GitHubComment -OwnerName Powershell -RepositoryName PowerShellForGitHub -CommentID 1
+```
+
+#### Adding a new comment to an issue
+```powershell
+New-GitHubComment -OwnerName Powershell -RepositoryName PowerShellForGitHub -Issue 1 -Body "Testing this API"
+```
+
+#### Editing an existing comment
+```powershell
+Set-GitHubComment -OwnerName Powershell -RepositoryName PowerShellForGitHub -CommentID 1 -Body "Testing this API"
+```
+
+#### Removing a comment
+```powershell
+Remove-GitHubComment -OwnerName Powershell -RepositoryName PowerShellForGitHub -CommentID 1
 ```
