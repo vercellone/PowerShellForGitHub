@@ -42,10 +42,17 @@
         *   [Adding a new comment to an issue](#adding-a-new-comment-to-an-issue)
         *   [Editing an existing comment](#editing-an-existing-comment)
         *   [Removing a comment](#removing-a-comment)
+    *   [Milestones](#milestones)
+        *   [Get milestones from a repository](#get-milestones-from-a-repository)
+        *   [Get a single milestone](#get-a-single-milestone)
+        *   [Adding a new milestone](#adding-a-new-milestone)
+        *   [Editing an existing milestone](#editing-an-existing-milestone)
+        *   [Removing a milestone](#removing-a-milestone)
     *   [Events](#Events)
         *   [Get events from a repository](#get-events-from-a-repository)
         *   [Get events from an issue](#get-events-from-an-issue)
         *   [Get a single event](#get-a-single-event])
+        
 ----------
 
 ## Logging
@@ -414,6 +421,36 @@ Set-GitHubComment -OwnerName Powershell -RepositoryName PowerShellForGitHub -Com
 #### Removing a comment
 ```powershell
 Remove-GitHubComment -OwnerName Powershell -RepositoryName PowerShellForGitHub -CommentID 1
+```
+
+----------
+
+### Milestones
+
+#### Get milestones from a repository
+```powershell
+Get-GitHubMilestone -OwnerName Powershell -RepositoryName PowerShellForGitHub -Sort "due_on" -Direction "asc" -DueOn '2011-04-14T16:00:49Z'
+```
+
+#### Get a single milestone
+```powershell
+Get-GitHubMilestone -OwnerName Powershell -RepositoryName PowerShellForGitHub -Milestone 1
+```
+
+#### Assign an existing issue to a new milestone
+```powershell
+New-GitHubMilestone -OwnerName Powershell -RepositoryName PowerShellForGitHub -Title "Testing this API"
+Update-GitHubIssue -OwnerName PowerShell -RepositoryName PowerShellForGitHub -Issue 2 -Milestone 1 
+```
+
+#### Editing an existing milestone
+```powershell
+Set-GitHubMilestone -OwnerName Powershell -RepositoryName PowerShellForGitHub -Milestone 1 -Title "Testing this API edited"
+```
+
+#### Removing a milestone
+```powershell
+Remove-GitHubMilestone -OwnerName Powershell -RepositoryName PowerShellForGitHub -Milestone 1
 ```
 
 ----------
