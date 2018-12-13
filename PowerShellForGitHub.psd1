@@ -44,6 +44,7 @@
 
     # Functions to export from this module
     FunctionsToExport = @(
+        'Add-GitHubIssueLabel',
         'Backup-GitHubConfiguration',
         'Clear-GitHubAuthentication',
         'ConvertFrom-Markdown',
@@ -93,6 +94,7 @@
         'New-GitHubRepositoryFork',
         'Remove-GithubAssignee',
         'Remove-GitHubComment',
+        'Remove-GitHubIssueLabel',
         'Remove-GitHubLabel',
         'Remove-GitHubMilestone',
         'Remove-GitHubRepository',
@@ -101,6 +103,7 @@
         'Set-GitHubAuthentication',
         'Set-GitHubComment',
         'Set-GitHubConfiguration',
+        'Set-GitHubIssueLabel',
         'Set-GitHubLabel',
         'Set-GitHubMilestone',
         'Set-GitHubRepositoryTopic',
