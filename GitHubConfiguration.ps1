@@ -67,6 +67,11 @@ function Set-GitHubConfiguration
 
         The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
 
+    .PARAMETER ApiHostName
+        The hostname of the GitHub instance to communicate with. Defaults to 'github.com'. Provide a
+        different hostname when using a GitHub Enterprise server. Do not include the HTTP/S prefix,
+        and do not include 'api'. For example, use "github.contoso.com".
+
     .PARAMETER ApplicationInsightsKey
         Change the Application Insights instance that telemetry will be reported to (if telemetry
         hasn't been disabled via DisableTelemetry).
@@ -158,10 +163,19 @@ function Set-GitHubConfiguration
 
         Disables the logging of any activity to the logfile specified in LogPath, but for this
         session only.
+
+    .EXAMPLE
+        Set-GitHubConfiguration -ApiHostName "github.contoso.com"
+
+        Sets all requests to connect to a GitHub Enterprise server running at
+        github.contoso.com.
 #>
     [CmdletBinding(SupportsShouldProcess)]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
+        [ValidatePattern('^(?!https?:)(?!api\.)(?!www\.).*')]
+        [string] $ApiHostName,
+
         [string] $ApplicationInsightsKey,
 
         [string] $AssemblyPath,
@@ -239,7 +253,7 @@ function Get-GitHubConfiguration
 
         Always returns the value for this session, which may or may not be the persisted
         setting (that all depends on whether or not the setting was previously modified
-        during this session using Set-GitHubCOnfiguration -SessionOnly).
+        during this session using Set-GitHubConfiguration -SessionOnly).
 
         The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
 
@@ -257,6 +271,7 @@ function Get-GitHubConfiguration
     param(
         [Parameter(Mandatory)]
         [ValidateSet(
+            'ApiHostName',
             'ApplicationInsightsKey',
             'AssemblyPath',
             'DefaultNoStatus',
@@ -589,6 +604,7 @@ function Import-GitHubConfiguration
     }
 
     $config = [PSCustomObject]@{
+        'apiHostName' = 'github.com'
         'applicationInsightsKey' = '66d83c52-3070-489b-886b-09860e05e78a'
         'assemblyPath' = [String]::Empty
         'disableLogging' = ([String]::IsNullOrEmpty($logPath))

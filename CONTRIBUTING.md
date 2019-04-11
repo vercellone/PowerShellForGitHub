@@ -247,14 +247,16 @@ Here are some general guidelines
 ## Adding New Configuration Properties
 
 If you want to add a new configuration value to the module, you must modify the following:
- * In `Restore-GitHubConfiguration`, update `$config` to declare the new property along with
-   it's default value, being sure that PowerShell will understand what its type is.
+ * In `Import-GitHubConfiguration`, update `$config` to declare the new property along with
+   its default value, being sure that PowerShell will understand what its type is. Properties
+   should be alphabetical.
  * Update `Get-GitHubConfiguration` and add the new property name to the `ValidateSet` list
    so that tab-completion and documentation gets auto-updated. You shouldn't have to add anything
-   to the body of the method.
+   to the body of the method. Property names should be alphabetical.
  * Add a new explicit parameter to `Set-GitHubConfiguration` to receive the property, along with
    updating the CBH (Comment Based Help) by adding a new `.PAREMETER` entry. You shouldn't
-   have to add anything to the body of the method.
+   have to add anything to the body of the method. Parameters should be alphabetical save for the
+   `SessionOnly` switch, which should be last.
 
 ----------
 
