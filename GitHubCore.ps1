@@ -127,7 +127,7 @@ function Invoke-GHRestMethod
     # be coming from the Location header in a previous response.  Either way, we don't want there
     # to be a leading "/" or trailing '/'
     if ($UriFragment.StartsWith('/')) { $UriFragment = $UriFragment.Substring(1) }
-    if ($UriFragment.EndsWIth('/')) { $UriFragment = $UriFragment.Substring(0, $UriFragment.Length - 1) }
+    if ($UriFragment.EndsWith('/')) { $UriFragment = $UriFragment.Substring(0, $UriFragment.Length - 1) }
 
     if ([String]::IsNullOrEmpty($Description))
     {
@@ -645,7 +645,8 @@ function Invoke-GHRestMethodMultipleResult
 
     try
     {
-        do {
+        do
+        {
             $params = @{
                 'UriFragment' = $nextLink
                 'Method' = 'Get'
@@ -949,6 +950,10 @@ function Get-MediaAcceptHeader
         Text - Return a text only representation of the markdown body. Response will include body_text.
         Html - Return HTML rendered from the body's markdown. Response will include body_html.
         Full - Return raw, text and HTML representations. Response will include body, body_text, and body_html.
+        Object - Return a json object representation a file or folder.
+
+    .PARAMETER AsJson
+        If this switch is specified as +json value is appended to the MediaType header.
 
     .PARAMETER AcceptHeader
         The accept header that should be included with the MediaType accept header.
@@ -960,16 +965,24 @@ function Get-MediaAcceptHeader
 #>
     [CmdletBinding()]
     param(
-        [ValidateSet('Raw', 'Text', 'Html', 'Full')]
+        [ValidateSet('Raw', 'Text', 'Html', 'Full', 'Object')]
         [string] $MediaType = 'Raw',
 
-        [Parameter(Mandatory)]
+        [switch] $AsJson,
+
         [string] $AcceptHeader
     )
 
-    $acceptHeaders = @(
-        $AcceptHeader,
-        "application/vnd.github.$mediaTypeVersion.$($MediaType.ToLower())+json")
+    $resultHeaders = "application/vnd.github.$mediaTypeVersion.$($MediaType.ToLower())"
+    if ($AsJson)
+    {
+        $resultHeaders = $resultHeaders + "+json"
+    }
 
-    return ($acceptHeaders -join ',')
+    if (-not [String]::IsNullOrEmpty($AcceptHeader))
+    {
+        $resultHeaders = "$AcceptHeader,$resultHeaders"
+    }
+
+    return $resultHeaders
 }
