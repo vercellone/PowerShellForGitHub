@@ -1,7 +1,7 @@
 ---
 name: Bug or problem report
 about: If you have a general question or request for help.
-labels: 'triage needed', 'bug'
+labels: triage needed, bug
 assignees: ''
 ---
 

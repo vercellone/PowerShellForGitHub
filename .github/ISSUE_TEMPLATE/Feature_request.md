@@ -1,7 +1,7 @@
 ---
 name: Feature request or suggestion
 about: If you have an idea for a feature that this module is missing.
-labels: 'triage needed', 'enhancement'
+labels: triage needed, enhancement
 assignees: ''
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: Support request or question
 about: If you have a general question or request for help.
-labels: 'triage needed', 'support'
+labels: triage needed, support
 assignees: ''
 ---
 

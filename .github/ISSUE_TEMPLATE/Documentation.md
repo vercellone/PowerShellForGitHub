@@ -1,7 +1,7 @@
 ---
 name: Documentation issue
 about: If you found a problem with documentation in the module or in this repo.
-labels: 'triage needed', 'documentation'
+labels: triage needed, documentation
 assignees: ''
 ---
 
