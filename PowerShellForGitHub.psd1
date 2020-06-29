@@ -55,6 +55,7 @@
 
     # Functions to export from this module
     FunctionsToExport = @(
+        'Add-GitHubAssignee',
         'Add-GitHubIssueLabel',
         'Backup-GitHubConfiguration',
         'Clear-GitHubAuthentication',
@@ -102,6 +103,7 @@
         'Get-GitHubViewTraffic',
         'Group-GitHubIssue',
         'Group-GitHubPullRequest',
+        'Initialize-GitHubLabel',
         'Invoke-GHRestMethod',
         'Invoke-GHRestMethodMultipleResult',
         'Join-GitHubUri',
@@ -109,7 +111,6 @@
         'Move-GitHubProjectCard',
         'Move-GitHubProjectColumn',
         'Move-GitHubRepositoryOwnership',
-        'New-GitHubAssignee',
         'New-GitHubIssue',
         'New-GitHubIssueComment',
         'New-GitHubLabel',
@@ -136,24 +137,23 @@
         'Set-GitHubAuthentication',
         'Set-GitHubConfiguration',
         'Set-GitHubContent',
+        'Set-GitHubIssue',
         'Set-GitHubIssueComment',
         'Set-GitHubIssueLabel',
         'Set-GitHubLabel',
         'Set-GitHubMilestone',
+        'Set-GitHubProfile',
         'Set-GitHubProject',
         'Set-GitHubProjectCard',
         'Set-GitHubProjectColumn',
+        'Set-GitHubRepository'
         'Set-GitHubRepositoryTopic',
         'Split-GitHubUri',
         'Test-GitHubAssignee',
         'Test-GitHubAuthenticationConfigured',
         'Test-GitHubOrganizationMember',
         'Test-GitHubRepositoryVulnerabilityAlert',
-        'Unlock-GitHubIssue',
-        'Update-GitHubCurrentUser',
-        'Update-GitHubIssue',
-        'Update-GitHubLabel',
-        'Update-GitHubRepository'
+        'Unlock-GitHubIssue'
     )
 
     AliasesToExport = @(
@@ -167,10 +167,15 @@
         'Delete-GitHubRepository',
         'Get-GitHubBranch',
         'Get-GitHubComment',
+        'New-GitHubAssignee',
         'New-GitHubComment',
         'Remove-GitHubComment',
         'Set-GitHubComment',
         'Transfer-GitHubRepositoryOwnership'
+        'Update-GitHubIssue',
+        'Update-GitHubLabel',
+        'Update-GitHubCurrentUser',
+        'Update-GitHubRepository'
     )
 
     # Cmdlets to export from this module

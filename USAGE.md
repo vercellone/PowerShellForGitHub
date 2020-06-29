@@ -395,13 +395,16 @@ Remove-GitHubIssueLabel -OwnerName microsoft -RepositoryName DesiredStateConfigu
 
 #### Updating a Label With a New Name and Color
 ```powershell
-Update-GitHubLabel -OwnerName microsoft -RepositoryName DesiredStateConfiguration -Name TestLabel -NewName NewTestLabel -Color BBBB00
+Set-GitHubLabel -OwnerName microsoft -RepositoryName DesiredStateConfiguration -Name TestLabel -NewName NewTestLabel -Color BBBB00
 ```
 
 #### Bulk Updating Labels in a Repository
+This replaces the entire set of labels in a repository to only contain the labels in the provided array.
+Any labels already in the repository that are not in this array will be removed upon execution.
+
 ```powershell
 $labels = @( @{ 'name' = 'Label1'; 'color' = 'BBBB00'; 'description' = 'My label description' }, @{ 'name' = 'Label2'; 'color' = 'FF00000' })
-Set-GitHubLabel -OwnerName PowerShell -RepositoryName DesiredStateConfiguration -Label $labels
+Initialize-GitHubLabel -OwnerName PowerShell -RepositoryName DesiredStateConfiguration -Label $labels
 ```
 
 ----------
@@ -413,9 +416,9 @@ Set-GitHubLabel -OwnerName PowerShell -RepositoryName DesiredStateConfiguration 
 Get-GitHubUser -Current
 ```
 
-#### Updating the current authenticated user
+#### Updating the current authenticated user's profile
 ```powershell
-Update-GitHubCurrentUser -Location 'Seattle, WA' -Hireable:$false
+Set-GitHubProfile -Location 'Seattle, WA' -Hireable:$false
 ```
 
 #### Getting any user
@@ -569,7 +572,7 @@ $HasPermission = Test-GitHubAssignee -OwnerName microsoft -RepositoryName PowerS
 
 #### Add assignee to an issue
 ```powershell
-New-GitHubAssignee -OwnerName microsoft -RepositoryName PowerShellForGitHub -Assignees $assignees -Issue 1
+Add-GitHubAssignee -OwnerName microsoft -RepositoryName PowerShellForGitHub -Assignees $assignees -Issue 1
 ```
 
 #### Remove assignee from an issue
@@ -628,7 +631,7 @@ Get-GitHubMilestone -OwnerName microsoft -RepositoryName PowerShellForGitHub -Mi
 #### Assign an existing issue to a new milestone
 ```powershell
 New-GitHubMilestone -OwnerName microsoft -RepositoryName PowerShellForGitHub -Title "Testing this API"
-Update-GitHubIssue -OwnerName microsoft -RepositoryName PowerShellForGitHub -Issue 2 -Milestone 1
+Set-GitHubIssue -OwnerName microsoft -RepositoryName PowerShellForGitHub -Issue 2 -Milestone 1
 ```
 
 #### Editing an existing milestone
@@ -722,5 +725,5 @@ $issue = $repo | New-GitHubIssue -Title $IssueTitle -Body $body -Label 'blog com
 $issue | New-GitHubIssueComment -Body $CommentBody
 
 # Close issue
-$issue | Update-GitHubIssue -State Closed
+$issue | Set-GitHubIssue -State Closed
 ```
