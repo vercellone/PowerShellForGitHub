@@ -41,6 +41,7 @@
         'GitHubProjectCards.ps1',
         'GitHubProjectColumns.ps1',
         'GitHubPullRequests.ps1',
+        'GitHubReactions.ps1',
         'GitHubReleases.ps1',
         'GitHubRepositories.ps1',
         'GitHubRepositoryForks.ps1',
@@ -85,6 +86,7 @@
         'Get-GitHubProjectColumn',
         'Get-GitHubPullRequest',
         'Get-GitHubRateLimit',
+        'Get-GitHubReaction',
         'Get-GitHubReferrerTraffic',
         'Get-GitHubRelease',
         'Get-GitHubRepository',
@@ -131,6 +133,7 @@
         'Remove-GitHubProject',
         'Remove-GitHubProjectCard',
         'Remove-GitHubProjectColumn',
+        'Remove-GitHubReaction',
         'Remove-GitHubRepository',
         'Remove-GitHubRepositoryBranch'
         'Rename-GitHubRepository',
@@ -148,7 +151,8 @@
         'Set-GitHubProject',
         'Set-GitHubProjectCard',
         'Set-GitHubProjectColumn',
-        'Set-GitHubRepository'
+        'Set-GitHubReaction',
+        'Set-GitHubRepository',
         'Set-GitHubRepositoryTopic',
         'Split-GitHubUri',
         'Test-GitHubAssignee',
@@ -166,7 +170,8 @@
         'Delete-GitHubMilestone',
         'Delete-GitHubProject',
         'Delete-GitHubProjectCard',
-        'Delete-GitHubProjectColumn'
+        'Delete-GitHubProjectColumn',
+        'Delete-GitHubReaction',
         'Delete-GitHubRepository',
         'Delete-GitHubRepositoryBranch',
         'Get-GitHubBranch',

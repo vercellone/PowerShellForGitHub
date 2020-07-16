@@ -63,6 +63,7 @@ filter Get-GitHubLabel
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 
@@ -250,6 +251,7 @@ filter New-GitHubLabel
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 
@@ -391,6 +393,7 @@ filter Remove-GitHubLabel
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 
@@ -548,6 +551,7 @@ filter Set-GitHubLabel
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 
@@ -694,6 +698,7 @@ filter Initialize-GitHubLabel
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 
@@ -833,6 +838,7 @@ function Add-GitHubIssueLabel
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 
@@ -993,6 +999,7 @@ function Set-GitHubIssueLabel
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 
@@ -1184,6 +1191,7 @@ filter Remove-GitHubIssueLabel
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 

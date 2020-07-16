@@ -128,6 +128,7 @@ filter Get-GitHubIssue
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
         GitHub.User
@@ -431,6 +432,7 @@ filter Get-GitHubIssueTimeline
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 
@@ -569,6 +571,7 @@ filter New-GitHubIssue
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 
@@ -737,6 +740,7 @@ filter Set-GitHubIssue
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 
@@ -887,6 +891,7 @@ filter Lock-GitHubIssue
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 
@@ -1017,6 +1022,7 @@ filter Unlock-GitHubIssue
         GitHub.Project
         GitHub.ProjectCard
         GitHub.ProjectColumn
+        GitHub.Reaction
         GitHub.Release
         GitHub.Repository
 
