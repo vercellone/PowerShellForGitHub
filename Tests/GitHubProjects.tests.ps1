@@ -611,6 +611,10 @@ try
             $project = New-GitHubProject -OwnerName $script:ownerName -RepositoryName $repo.name -ProjectName $defaultRepoProject -Description $defaultRepoProjectDesc
             $null = Remove-GitHubProject -Project $project.id -Confirm:$false
             It 'Project should be removed' {
+                # The CI build has been unreliable with this test.
+                # Adding a short sleep to ensure successive queries reflect updated state.
+                Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
+
                 {Get-GitHubProject -Project $project.id} | Should -Throw
             }
         }
@@ -619,6 +623,10 @@ try
             $project = $repo | New-GitHubProject -ProjectName $defaultRepoProject -Description $defaultRepoProjectDesc
             $project | Remove-GitHubProject -Force
             It 'Project should be removed' {
+                # The CI build has been unreliable with this test.
+                # Adding a short sleep to ensure successive queries reflect updated state.
+                Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
+
                 {$project | Get-GitHubProject} | Should -Throw
             }
         }

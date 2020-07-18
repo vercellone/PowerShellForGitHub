@@ -29,6 +29,10 @@ try
         Context 'When a new fork is created' {
             BeforeAll {
                 $repo = New-GitHubRepositoryFork -OwnerName $script:upstreamOwnerName -RepositoryName $script:upstreamRepositoryName
+
+                # The CI build has been unreliable with this test.
+                # Adding a short sleep to ensure successive queries reflect updated state.
+                Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
             }
 
             AfterAll {
@@ -54,6 +58,10 @@ try
             BeforeAll {
                 $upstream = Get-GitHubRepository -OwnerName $script:upstreamOwnerName -RepositoryName $script:upstreamRepositoryName
                 $repo = $upstream | New-GitHubRepositoryFork
+
+                # The CI build has been unreliable with this test.
+                # Adding a short sleep to ensure successive queries reflect updated state.
+                Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
             }
 
             AfterAll {
@@ -80,10 +88,13 @@ try
         Context 'When a new fork is created' {
             BeforeAll {
                 $repo = New-GitHubRepositoryFork -OwnerName $script:upstreamOwnerName -RepositoryName $script:upstreamRepositoryName -OrganizationName $script:organizationName
+
+                # The CI build has been unreliable with this test.
+                # Adding a short sleep to ensure successive queries reflect updated state.
+                Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
             }
 
             AfterAll {
-                Start-Sleep -Seconds 3 # Trying to avoid an issue with deleting the repo if it's still being created by GitHub
                 $repo | Remove-GitHubRepository -Force
             }
 

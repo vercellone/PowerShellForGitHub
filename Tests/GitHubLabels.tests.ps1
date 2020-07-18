@@ -81,6 +81,10 @@ try
             $repositoryName = [Guid]::NewGuid().Guid
             $repo = New-GitHubRepository -RepositoryName $repositoryName
 
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
+
             Initialize-GitHubLabel -OwnerName $script:ownerName -RepositoryName $repositoryName -Label $defaultLabels
         }
 
@@ -205,6 +209,10 @@ try
         BeforeAll {
             $repositoryName = [Guid]::NewGuid().Guid
             $repo = New-GitHubRepository -RepositoryName $repositoryName
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
         }
 
         AfterAll {
@@ -319,6 +327,10 @@ try
         BeforeAll {
             $repositoryName = [Guid]::NewGuid().Guid
             $repo = New-GitHubRepository -RepositoryName $repositoryName
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
         }
 
         AfterAll {
@@ -327,6 +339,11 @@ try
 
         Context 'Removing a label with parameters' {
             $label = $repo | New-GitHubLabel -Label 'test' -Color 'CCCCCC'
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
+
             Remove-GitHubLabel -OwnerName $script:ownerName -RepositoryName $repositoryName -Label $label.name -Force
 
             It 'Should be gone after being removed by parameter' {
@@ -336,6 +353,11 @@ try
 
         Context 'Removing a label with the repo on the pipeline' {
             $label = $repo | New-GitHubLabel -Label 'test' -Color 'CCCCCC'
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
+
             $repo | Remove-GitHubLabel -Label $label.name -Confirm:$false
 
             It 'Should be gone after being removed by parameter' {
@@ -345,6 +367,11 @@ try
 
         Context 'Removing a label with the name on the pipeline' {
             $label = $repo | New-GitHubLabel -Label 'test' -Color 'CCCCCC'
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
+
             $label.name | Remove-GitHubLabel -OwnerName $script:ownerName -RepositoryName $repositoryName -Force
 
             It 'Should be gone after being removed by parameter' {
@@ -354,6 +381,11 @@ try
 
         Context 'Removing a label with the label object on the pipeline' {
             $label = $repo | New-GitHubLabel -Label 'test' -Color 'CCCCCC'
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
+
             $label | Remove-GitHubLabel -Force
 
             It 'Should be gone after being removed by parameter' {
@@ -366,6 +398,10 @@ try
         BeforeAll {
             $repositoryName = [Guid]::NewGuid().Guid
             $repo = New-GitHubRepository -RepositoryName $repositoryName
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
         }
 
         AfterAll {
@@ -543,6 +579,10 @@ try
         BeforeAll {
             $repositoryName = [Guid]::NewGuid().Guid
             $repo = New-GitHubRepository -RepositoryName $repositoryName
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
         }
 
         AfterAll {
@@ -617,6 +657,11 @@ try
         BeforeAll {
             $repositoryName = [Guid]::NewGuid().Guid
             $repo = New-GitHubRepository -RepositoryName $repositoryName
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
+
             $repo | Initialize-GitHubLabel -Label $defaultLabels
         }
 
@@ -845,6 +890,11 @@ try
         BeforeAll {
             $repositoryName = [Guid]::NewGuid().Guid
             $repo = New-GitHubRepository -RepositoryName $repositoryName
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
+
             $repo | Initialize-GitHubLabel -Label $defaultLabels
         }
 
@@ -911,6 +961,11 @@ try
         BeforeAll {
             $repositoryName = [Guid]::NewGuid().Guid
             $repo = New-GitHubRepository -RepositoryName $repositoryName
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
+
             $repo | Initialize-GitHubLabel -Label $defaultLabels
         }
 
@@ -1078,6 +1133,11 @@ try
         BeforeAll {
             $repositoryName = [Guid]::NewGuid().Guid
             $repo = New-GitHubRepository -RepositoryName $repositoryName
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
+
             $repo | Initialize-GitHubLabel -Label $defaultLabels
         }
 
@@ -1227,6 +1287,11 @@ try
         BeforeAll {
             $repositoryName = [Guid]::NewGuid().Guid
             $repo = New-GitHubRepository -RepositoryName $repositoryName
+
+            # The CI build has been unreliable with this test.
+            # Adding a short sleep to ensure successive queries reflect updated state.
+            Start-Sleep -Seconds $script:defaultSleepSecondsForReliability
+
             $repo | Initialize-GitHubLabel -Label $defaultLabels
 
             $milestone = $repo | New-GitHubMilestone -Title 'test milestone'
