@@ -15,6 +15,7 @@
 
     # Format files (.ps1xml) to be loaded when importing this module
     FormatsToProcess = @(
+        'Formatters/GitHubReleases.Format.ps1xml'
         'Formatters/GitHubRepositories.Format.ps1xml'
     )
 
@@ -89,6 +90,7 @@
         'Get-GitHubReaction',
         'Get-GitHubReferrerTraffic',
         'Get-GitHubRelease',
+        'Get-GitHubReleaseAsset',
         'Get-GitHubRepository',
         'Get-GitHubRepositoryBranch',
         'Get-GitHubRepositoryCollaborator',
@@ -121,6 +123,8 @@
         'New-GitHubProjectCard',
         'New-GitHubProjectColumn',
         'New-GitHubPullRequest',
+        'New-GitHubRelease',
+        'New-GitHubReleaseAsset',
         'New-GitHubRepository',
         'New-GitHubRepositoryFromTemplate',
         'New-GitHubRepositoryBranch',
@@ -134,6 +138,8 @@
         'Remove-GitHubProjectCard',
         'Remove-GitHubProjectColumn',
         'Remove-GitHubReaction',
+        'Remove-GitHubRelease',
+        'Remove-GitHubReleaseAsset',
         'Remove-GitHubRepository',
         'Remove-GitHubRepositoryBranch'
         'Rename-GitHubRepository',
@@ -152,6 +158,8 @@
         'Set-GitHubProjectCard',
         'Set-GitHubProjectColumn',
         'Set-GitHubReaction',
+        'Set-GitHubRelease',
+        'Set-GitHubReleaseAsset',
         'Set-GitHubRepository',
         'Set-GitHubRepositoryTopic',
         'Split-GitHubUri',
@@ -163,6 +171,7 @@
     )
 
     AliasesToExport = @(
+        'Delete-GitHubAsset',
         'Delete-GitHubBranch',
         'Delete-GitHubComment',
         'Delete-GitHubIssueComment',
@@ -170,17 +179,23 @@
         'Delete-GitHubMilestone',
         'Delete-GitHubProject',
         'Delete-GitHubProjectCard',
-        'Delete-GitHubProjectColumn',
+        'Delete-GitHubProjectColumn'
         'Delete-GitHubReaction',
+        'Delete-GitHubRelease',
+        'Delete-GitHubReleaseAsset',
         'Delete-GitHubRepository',
         'Delete-GitHubRepositoryBranch',
+        'Get-GitHubAsset',
         'Get-GitHubBranch',
         'Get-GitHubComment',
+        'New-GitHubAsset',
         'New-GitHubAssignee',
         'New-GitHubBranch',
         'New-GitHubComment',
+        'Remove-GitHubAsset',
         'Remove-GitHubBranch'
         'Remove-GitHubComment',
+        'Set-GitHubAsset',
         'Set-GitHubComment',
         'Transfer-GitHubRepositoryOwnership'
         'Update-GitHubIssue',
