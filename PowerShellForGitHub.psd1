@@ -15,6 +15,8 @@
 
     # Format files (.ps1xml) to be loaded when importing this module
     FormatsToProcess = @(
+        'Formatters/GitHubGistComments.Format.ps1xml',
+        'Formatters/GitHubGists.Format.ps1xml',
         'Formatters/GitHubReleases.Format.ps1xml'
         'Formatters/GitHubRepositories.Format.ps1xml'
     )
@@ -32,6 +34,8 @@
         'GitHubCore.ps1',
         'GitHubContents.ps1',
         'GitHubEvents.ps1',
+        'GitHubGistComments.ps1',
+        'GitHubGists.ps1',
         'GitHubIssueComments.ps1',
         'GitHubIssues.ps1',
         'GitHubLabels.ps1',
@@ -59,9 +63,11 @@
     FunctionsToExport = @(
         'Add-GitHubAssignee',
         'Add-GitHubIssueLabel',
+        'Add-GitHubGistStar',
         'Backup-GitHubConfiguration',
         'Clear-GitHubAuthentication',
         'ConvertFrom-GitHubMarkdown',
+        'Copy-GitHubGist',
         'Disable-GitHubRepositorySecurityFix',
         'Disable-GitHubRepositoryVulnerabilityAlert',
         'Enable-GitHubRepositorySecurityFix',
@@ -73,6 +79,8 @@
         'Get-GitHubContent',
         'Get-GitHubEmoji',
         'Get-GitHubEvent',
+        'Get-GitHubGist',
+        'Get-GitHubGistComment',
         'Get-GitHubGitIgnore',
         'Get-GitHubIssue',
         'Get-GitHubIssueComment',
@@ -115,6 +123,8 @@
         'Move-GitHubProjectCard',
         'Move-GitHubProjectColumn',
         'Move-GitHubRepositoryOwnership',
+        'New-GitHubGist',
+        'New-GitHubGistComment',
         'New-GitHubIssue',
         'New-GitHubIssueComment',
         'New-GitHubLabel',
@@ -130,6 +140,11 @@
         'New-GitHubRepositoryBranch',
         'New-GitHubRepositoryFork',
         'Remove-GitHubAssignee',
+        'Remove-GitHubComment',
+        'Remove-GitHubGist',
+        'Remove-GitHubGistComment',
+        'Remove-GitHubGistFile',
+        'Remove-GitHubGistStar',
         'Remove-GitHubIssueComment',
         'Remove-GitHubIssueLabel',
         'Remove-GitHubLabel',
@@ -142,12 +157,17 @@
         'Remove-GitHubReleaseAsset',
         'Remove-GitHubRepository',
         'Remove-GitHubRepositoryBranch'
+        'Rename-GitHubGistFile',
         'Rename-GitHubRepository',
         'Reset-GitHubConfiguration',
         'Restore-GitHubConfiguration',
         'Set-GitHubAuthentication',
         'Set-GitHubConfiguration',
         'Set-GitHubContent',
+        'Set-GitHubGist',
+        'Set-GitHubGistComment',
+        'Set-GitHubGistFile',
+        'Set-GitHubGistStar',
         'Set-GitHubIssue',
         'Set-GitHubIssueComment',
         'Set-GitHubIssueLabel',
@@ -165,15 +185,20 @@
         'Split-GitHubUri',
         'Test-GitHubAssignee',
         'Test-GitHubAuthenticationConfigured',
+        'Test-GitHubGistStar',
         'Test-GitHubOrganizationMember',
         'Test-GitHubRepositoryVulnerabilityAlert',
         'Unlock-GitHubIssue'
     )
 
     AliasesToExport = @(
+        'Add-GitHubGistFile',
         'Delete-GitHubAsset',
         'Delete-GitHubBranch',
         'Delete-GitHubComment',
+        'Delete-GitHubGist',
+        'Delete-GitHubGistComment',
+        'Delete-GitHubGistFile',
         'Delete-GitHubIssueComment',
         'Delete-GitHubLabel',
         'Delete-GitHubMilestone',
@@ -185,6 +210,7 @@
         'Delete-GitHubReleaseAsset',
         'Delete-GitHubRepository',
         'Delete-GitHubRepositoryBranch',
+        'Fork-GitHubGist',
         'Get-GitHubAsset',
         'Get-GitHubBranch',
         'Get-GitHubComment',
@@ -197,7 +223,9 @@
         'Remove-GitHubComment',
         'Set-GitHubAsset',
         'Set-GitHubComment',
+        'Star-GitHubGist',
         'Transfer-GitHubRepositoryOwnership'
+        'Unstar-GitHubGist'
         'Update-GitHubIssue',
         'Update-GitHubLabel',
         'Update-GitHubCurrentUser',
