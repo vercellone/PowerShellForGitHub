@@ -90,10 +90,7 @@ filter Get-GitHubPullRequest
     .EXAMPLE
         $pullRequests = Get-GitHubPullRequest -OwnerName microsoft -RepositoryName PowerShellForGitHub -State Closed
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName='Elements')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
+    [CmdletBinding(DefaultParameterSetName = 'Elements')]
     param(
         [Parameter(ParameterSetName='Elements')]
         [string] $OwnerName,
@@ -300,7 +297,6 @@ filter New-GitHubPullRequest
         New-GitHubPullRequest -Uri 'https://github.com/PowerShell/PSScriptAnalyzer' -Issue 642 -Head simple-test -HeadOwner octocat -Base development -Draft
     #>
 
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [CmdletBinding(
         SupportsShouldProcess,
         DefaultParameterSetName='Elements_Title')]
@@ -401,6 +397,7 @@ filter New-GitHubPullRequest
     if ($PSBoundParameters.ContainsKey('Title'))
     {
         $description = "Creating pull request $Title in $RepositoryName"
+        $shouldProcessAction = "Create GitHub Pull Request: $Title"
         $postBody['title'] = $Title
 
         # Body may be whitespace, although this might not be useful
@@ -412,6 +409,7 @@ filter New-GitHubPullRequest
     else
     {
         $description = "Creating pull request for issue $Issue in $RepositoryName"
+        $shouldProcessAction = "Create GitHub Pull Request for Issue $Issue"
         $postBody['issue'] = $Issue
     }
 
@@ -424,6 +422,11 @@ filter New-GitHubPullRequest
     {
         $postBody['draft'] = $true
         $acceptHeader = 'application/vnd.github.shadow-cat-preview+json'
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($RepositoryName, $shouldProcessAction))
+    {
+        return
     }
 
     $restParams = @{

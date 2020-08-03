@@ -100,11 +100,8 @@ filter Get-GitHubProject
 
         Get a project by id, with this parameter you don't need any other information.
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName = 'Elements')]
+    [CmdletBinding(DefaultParameterSetName = 'Elements')]
     [OutputType({$script:GitHubPullRequestTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification = "Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(
             Mandatory,
@@ -309,7 +306,6 @@ filter New-GitHubProject
         SupportsShouldProcess,
         DefaultParameterSetName = 'Elements')]
     [OutputType({$script:GitHubPullRequestTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification = "Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(
             Mandatory,
@@ -392,6 +388,11 @@ filter New-GitHubProject
     if ($PSBoundParameters.ContainsKey('Description'))
     {
         $hashBody.add('body', $Description)
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($ProjectName, 'Create GitHub Project'))
+    {
+        return
     }
 
     $params = @{
@@ -479,7 +480,6 @@ filter Set-GitHubProject
 #>
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType({$script:GitHubPullRequestTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification = "Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(
             Mandatory,
@@ -534,6 +534,11 @@ filter Set-GitHubProject
     {
         $hashBody.add('organization_permission', $OrganizationPermission.ToLower())
         $apiDescription += ", organization_permission to '$OrganizationPermission'"
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($Project, 'Set GitHub Project'))
+    {
+        return
     }
 
     $params = @{
@@ -644,22 +649,23 @@ filter Remove-GitHubProject
         $ConfirmPreference = 'None'
     }
 
-    if ($PSCmdlet.ShouldProcess($project, "Remove project"))
+    if (-not $PSCmdlet.ShouldProcess($Project, 'Remove GitHub Project'))
     {
-        $params = @{
-            'UriFragment' = $uriFragment
-            'Description' = $description
-            'AccessToken' = $AccessToken
-            'Method' = 'Delete'
-            'TelemetryEventName' = $MyInvocation.MyCommand.Name
-            'TelemetryProperties' = $telemetryProperties
-            'NoStatus' = (Resolve-ParameterWithDefaultConfigurationValue -Name NoStatus -ConfigValueName DefaultNoStatus)
-            'AcceptHeader' = $script:inertiaAcceptHeader
-        }
-
-        return Invoke-GHRestMethod @params
+        return
     }
 
+    $params = @{
+        'UriFragment' = $uriFragment
+        'Description' = $description
+        'AccessToken' = $AccessToken
+        'Method' = 'Delete'
+        'TelemetryEventName' = $MyInvocation.MyCommand.Name
+        'TelemetryProperties' = $telemetryProperties
+        'NoStatus' = (Resolve-ParameterWithDefaultConfigurationValue -Name NoStatus -ConfigValueName DefaultNoStatus)
+        'AcceptHeader' = $script:inertiaAcceptHeader
+    }
+
+    return Invoke-GHRestMethod @params
 }
 
 filter Add-GitHubProjectAdditionalProperties

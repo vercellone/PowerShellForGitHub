@@ -49,11 +49,8 @@ filter Get-GitHubProjectColumn
 
         Get the column with ID 999999.
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName = 'Column')]
+    [CmdletBinding(DefaultParameterSetName = 'Column')]
     [OutputType({$script:GitHubProjectColumnTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification = "Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(
@@ -151,7 +148,6 @@ filter New-GitHubProjectColumn
 #>
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType({$script:GitHubProjectColumnTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification = "Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
 
@@ -182,6 +178,11 @@ filter New-GitHubProjectColumn
 
     $hashBody = @{
         'name' = $ColumnName
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($ColumnName, 'Create GitHub Project Column'))
+    {
+        return
     }
 
     $params = @{
@@ -237,7 +238,6 @@ filter Set-GitHubProjectColumn
 #>
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType({$script:GitHubProjectColumnTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification = "Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(
@@ -264,6 +264,11 @@ filter Set-GitHubProjectColumn
 
     $hashBody = @{
         'name' = $ColumnName
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($ColumnName, 'Set GitHub Project Column'))
+    {
+        return
     }
 
     $params = @{
@@ -355,21 +360,23 @@ filter Remove-GitHubProjectColumn
         $ConfirmPreference = 'None'
     }
 
-    if ($PSCmdlet.ShouldProcess($Column, "Remove column"))
+    if (-not $PSCmdlet.ShouldProcess($Column, 'Remove GitHub Project Column'))
     {
-        $params = @{
-            'UriFragment' = $uriFragment
-            'Description' = $description
-            'AccessToken' = $AccessToken
-            'Method' = 'Delete'
-            'TelemetryEventName' = $MyInvocation.MyCommand.Name
-            'TelemetryProperties' = $telemetryProperties
-            'NoStatus' = (Resolve-ParameterWithDefaultConfigurationValue -Name NoStatus -ConfigValueName DefaultNoStatus)
-            'AcceptHeader' = $script:inertiaAcceptHeader
-        }
-
-        return Invoke-GHRestMethod @params
+        return
     }
+
+    $params = @{
+        'UriFragment' = $uriFragment
+        'Description' = $description
+        'AccessToken' = $AccessToken
+        'Method' = 'Delete'
+        'TelemetryEventName' = $MyInvocation.MyCommand.Name
+        'TelemetryProperties' = $telemetryProperties
+        'NoStatus' = (Resolve-ParameterWithDefaultConfigurationValue -Name NoStatus -ConfigValueName DefaultNoStatus)
+        'AcceptHeader' = $script:inertiaAcceptHeader
+    }
+
+    return Invoke-GHRestMethod @params
 }
 
 filter Move-GitHubProjectColumn
@@ -423,7 +430,6 @@ filter Move-GitHubProjectColumn
         Moves the project column with ID 999999 to the position after column with ID 888888.
 #>
     [CmdletBinding(SupportsShouldProcess)]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification = "Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(
@@ -471,6 +477,11 @@ filter Move-GitHubProjectColumn
 
     $hashBody = @{
         'position' = $Position
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($Column, 'Move GitHub Project Column'))
+    {
+        return
     }
 
     $params = @{

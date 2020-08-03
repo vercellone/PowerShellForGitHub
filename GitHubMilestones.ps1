@@ -83,10 +83,7 @@ filter Get-GitHubMilestone
         Get-GitHubMilestone -Uri 'https://github.com/PowerShell/PowerShellForGitHub' -Milestone 1
         Get milestone number 1 for the microsoft\PowerShellForGitHub project.
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName='RepositoryElements')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
+    [CmdletBinding(DefaultParameterSetName = 'RepositoryElements')]
     param(
         [Parameter(
             Mandatory,
@@ -299,7 +296,6 @@ filter New-GitHubMilestone
     [CmdletBinding(
         SupportsShouldProcess,
         DefaultParameterSetName='Elements')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(
             Mandatory,
@@ -378,6 +374,11 @@ filter New-GitHubMilestone
         $modifiedDueOn = $DueOn.ToUniversalTime().date.AddHours($script:minimumHoursToEnsureDesiredDateInPacificTime)
         $dueOnFormattedTime = $modifiedDueOn.ToString('o')
         $hashBody.add('due_on', $dueOnFormattedTime)
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($Title, 'Create GitHub Milestone'))
+    {
+        return
     }
 
     $params = @{
@@ -482,7 +483,6 @@ filter Set-GitHubMilestone
     [CmdletBinding(
         SupportsShouldProcess,
         DefaultParameterSetName='Elements')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(
             Mandatory,
@@ -571,6 +571,11 @@ filter Set-GitHubMilestone
         $modifiedDueOn = $DueOn.ToUniversalTime().date.AddHours($script:minimumHoursToEnsureDesiredDateInPacificTime)
         $dueOnFormattedTime = $modifiedDueOn.ToString('o')
         $hashBody.add('due_on', $dueOnFormattedTime)
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($Milestone, 'Set GitHub Milestone'))
+    {
+        return
     }
 
     $params = @{
@@ -717,20 +722,22 @@ filter Remove-GitHubMilestone
         $ConfirmPreference = 'None'
     }
 
-    if ($PSCmdlet.ShouldProcess($Milestone, "Remove milestone"))
+    if (-not $PSCmdlet.ShouldProcess($Milestone, 'Remove GitHub Milestone'))
     {
-        $params = @{
-            'UriFragment' = "repos/$OwnerName/$RepositoryName/milestones/$Milestone"
-            'Method' = 'Delete'
-            'Description' = "Removing milestone $Milestone for $RepositoryName"
-            'AccessToken' = $AccessToken
-            'TelemetryEventName' = $MyInvocation.MyCommand.Name
-            'TelemetryProperties' = $telemetryProperties
-            'NoStatus' = (Resolve-ParameterWithDefaultConfigurationValue -Name NoStatus -ConfigValueName DefaultNoStatus)
-        }
-
-        return Invoke-GHRestMethod @params
+        return
     }
+
+    $params = @{
+        'UriFragment' = "repos/$OwnerName/$RepositoryName/milestones/$Milestone"
+        'Method' = 'Delete'
+        'Description' = "Removing milestone $Milestone for $RepositoryName"
+        'AccessToken' = $AccessToken
+        'TelemetryEventName' = $MyInvocation.MyCommand.Name
+        'TelemetryProperties' = $telemetryProperties
+        'NoStatus' = (Resolve-ParameterWithDefaultConfigurationValue -Name NoStatus -ConfigValueName DefaultNoStatus)
+    }
+
+    return Invoke-GHRestMethod @params
 }
 
 filter Add-GitHubMilestoneAdditionalProperties

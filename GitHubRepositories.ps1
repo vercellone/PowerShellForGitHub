@@ -127,7 +127,6 @@ filter New-GitHubRepository
 #>
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType({$script:GitHubRepositoryTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(
             Mandatory,
@@ -174,7 +173,7 @@ filter New-GitHubRepository
         [switch] $NoStatus
     )
 
-    Write-InvocationLog -Invocation $MyInvocation
+    Write-InvocationLog
 
     $telemetryProperties = @{
         'RepositoryName' = (Get-PiiSafeString -PlainText $RepositoryName)
@@ -214,6 +213,11 @@ filter New-GitHubRepository
     if ($PSBoundParameters.ContainsKey('DisallowRebaseMerge')) { $hashBody['allow_rebase_merge'] = (-not $DisallowRebaseMerge.ToBool()) }
     if ($PSBoundParameters.ContainsKey('DeleteBranchOnMerge')) { $hashBody['delete_branch_on_merge'] = $DeleteBranchOnMerge.ToBool() }
     if ($PSBoundParameters.ContainsKey('IsTemplate')) { $hashBody['is_template'] = $IsTemplate.ToBool() }
+
+    if (-not $PSCmdlet.ShouldProcess($RepositoryName, 'Create GitHub Repository'))
+    {
+        return
+    }
 
     $params = @{
         'UriFragment' = $uriFragment
@@ -318,9 +322,6 @@ filter New-GitHubRepositoryFromTemplate
         SupportsShouldProcess,
         PositionalBinding = $false)]
     [OutputType({$script:GitHubRepositoryTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "",
-        Justification="Methods called within here make use of PSShouldProcess, and the switch is
-        passed on to them inherently.")]
     param(
         [Parameter(ParameterSetName = 'Elements')]
         [string] $OwnerName,
@@ -383,6 +384,13 @@ filter New-GitHubRepositoryFromTemplate
 
     if ($PSBoundParameters.ContainsKey('Description')) { $hashBody['description'] = $Description }
     if ($PSBoundParameters.ContainsKey('Private')) { $hashBody['private'] = $Private.ToBool() }
+
+    if (-not $PSCmdlet.ShouldProcess(
+        $TargetRepositoryName,
+        "Create GitHub Repository From Template $RepositoryName"))
+    {
+        return
+    }
 
     $params = @{
         'UriFragment' = $uriFragment
@@ -503,7 +511,7 @@ filter Remove-GitHubRepository
         [switch] $NoStatus
     )
 
-    Write-InvocationLog -Invocation $MyInvocation
+    Write-InvocationLog
 
     $elements = Resolve-RepositoryElements
     $OwnerName = $elements.ownerName
@@ -519,20 +527,22 @@ filter Remove-GitHubRepository
         $ConfirmPreference = 'None'
     }
 
-    if ($PSCmdlet.ShouldProcess($RepositoryName, "Remove repository"))
+    if (-not $PSCmdlet.ShouldProcess($RepositoryName, 'Remove GitHub Repository'))
     {
-        $params = @{
-            'UriFragment' = "repos/$OwnerName/$RepositoryName"
-            'Method' = 'Delete'
-            'Description' = "Deleting $RepositoryName"
-            'AccessToken' = $AccessToken
-            'TelemetryEventName' = $MyInvocation.MyCommand.Name
-            'TelemetryProperties' = $telemetryProperties
-            'NoStatus' = (Resolve-ParameterWithDefaultConfigurationValue -Name NoStatus -ConfigValueName DefaultNoStatus)
-        }
-
-        return Invoke-GHRestMethod @params
+        return
     }
+
+    $params = @{
+        'UriFragment' = "repos/$OwnerName/$RepositoryName"
+        'Method' = 'Delete'
+        'Description' = "Deleting $RepositoryName"
+        'AccessToken' = $AccessToken
+        'TelemetryEventName' = $MyInvocation.MyCommand.Name
+        'TelemetryProperties' = $telemetryProperties
+        'NoStatus' = (Resolve-ParameterWithDefaultConfigurationValue -Name NoStatus -ConfigValueName DefaultNoStatus)
+    }
+
+    return Invoke-GHRestMethod @params
 }
 
 filter Get-GitHubRepository
@@ -660,12 +670,8 @@ filter Get-GitHubRepository
 
         Gets all of the repositories in the PowerShell organization.
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName='AuthenticatedUser')]
+    [CmdletBinding(DefaultParameterSetName = 'AuthenticatedUser')]
     [OutputType({$script:GitHubRepositoryTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "",
-        Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "",
         Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
@@ -727,7 +733,7 @@ filter Get-GitHubRepository
         [switch] $NoStatus
     )
 
-    Write-InvocationLog -Invocation $MyInvocation
+    Write-InvocationLog
 
     # We are explicitly disabling validation here because a valid parameter set for this function
     # allows the OwnerName to be passed in, but not the RepositoryName.  That would allow the caller
@@ -993,7 +999,6 @@ filter Rename-GitHubRepository
         DefaultParameterSetName='Uri',
         ConfirmImpact="High")]
     [OutputType({$script:GitHubRepositoryTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(
             Mandatory,
@@ -1153,11 +1158,9 @@ filter Set-GitHubRepository
 #>
     [CmdletBinding(
         SupportsShouldProcess,
-        DefaultParameterSetName='Elements',
-        ConfirmImpact='High')]
+        DefaultParameterSetName = 'Elements')]
     [OutputType({$script:GitHubRepositoryTypeName})]
     [Alias('Update-GitHubRepository')] # Non-standard usage of the Update verb, but done to avoid a breaking change post 0.14.0
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(ParameterSetName='Elements')]
         [string] $OwnerName,
@@ -1208,7 +1211,7 @@ filter Set-GitHubRepository
         [switch] $NoStatus
     )
 
-    Write-InvocationLog -Invocation $MyInvocation
+    Write-InvocationLog
 
     $elements = Resolve-RepositoryElements
     $OwnerName = $elements.ownerName
@@ -1219,22 +1222,14 @@ filter Set-GitHubRepository
         'RepositoryName' = (Get-PiiSafeString -PlainText $RepositoryName)
     }
 
-    if ($Force -and (-not $Confirm))
-    {
-        $ConfirmPreference = 'None'
-    }
-
     $hashBody = @{}
+    $shouldProcessMessage = 'Update GitHub Repository'
 
     if ($PSBoundParameters.ContainsKey('NewName'))
     {
-        $existingName = if ($PSCmdlet.ParameterSetName -eq 'Uri') { $Uri } else { $OwnerName, $RepositoryName -join '/' }
-        if (-not $PSCmdlet.ShouldProcess($existingName, "Rename repository to '$NewName'"))
-        {
-            return
-        }
-
         $hashBody['name'] = $NewName
+        $ConfirmPreference = 'Low'
+        $shouldProcessMessage = "Rename repository to '$NewName'"
     }
 
     if ($PSBoundParameters.ContainsKey('Description')) { $hashBody['description'] = $Description }
@@ -1250,6 +1245,16 @@ filter Set-GitHubRepository
     if ($PSBoundParameters.ContainsKey('DeleteBranchOnMerge')) { $hashBody['delete_branch_on_merge'] = $DeleteBranchOnMerge.ToBool() }
     if ($PSBoundParameters.ContainsKey('IsTemplate')) { $hashBody['is_template'] = $IsTemplate.ToBool() }
     if ($PSBoundParameters.ContainsKey('Archived')) { $hashBody['archived'] = $Archived.ToBool() }
+
+    if ($Force -and (-not $Confirm))
+    {
+        $ConfirmPreference = 'None'
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($RepositoryName, $shouldProcessMessage))
+    {
+        return
+    }
 
     $params = @{
         'UriFragment' = "repos/$OwnerName/$RepositoryName"
@@ -1326,11 +1331,8 @@ filter Get-GitHubRepositoryTopic
     .EXAMPLE
         Get-GitHubRepositoryTopic -Uri https://github.com/PowerShell/PowerShellForGitHub
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName='Elements')]
+    [CmdletBinding(DefaultParameterSetName = 'Elements')]
     [OutputType({$script:GitHubRepositoryTopicTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(ParameterSetName='Elements')]
@@ -1351,7 +1353,7 @@ filter Get-GitHubRepositoryTopic
         [switch] $NoStatus
     )
 
-    Write-InvocationLog -Invocation $MyInvocation
+    Write-InvocationLog
 
     $elements = Resolve-RepositoryElements
     $OwnerName = $elements.ownerName
@@ -1457,7 +1459,6 @@ function Set-GitHubRepositoryTopic
         SupportsShouldProcess,
         DefaultParameterSetName='ElementsName')]
     [OutputType({$script:GitHubRepositoryTopicTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(ParameterSetName='ElementsName')]
         [Parameter(ParameterSetName='ElementsClear')]
@@ -1517,7 +1518,7 @@ function Set-GitHubRepositoryTopic
 
     end
     {
-        Write-InvocationLog -Invocation $MyInvocation
+        Write-InvocationLog
 
         $elements = Resolve-RepositoryElements
         $OwnerName = $elements.ownerName
@@ -1540,6 +1541,13 @@ function Set-GitHubRepositoryTopic
 
         $hashBody = @{
             'names' = $topics
+        }
+
+        if (-not $PSCmdlet.ShouldProcess(
+            $RepositoryName,
+            "Set GitHub Repository Topic $($Topic -join ', ')"))
+        {
+            return
         }
 
         $params = @{
@@ -1637,12 +1645,9 @@ filter Get-GitHubRepositoryContributor
 
         Gets a list of contributors for the PowerShellForGithub repository including statistics.
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName='Elements')]
+    [CmdletBinding(DefaultParameterSetName = 'Elements')]
     [OutputType({$script:GitHubRepositoryContributorTypeName})]
     [OutputType({$script:GitHubRepositoryContributorStatisticsTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(ParameterSetName='Elements')]
@@ -1667,7 +1672,7 @@ filter Get-GitHubRepositoryContributor
         [switch] $NoStatus
     )
 
-    Write-InvocationLog -Invocation $MyInvocation
+    Write-InvocationLog
 
     $elements = Resolve-RepositoryElements
     $OwnerName = $elements.ownerName
@@ -1790,11 +1795,8 @@ filter Get-GitHubRepositoryCollaborator
 
         Gets a list of collaborators for the PowerShellForGithub repository.
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName='Elements')]
+    [CmdletBinding(DefaultParameterSetName = 'Elements')]
     [OutputType({$script:GitHubRepositoryCollaboratorTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(ParameterSetName='Elements')]
@@ -1818,7 +1820,7 @@ filter Get-GitHubRepositoryCollaborator
         [switch] $NoStatus
     )
 
-    Write-InvocationLog -Invocation $MyInvocation
+    Write-InvocationLog
 
     $elements = Resolve-RepositoryElements
     $OwnerName = $elements.ownerName
@@ -1907,11 +1909,8 @@ filter Get-GitHubRepositoryLanguage
     .EXAMPLE
         Get-GitHubRepositoryLanguage -Uri https://github.com/PowerShell/PowerShellForGitHub
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName='Elements')]
+    [CmdletBinding(DefaultParameterSetName = 'Elements')]
     [OutputType({$script:GitHubRepositoryLanguageTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(ParameterSetName='Elements')]
@@ -1932,7 +1931,7 @@ filter Get-GitHubRepositoryLanguage
         [switch] $NoStatus
     )
 
-    Write-InvocationLog -Invocation $MyInvocation
+    Write-InvocationLog
 
     $elements = Resolve-RepositoryElements
     $OwnerName = $elements.ownerName
@@ -2016,11 +2015,8 @@ filter Get-GitHubRepositoryTag
     .EXAMPLE
         Get-GitHubRepositoryTag -Uri https://github.com/PowerShell/PowerShellForGitHub
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName='Elements')]
+    [CmdletBinding(DefaultParameterSetName = 'Elements')]
     [OutputType({$script:GitHubRepositoryTagTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(ParameterSetName='Elements')]
@@ -2041,7 +2037,7 @@ filter Get-GitHubRepositoryTag
         [switch] $NoStatus
     )
 
-    Write-InvocationLog -Invocation $MyInvocation
+    Write-InvocationLog
 
     $elements = Resolve-RepositoryElements
     $OwnerName = $elements.ownerName
@@ -2134,7 +2130,6 @@ filter Move-GitHubRepositoryOwnership
         DefaultParameterSetName='Elements')]
     [OutputType({$script:GitHubRepositoryTypeName})]
     [Alias('Transfer-GitHubRepositoryOwnership')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(ParameterSetName='Elements')]
@@ -2161,7 +2156,7 @@ filter Move-GitHubRepositoryOwnership
         [switch] $NoStatus
     )
 
-    Write-InvocationLog -Invocation $MyInvocation
+    Write-InvocationLog
 
     $elements = Resolve-RepositoryElements
     $OwnerName = $elements.ownerName
@@ -2177,6 +2172,13 @@ filter Move-GitHubRepositoryOwnership
     }
 
     if ($TeamId.Count -gt 0) { $hashBody['team_ids'] = @($TeamId) }
+
+    if (-not $PSCmdlet.ShouldProcess(
+        $RepositoryName,
+        "Move GitHub Repository Ownership from $OwnerName to $NewOwnerName"))
+    {
+        return
+    }
 
     $params = @{
         'UriFragment' = "repos/$OwnerName/$RepositoryName/transfer"
@@ -2429,6 +2431,8 @@ filter Enable-GitHubRepositoryVulnerabilityAlert
         [switch] $NoStatus
     )
 
+    Write-InvocationLog
+
     $elements = Resolve-RepositoryElements -BoundParameters $PSBoundParameters
     $OwnerName = $elements.ownerName
     $RepositoryName = $elements.repositoryName
@@ -2438,24 +2442,24 @@ filter Enable-GitHubRepositoryVulnerabilityAlert
         'RepositoryName' = (Get-PiiSafeString -PlainText $RepositoryName)
     }
 
-    if ($PSCmdlet.ShouldProcess($RepositoryName, 'Enable Vulnerability Alerts'))
+    if (-not $PSCmdlet.ShouldProcess($RepositoryName, 'Enable Vulnerability Alerts'))
     {
-        Write-InvocationLog
-
-        $params = @{
-            UriFragment = "repos/$OwnerName/$RepositoryName/vulnerability-alerts"
-            Description =  "Enabling Vulnerability Alerts for $RepositoryName"
-            AcceptHeader = $script:dorianAcceptHeader
-            Method = 'Put'
-            AccessToken = $AccessToken
-            TelemetryEventName = $MyInvocation.MyCommand.Name
-            TelemetryProperties = $telemetryProperties
-            NoStatus = (Resolve-ParameterWithDefaultConfigurationValue -BoundParameters $PSBoundParameters `
-                -Name NoStatus -ConfigValueName DefaultNoStatus)
-        }
-
-        Invoke-GHRestMethod @params | Out-Null
+        return
     }
+
+    $params = @{
+        UriFragment = "repos/$OwnerName/$RepositoryName/vulnerability-alerts"
+        Description =  "Enabling Vulnerability Alerts for $RepositoryName"
+        AcceptHeader = $script:dorianAcceptHeader
+        Method = 'Put'
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+        TelemetryProperties = $telemetryProperties
+        NoStatus = (Resolve-ParameterWithDefaultConfigurationValue -BoundParameters $PSBoundParameters `
+            -Name NoStatus -ConfigValueName DefaultNoStatus)
+    }
+
+    Invoke-GHRestMethod @params | Out-Null
 }
 
 filter Disable-GitHubRepositoryVulnerabilityAlert
@@ -2546,6 +2550,8 @@ filter Disable-GitHubRepositoryVulnerabilityAlert
         [switch] $NoStatus
     )
 
+    Write-InvocationLog
+
     $elements = Resolve-RepositoryElements -BoundParameters $PSBoundParameters
     $OwnerName = $elements.ownerName
     $RepositoryName = $elements.repositoryName
@@ -2555,24 +2561,24 @@ filter Disable-GitHubRepositoryVulnerabilityAlert
         'RepositoryName' = (Get-PiiSafeString -PlainText $RepositoryName)
     }
 
-    if ($PSCmdlet.ShouldProcess($RepositoryName, 'Disable Vulnerability Alerts'))
+    if (-not $PSCmdlet.ShouldProcess($RepositoryName, 'Disable Vulnerability Alerts'))
     {
-        Write-InvocationLog
-
-        $params = @{
-            UriFragment = "repos/$OwnerName/$RepositoryName/vulnerability-alerts"
-            Description =  "Disabling Vulnerability Alerts for $RepositoryName"
-            AcceptHeader = $script:dorianAcceptHeader
-            Method = 'Delete'
-            AccessToken = $AccessToken
-            TelemetryEventName = $MyInvocation.MyCommand.Name
-            TelemetryProperties = $telemetryProperties
-            NoStatus = (Resolve-ParameterWithDefaultConfigurationValue -BoundParameters $PSBoundParameters `
-                -Name NoStatus -ConfigValueName DefaultNoStatus)
-        }
-
-        Invoke-GHRestMethod @params | Out-Null
+        return
     }
+
+    $params = @{
+        UriFragment = "repos/$OwnerName/$RepositoryName/vulnerability-alerts"
+        Description =  "Disabling Vulnerability Alerts for $RepositoryName"
+        AcceptHeader = $script:dorianAcceptHeader
+        Method = 'Delete'
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+        TelemetryProperties = $telemetryProperties
+        NoStatus = (Resolve-ParameterWithDefaultConfigurationValue -BoundParameters $PSBoundParameters `
+            -Name NoStatus -ConfigValueName DefaultNoStatus)
+    }
+
+    Invoke-GHRestMethod @params | Out-Null
 }
 
 filter Enable-GitHubRepositorySecurityFix
@@ -2663,6 +2669,8 @@ filter Enable-GitHubRepositorySecurityFix
         [switch] $NoStatus
     )
 
+    Write-InvocationLog
+
     $elements = Resolve-RepositoryElements -BoundParameters $PSBoundParameters
     $OwnerName = $elements.ownerName
     $RepositoryName = $elements.repositoryName
@@ -2672,24 +2680,24 @@ filter Enable-GitHubRepositorySecurityFix
         'RepositoryName' = (Get-PiiSafeString -PlainText $RepositoryName)
     }
 
-    if ($PSCmdlet.ShouldProcess($RepositoryName, 'Enable Automated Security Fixes'))
+    if (-not $PSCmdlet.ShouldProcess($RepositoryName, 'Enable Automated Security Fixes'))
     {
-        Write-InvocationLog
-
-        $params = @{
-            UriFragment = "repos/$OwnerName/$RepositoryName/automated-security-fixes"
-            Description =  "Enabling Automated Security Fixes for $RepositoryName"
-            AcceptHeader = $script:londonAcceptHeader
-            Method = 'Put'
-            AccessToken = $AccessToken
-            TelemetryEventName = $MyInvocation.MyCommand.Name
-            TelemetryProperties = $telemetryProperties
-            NoStatus = (Resolve-ParameterWithDefaultConfigurationValue -BoundParameters $PSBoundParameters `
-                -Name NoStatus -ConfigValueName DefaultNoStatus)
-        }
-
-        Invoke-GHRestMethod @params
+        return
     }
+
+    $params = @{
+        UriFragment = "repos/$OwnerName/$RepositoryName/automated-security-fixes"
+        Description =  "Enabling Automated Security Fixes for $RepositoryName"
+        AcceptHeader = $script:londonAcceptHeader
+        Method = 'Put'
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+        TelemetryProperties = $telemetryProperties
+        NoStatus = (Resolve-ParameterWithDefaultConfigurationValue -BoundParameters $PSBoundParameters `
+            -Name NoStatus -ConfigValueName DefaultNoStatus)
+    }
+
+    Invoke-GHRestMethod @params
 }
 
 filter Disable-GitHubRepositorySecurityFix
@@ -2779,6 +2787,8 @@ filter Disable-GitHubRepositorySecurityFix
         [switch] $NoStatus
     )
 
+    Write-InvocationLog
+
     $elements = Resolve-RepositoryElements -BoundParameters $PSBoundParameters
     $OwnerName = $elements.ownerName
     $RepositoryName = $elements.repositoryName
@@ -2788,24 +2798,24 @@ filter Disable-GitHubRepositorySecurityFix
         'RepositoryName' = (Get-PiiSafeString -PlainText $RepositoryName)
     }
 
-    if ($PSCmdlet.ShouldProcess($RepositoryName, 'Disable Automated Security Fixes'))
+    if (-not $PSCmdlet.ShouldProcess($RepositoryName, 'Disable Automated Security Fixes'))
     {
-        Write-InvocationLog
-
-        $params = @{
-            UriFragment = "repos/$OwnerName/$RepositoryName/automated-security-fixes"
-            Description =  "Disabling Automated Security Fixes for $RepositoryName"
-            AcceptHeader = $script:londonAcceptHeader
-            Method = 'Delete'
-            AccessToken = $AccessToken
-            TelemetryEventName = $MyInvocation.MyCommand.Name
-            TelemetryProperties = $telemetryProperties
-            NoStatus = (Resolve-ParameterWithDefaultConfigurationValue -BoundParameters $PSBoundParameters `
-                -Name NoStatus -ConfigValueName DefaultNoStatus)
-        }
-
-        Invoke-GHRestMethod @params | Out-Null
+        return
     }
+
+    $params = @{
+        UriFragment = "repos/$OwnerName/$RepositoryName/automated-security-fixes"
+        Description =  "Disabling Automated Security Fixes for $RepositoryName"
+        AcceptHeader = $script:londonAcceptHeader
+        Method = 'Delete'
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+        TelemetryProperties = $telemetryProperties
+        NoStatus = (Resolve-ParameterWithDefaultConfigurationValue -BoundParameters $PSBoundParameters `
+            -Name NoStatus -ConfigValueName DefaultNoStatus)
+    }
+
+    Invoke-GHRestMethod @params | Out-Null
 }
 
 filter Add-GitHubRepositoryAdditionalProperties

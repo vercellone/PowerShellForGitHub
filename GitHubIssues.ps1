@@ -147,11 +147,8 @@ filter Get-GitHubIssue
 
         Gets every issue in the microsoft\PowerShellForGitHub repository that is assigned to Octocat.
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName='Elements')]
+    [CmdletBinding(DefaultParameterSetName = 'Elements')]
     [OutputType({$script:GitHubIssueTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(ParameterSetName='Elements')]
         [string] $OwnerName,
@@ -444,11 +441,8 @@ filter Get-GitHubIssueTimeline
     .EXAMPLE
         Get-GitHubIssueTimeline -OwnerName microsoft -RepositoryName PowerShellForGitHub -Issue 24
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName='Elements')]
+    [CmdletBinding(DefaultParameterSetName = 'Elements')]
     [OutputType({$script:GitHubEventTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(ParameterSetName='Elements')]
@@ -588,7 +582,6 @@ filter New-GitHubIssue
         SupportsShouldProcess,
         DefaultParameterSetName='Elements')]
     [OutputType({$script:GitHubIssueTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(ParameterSetName='Elements')]
         [string] $OwnerName,
@@ -644,6 +637,11 @@ filter New-GitHubIssue
     if ($PSBoundParameters.ContainsKey('Assignee')) { $hashBody['assignees'] = @($Assignee) }
     if ($PSBoundParameters.ContainsKey('Milestone')) { $hashBody['milestone'] = $Milestone }
     if ($PSBoundParameters.ContainsKey('Label')) { $hashBody['labels'] = @($Label) }
+
+    if (-not $PSCmdlet.ShouldProcess($Title, 'Create GitHub Issue'))
+    {
+        return
+    }
 
     $params = @{
         'UriFragment' = "/repos/$OwnerName/$RepositoryName/issues"
@@ -759,7 +757,6 @@ filter Set-GitHubIssue
         DefaultParameterSetName='Elements')]
     [OutputType({$script:GitHubIssueTypeName})]
     [Alias('Update-GitHubIssue')] # Non-standard usage of the Update verb, but done to avoid a breaking change post 0.14.0
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(ParameterSetName='Elements')]
         [string] $OwnerName,
@@ -826,6 +823,11 @@ filter Set-GitHubIssue
         {
             $hashBody['milestone'] = $null
         }
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($Issue, 'Update GitHub Issue'))
+    {
+        return
     }
 
     $params = @{
@@ -906,7 +908,6 @@ filter Lock-GitHubIssue
     [CmdletBinding(
         SupportsShouldProcess,
         DefaultParameterSetName='Elements')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(ParameterSetName='Elements')]
         [string] $OwnerName,
@@ -961,6 +962,11 @@ filter Lock-GitHubIssue
 
         $telemetryProperties['Reason'] = $Reason
         $hashBody['lock_reason'] = $reasonConverter[$Reason]
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($Issue, 'Lock GitHub Issue'))
+    {
+        return
     }
 
     $params = @{
@@ -1038,7 +1044,6 @@ filter Unlock-GitHubIssue
     [CmdletBinding(
         SupportsShouldProcess,
         DefaultParameterSetName='Elements')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(ParameterSetName='Elements')]
@@ -1074,6 +1079,11 @@ filter Unlock-GitHubIssue
     $telemetryProperties = @{
         'OwnerName' = (Get-PiiSafeString -PlainText $OwnerName)
         'RepositoryName' = (Get-PiiSafeString -PlainText $RepositoryName)
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($Issue, 'Unlock GitHub Issue'))
+    {
+        return
     }
 
     $params = @{

@@ -120,12 +120,9 @@ filter Get-GitHubIssueComment
         passing it in via the pipeline.  This shows some of the different types of objects you
         can pipe into this function.
 #>
-    [CmdletBinding(
-        SupportsShouldProcess,
-        DefaultParameterSetName='RepositoryElements')]
+    [CmdletBinding(DefaultParameterSetName = 'RepositoryElements')]
     [Alias('Get-GitHubComment')] # Aliased to avoid a breaking change after v0.14.0
     [OutputType({$script:GitHubIssueCommentTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     param(
         [Parameter(
             Mandatory,
@@ -364,7 +361,6 @@ filter New-GitHubIssueComment
         DefaultParameterSetName='Elements')]
     [Alias('New-GitHubComment')] # Aliased to avoid a breaking change after v0.14.0
     [OutputType({$script:GitHubIssueCommentTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(ParameterSetName='Elements')]
@@ -411,6 +407,11 @@ filter New-GitHubIssueComment
 
     $hashBody = @{
         'body' = $Body
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($Issue, 'Create GitHub Issue Comment'))
+    {
+        return
     }
 
     $params = @{
@@ -509,7 +510,6 @@ filter Set-GitHubIssueComment
         DefaultParameterSetName='Elements')]
     [Alias('Set-GitHubComment')] # Aliased to avoid a breaking change after v0.14.0
     [OutputType({$script:GitHubIssueCommentTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSShouldProcess", "", Justification="Methods called within here make use of PSShouldProcess, and the switch is passed on to them inherently.")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(ParameterSetName='Elements')]
@@ -556,6 +556,11 @@ filter Set-GitHubIssueComment
 
     $hashBody = @{
         'body' = $Body
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($Comment, 'Update GitHub Issue Comment'))
+    {
+        return
     }
 
     $params = @{
@@ -696,20 +701,22 @@ filter Remove-GitHubIssueComment
         $ConfirmPreference = 'None'
     }
 
-    if ($PSCmdlet.ShouldProcess($Comment, "Remove comment"))
+    if (-not $PSCmdlet.ShouldProcess($Comment, 'Remove GitHub Issue Comment'))
     {
-        $params = @{
-            'UriFragment' = "repos/$OwnerName/$RepositoryName/issues/comments/$Comment"
-            'Method' = 'Delete'
-            'Description' = "Removing comment $Comment for $RepositoryName"
-            'AccessToken' = $AccessToken
-            'TelemetryEventName' = $MyInvocation.MyCommand.Name
-            'TelemetryProperties' = $telemetryProperties
-            'NoStatus' = (Resolve-ParameterWithDefaultConfigurationValue -Name NoStatus -ConfigValueName DefaultNoStatus)
-        }
-
-        return Invoke-GHRestMethod @params
+        return
     }
+
+    $params = @{
+        'UriFragment' = "repos/$OwnerName/$RepositoryName/issues/comments/$Comment"
+        'Method' = 'Delete'
+        'Description' = "Removing comment $Comment for $RepositoryName"
+        'AccessToken' = $AccessToken
+        'TelemetryEventName' = $MyInvocation.MyCommand.Name
+        'TelemetryProperties' = $telemetryProperties
+        'NoStatus' = (Resolve-ParameterWithDefaultConfigurationValue -Name NoStatus -ConfigValueName DefaultNoStatus)
+    }
+
+    return Invoke-GHRestMethod @params
 }
 
 filter Add-GitHubIssueCommentAdditionalProperties
