@@ -3,6 +3,7 @@
 
 @{
     GitHubTeamTypeName = 'GitHub.Team'
+    GitHubTeamSummaryTypeName = 'GitHub.TeamSummary'
  }.GetEnumerator() | ForEach-Object {
      Set-Variable -Scope Script -Option ReadOnly -Name $_.Key -Value $_.Value
  }
@@ -33,6 +34,9 @@ filter Get-GitHubTeam
 
     .PARAMETER OrganizationName
         The name of the organization
+
+    .PARAMETER TeamName
+        The name of the specific team to retrieve
 
     .PARAMETER TeamId
         The ID of the specific team to retrieve
@@ -68,12 +72,15 @@ filter Get-GitHubTeam
 
     .OUTPUTS
         GitHub.Team
+        GitHub.TeamSummary
 
     .EXAMPLE
         Get-GitHubTeam -OrganizationName PowerShell
 #>
     [CmdletBinding(DefaultParameterSetName = 'Elements')]
-    [OutputType({$script:GitHubTeamTypeName})]
+    [OutputType(
+        {$script:GitHubTeamTypeName},
+        {$script:GitHubTeamSummaryTypeName})]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="One or more parameters (like NoStatus) are only referenced by helper methods which get access to it from the stack via Get-Variable -Scope 1.")]
     param
     (
@@ -97,6 +104,11 @@ filter Get-GitHubTeam
         [ValidateNotNullOrEmpty()]
         [string] $OrganizationName,
 
+        [Parameter(ParameterSetName='Organization')]
+        [Parameter(ParameterSetName='Elements')]
+        [Parameter(ParameterSetName='Uri')]
+        [string] $TeamName,
+
         [Parameter(
             Mandatory,
             ValueFromPipelineByPropertyName,
@@ -115,6 +127,7 @@ filter Get-GitHubTeam
 
     $uriFragment = [String]::Empty
     $description = [String]::Empty
+    $teamType = [String]::Empty
     if ($PSCmdlet.ParameterSetName -in ('Elements', 'Uri'))
     {
         $elements = Resolve-RepositoryElements
@@ -126,6 +139,7 @@ filter Get-GitHubTeam
 
         $uriFragment = "/repos/$OwnerName/$RepositoryName/teams"
         $description = "Getting teams for $RepositoryName"
+        $teamType = $script:GitHubTeamSummaryTypeName
     }
     elseif ($PSCmdlet.ParameterSetName -eq 'Organization')
     {
@@ -133,6 +147,7 @@ filter Get-GitHubTeam
 
         $uriFragment = "/orgs/$OrganizationName/teams"
         $description = "Getting teams in $OrganizationName"
+        $teamType = $script:GitHubTeamSummaryTypeName
     }
     else
     {
@@ -140,6 +155,7 @@ filter Get-GitHubTeam
 
         $uriFragment = "/teams/$TeamId"
         $description = "Getting team $TeamId"
+        $teamType = $script:GitHubTeamTypeName
     }
 
     $params = @{
@@ -152,8 +168,40 @@ filter Get-GitHubTeam
         'NoStatus' = (Resolve-ParameterWithDefaultConfigurationValue -Name NoStatus -ConfigValueName DefaultNoStatus)
     }
 
-    return (Invoke-GHRestMethodMultipleResult @params |
-        Add-GitHubTeamAdditionalProperties)
+    $result = Invoke-GHRestMethodMultipleResult @params |
+        Add-GitHubTeamAdditionalProperties -TypeName $teamType
+
+    if ($PSBoundParameters.ContainsKey('TeamName'))
+    {
+        $team = $result | Where-Object -Property name -eq $TeamName
+
+        if ($null -eq $team)
+        {
+            $message = "Team '$TeamName' not found"
+            Write-Log -Message $message -Level Error
+            throw $message
+        }
+        else
+        {
+            $uriFragment = "/orgs/$($team.OrganizationName)/teams/$($team.slug)"
+            $description = "Getting team $($team.slug)"
+
+            $params = @{
+                UriFragment = $uriFragment
+                Description =  $description
+                Method = 'Get'
+                AccessToken = $AccessToken
+                TelemetryEventName = $MyInvocation.MyCommand.Name
+                TelemetryProperties = $telemetryProperties
+                NoStatus = (Resolve-ParameterWithDefaultConfigurationValue `
+                    -Name NoStatus -ConfigValueName DefaultNoStatus)
+            }
+
+            $result = Invoke-GHRestMethod @params | Add-GitHubTeamAdditionalProperties
+        }
+    }
+
+    return $result
 }
 
 filter Get-GitHubTeamMember
@@ -273,6 +321,482 @@ filter Get-GitHubTeamMember
     return (Invoke-GHRestMethodMultipleResult @params | Add-GitHubUserAdditionalProperties)
 }
 
+function New-GitHubTeam
+{
+<#
+    .SYNOPSIS
+        Creates a team within an organization on GitHub.
+
+    .DESCRIPTION
+        Creates a team within an organization on GitHub.
+
+        The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
+
+    .PARAMETER OrganizationName
+        The name of the organization to create the team in.
+
+    .PARAMETER TeamName
+        The name of the team.
+
+    .PARAMETER Description
+        The description for the team.
+
+    .PARAMETER MaintainerName
+        A list of GitHub user names for organization members who will become team maintainers.
+
+    .PARAMETER RepositoryName
+        The name of repositories to add the team to.
+
+    .PARAMETER Privacy
+        The level of privacy this team should have.
+
+    .PARAMETER ParentTeamName
+        The name of a team to set as the parent team.
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .PARAMETER NoStatus
+        If this switch is specified, long-running commands will run on the main thread
+        with no commandline status update.  When not specified, those commands run in
+        the background, enabling the command prompt to provide status information.
+        If not supplied here, the DefaultNoStatus configuration property value will be used.
+
+    .INPUTS
+        GitHub.Team
+        GitHub.User
+        System.String
+
+    .OUTPUTS
+        GitHub.Team
+
+    .EXAMPLE
+        New-GitHubTeam -OrganizationName PowerShell -TeamName 'Developers'
+
+        Creates a new GitHub team called 'Developers' in the 'PowerShell' organization.
+
+    .EXAMPLE
+        $teamName = 'Team1'
+        $teamName | New-GitHubTeam -OrganizationName PowerShell
+
+        You can also pipe in a team name that was returned from a previous command.
+
+    .EXAMPLE
+        $users = Get-GitHubUsers -OrganizationName PowerShell
+        $users | New-GitHubTeam -OrganizationName PowerShell -TeamName 'Team1'
+
+        You can also pipe in a list of GitHub users that were returned from a previous command.
+#>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '',
+        Justification = 'One or more parameters (like NoStatus) are only referenced by helper
+        methods which get access to it from the stack via Get-Variable -Scope 1.')]
+    [CmdletBinding(
+        SupportsShouldProcess,
+        PositionalBinding = $false
+    )]
+    [OutputType({$script:GitHubTeamTypeName})]
+    param
+    (
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            Position = 1)]
+        [ValidateNotNullOrEmpty()]
+        [string] $OrganizationName,
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            Position = 2)]
+        [ValidateNotNullOrEmpty()]
+        [string] $TeamName,
+
+        [string] $Description,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('UserName')]
+        [string[]] $MaintainerName,
+
+        [string[]] $RepositoryName,
+
+        [ValidateSet('Secret', 'Closed')]
+        [string] $Privacy,
+
+        [string] $ParentTeamName,
+
+        [string] $AccessToken,
+
+        [switch] $NoStatus
+    )
+
+    begin
+    {
+        $maintainerNames = @()
+    }
+
+    process
+    {
+        foreach ($user in $MaintainerName)
+        {
+            $maintainerNames += $user
+        }
+    }
+
+    end
+    {
+        Write-InvocationLog
+
+        $telemetryProperties = @{
+            OrganizationName = (Get-PiiSafeString -PlainText $OrganizationName)
+            TeamName = (Get-PiiSafeString -PlainText $TeamName)
+        }
+
+        $uriFragment = "/orgs/$OrganizationName/teams"
+
+        $hashBody = @{
+            name = $TeamName
+        }
+
+        if ($PSBoundParameters.ContainsKey('Description')) { $hashBody['description'] = $Description }
+        if ($PSBoundParameters.ContainsKey('RepositoryName'))
+        {
+            $repositoryFullNames = @()
+            foreach ($repository in $RepositoryName)
+            {
+                $repositoryFullNames += "$OrganizationName/$repository"
+            }
+            $hashBody['repo_names'] = $repositoryFullNames
+        }
+        if ($PSBoundParameters.ContainsKey('Privacy')) { $hashBody['privacy'] = $Privacy.ToLower() }
+        if ($MaintainerName.Count -gt 0)
+        {
+            $hashBody['maintainers'] = $maintainerNames
+        }
+        if ($PSBoundParameters.ContainsKey('ParentTeamName'))
+        {
+            $getGitHubTeamParms = @{
+                OrganizationName = $OrganizationName
+                TeamName = $ParentTeamName
+            }
+            if ($PSBoundParameters.ContainsKey('AccessToken'))
+            {
+                $getGitHubTeamParms['AccessToken'] = $AccessToken
+            }
+            if ($PSBoundParameters.ContainsKey('NoStatus'))
+            {
+                $getGitHubTeamParms['NoStatus'] = $NoStatus
+            }
+
+            $team = Get-GitHubTeam @getGitHubTeamParms
+
+            $hashBody['parent_team_id'] = $team.id
+        }
+
+        if (-not $PSCmdlet.ShouldProcess($TeamName, 'Create GitHub Team'))
+        {
+            return
+        }
+
+        $params = @{
+            UriFragment = $uriFragment
+            Body = (ConvertTo-Json -InputObject $hashBody)
+            Method = 'Post'
+            Description =  "Creating $TeamName"
+            AccessToken = $AccessToken
+            TelemetryEventName = $MyInvocation.MyCommand.Name
+            TelemetryProperties = $telemetryProperties
+            NoStatus = (Resolve-ParameterWithDefaultConfigurationValue `
+                -Name NoStatus -ConfigValueName DefaultNoStatus)
+        }
+
+        return (Invoke-GHRestMethod @params | Add-GitHubTeamAdditionalProperties)
+    }
+}
+
+filter Set-GitHubTeam
+{
+<#
+    .SYNOPSIS
+        Updates a team within an organization on GitHub.
+
+    .DESCRIPTION
+        Updates a team within an organization on GitHub.
+
+        The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
+
+    .PARAMETER OrganizationName
+        The name of the team's organization.
+
+    .PARAMETER TeamName
+        The name of the team.
+
+    .PARAMETER Description
+        The description for the team.
+
+    .PARAMETER Privacy
+        The level of privacy this team should have.
+
+    .PARAMETER ParentTeamName
+        The name of a team to set as the parent team.
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .PARAMETER NoStatus
+        If this switch is specified, long-running commands will run on the main thread
+        with no commandline status update.  When not specified, those commands run in
+        the background, enabling the command prompt to provide status information.
+        If not supplied here, the DefaultNoStatus configuration property value will be used.
+
+    .INPUTS
+        GitHub.Organization
+        GitHub.Team
+
+    .OUTPUTS
+        GitHub.Team
+
+    .EXAMPLE
+        Set-GitHubTeam -OrganizationName PowerShell -TeamName Developers -Description 'New Description'
+
+        Updates the description for the 'Developers' GitHub team in the 'PowerShell' organization.
+
+    .EXAMPLE
+        $team = Get-GitHubTeam -OrganizationName PowerShell -TeamName Developers
+        $team | Set-GitHubTeam -Description 'New Description'
+
+        You can also pipe in a GitHub team that was returned from a previous command.
+#>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '',
+        Justification = 'One or more parameters (like NoStatus) are only referenced by helper
+        methods which get access to it from the stack via Get-Variable -Scope 1.')]
+    [CmdletBinding(
+        SupportsShouldProcess,
+        PositionalBinding = $false
+    )]
+    [OutputType( { $script:GitHubTeamTypeName } )]
+    param
+    (
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            Position = 1)]
+        [ValidateNotNullOrEmpty()]
+        [string] $OrganizationName,
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            Position = 2)]
+        [ValidateNotNullOrEmpty()]
+        [string] $TeamName,
+
+        [string] $Description,
+
+        [ValidateSet('Secret','Closed')]
+        [string] $Privacy,
+
+        [string] $ParentTeamName,
+
+        [string] $AccessToken,
+
+        [switch] $NoStatus
+    )
+
+    Write-InvocationLog
+
+    $telemetryProperties = @{
+        OrganizationName = (Get-PiiSafeString -PlainText $OrganizationName)
+        TeamName = (Get-PiiSafeString -PlainText $TeamName)
+    }
+
+    $getGitHubTeamParms = @{
+        OrganizationName = $OrganizationName
+    }
+    if ($PSBoundParameters.ContainsKey('AccessToken'))
+    {
+        $getGitHubTeamParms['AccessToken'] = $AccessToken
+    }
+    if ($PSBoundParameters.ContainsKey('NoStatus'))
+    {
+        $getGitHubTeamParms['NoStatus'] = $NoStatus
+    }
+
+    $orgTeams = Get-GitHubTeam @getGitHubTeamParms
+
+    $team = $orgTeams | Where-Object -Property name -eq $TeamName
+
+    $uriFragment = "/orgs/$OrganizationName/teams/$($team.slug)"
+
+    $hashBody = @{
+        name = $TeamName
+    }
+
+    if ($PSBoundParameters.ContainsKey('Description')) { $hashBody['description'] = $Description }
+    if ($PSBoundParameters.ContainsKey('Privacy')) { $hashBody['privacy'] = $Privacy.ToLower() }
+    if ($PSBoundParameters.ContainsKey('ParentTeamName'))
+    {
+        $parentTeam = $orgTeams | Where-Object -Property name -eq $ParentTeamName
+
+        $hashBody['parent_team_id'] = $parentTeam.id
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($TeamName, 'Set GitHub Team'))
+    {
+        return
+    }
+
+    $params = @{
+        UriFragment = $uriFragment
+        Body = (ConvertTo-Json -InputObject $hashBody)
+        Method = 'Patch'
+        Description =  "Updating $TeamName"
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+        TelemetryProperties = $telemetryProperties
+        NoStatus = (Resolve-ParameterWithDefaultConfigurationValue `
+            -Name NoStatus -ConfigValueName DefaultNoStatus)
+    }
+
+    return (Invoke-GHRestMethod @params | Add-GitHubTeamAdditionalProperties)
+}
+
+filter Remove-GitHubTeam
+{
+<#
+    .SYNOPSIS
+        Removes a team from an organization on GitHub.
+
+    .DESCRIPTION
+        Removes a team from an organization on GitHub.
+
+        The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
+
+    .PARAMETER OrganizationName
+        The name of the organization the team is in.
+
+    .PARAMETER TeamName
+        The name of the team.
+
+    .PARAMETER Force
+        If this switch is specified, you will not be prompted for confirmation of command execution.
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .PARAMETER NoStatus
+        If this switch is specified, long-running commands will run on the main thread
+        with no commandline status update.  When not specified, those commands run in
+        the background, enabling the command prompt to provide status information.
+        If not supplied here, the DefaultNoStatus configuration property value will be used.
+
+    .INPUTS
+        GitHub.Organization
+        GitHub.Team
+
+    .OUTPUTS
+        None
+
+    .EXAMPLE
+        Remove-GitHubTeam -OrganizationName PowerShell -TeamName Developers
+
+        Removes the 'Developers' GitHub team from the 'PowerShell' organization.
+
+    .EXAMPLE
+        Remove-GitHubTeam -OrganizationName PowerShell -TeamName Developers -Force
+
+        Removes the 'Developers' GitHub team from the 'PowerShell' organization without prompting.
+
+    .EXAMPLE
+        $team = Get-GitHubTeam -OrganizationName PowerShell -TeamName Developers
+        $team | Remove-GitHubTeam -Force
+
+        You can also pipe in a GitHub team that was returned from a previous command.
+#>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '',
+        Justification = 'One or more parameters (like NoStatus) are only referenced by helper
+        methods which get access to it from the stack via Get-Variable -Scope 1.')]
+    [CmdletBinding(
+        SupportsShouldProcess,
+        PositionalBinding = $false,
+        ConfirmImpact = 'High'
+    )]
+    [Alias('Delete-GitHubTeam')]
+    param
+    (
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName,
+            Position = 1)]
+        [ValidateNotNullOrEmpty()]
+        [string] $OrganizationName,
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName,
+            Position = 2)]
+        [ValidateNotNullOrEmpty()]
+        [string] $TeamName,
+
+        [switch] $Force,
+
+        [string] $AccessToken,
+
+        [switch] $NoStatus
+    )
+
+    Write-InvocationLog
+
+    $telemetryProperties = @{
+        OrganizationName = (Get-PiiSafeString -PlainText $RepositoryName)
+        TeamName = (Get-PiiSafeString -PlainText $TeamName)
+    }
+
+    $getGitHubTeamParms = @{
+        OrganizationName = $OrganizationName
+        TeamName = $TeamName
+    }
+    if ($PSBoundParameters.ContainsKey('AccessToken'))
+    {
+        $getGitHubTeamParms['AccessToken'] = $AccessToken
+    }
+    if ($PSBoundParameters.ContainsKey('NoStatus'))
+    {
+        $getGitHubTeamParms['NoStatus'] = $NoStatus
+    }
+
+    $team = Get-GitHubTeam @getGitHubTeamParms
+
+    $uriFragment = "/orgs/$OrganizationName/teams/$($team.slug)"
+
+    if ($Force -and (-not $Confirm))
+    {
+        $ConfirmPreference = 'None'
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($TeamName, 'Remove Github Team'))
+    {
+        return
+    }
+
+    $params = @{
+        UriFragment = $uriFragment
+        Method = 'Delete'
+        Description =  "Deleting $TeamName"
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+        TelemetryProperties = $telemetryProperties
+        NoStatus = (Resolve-ParameterWithDefaultConfigurationValue `
+            -Name NoStatus -ConfigValueName DefaultNoStatus)
+    }
+
+    Invoke-GHRestMethod @params | Out-Null
+}
+
 filter Add-GitHubTeamAdditionalProperties
 {
 <#
@@ -313,6 +837,23 @@ filter Add-GitHubTeamAdditionalProperties
         {
             Add-Member -InputObject $item -Name 'TeamName' -Value $item.name -MemberType NoteProperty -Force
             Add-Member -InputObject $item -Name 'TeamId' -Value $item.id -MemberType NoteProperty -Force
+
+            $organizationName = [String]::Empty
+            if ($item.organization)
+            {
+                $organizationName = $item.organization.login
+            }
+            else
+            {
+                $hostName = $(Get-GitHubConfiguration -Name 'ApiHostName')
+
+                if ($item.html_url -match "^https?://$hostName/orgs/([^/]+)/.*$")
+                {
+                    $organizationName = $Matches[1]
+                }
+            }
+
+            Add-Member -InputObject $item -Name 'OrganizationName' -Value $organizationName -MemberType NoteProperty -Force
 
             # Apply these properties to any embedded parent teams as well.
             if ($null -ne $item.parent)

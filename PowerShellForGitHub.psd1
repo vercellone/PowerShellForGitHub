@@ -1,4 +1,4 @@
-﻿# Copyright (c) Microsoft Corporation. All rights reserved.
+# Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
 @{
@@ -19,6 +19,7 @@
         'Formatters/GitHubGists.Format.ps1xml',
         'Formatters/GitHubReleases.Format.ps1xml'
         'Formatters/GitHubRepositories.Format.ps1xml'
+        'Formatters/GitHubTeams.Format.ps1xml'
     )
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
@@ -141,6 +142,7 @@
         'New-GitHubRepositoryBranch',
         'New-GitHubRepositoryBranchProtectionRule',
         'New-GitHubRepositoryFork',
+        'New-GitHubTeam',
         'Remove-GitHubAssignee',
         'Remove-GitHubComment',
         'Remove-GitHubGist',
@@ -160,6 +162,7 @@
         'Remove-GitHubRepository',
         'Remove-GitHubRepositoryBranch'
         'Remove-GitHubRepositoryBranchProtectionRule',
+        'Remove-GitHubTeam',
         'Rename-GitHubGistFile',
         'Rename-GitHubRepository',
         'Reset-GitHubConfiguration',
@@ -185,6 +188,7 @@
         'Set-GitHubReleaseAsset',
         'Set-GitHubRepository',
         'Set-GitHubRepositoryTopic',
+        'Set-GitHubTeam',
         'Split-GitHubUri',
         'Test-GitHubAssignee',
         'Test-GitHubAuthenticationConfigured',
@@ -214,6 +218,7 @@
         'Delete-GitHubRepository',
         'Delete-GitHubRepositoryBranch',
         'Delete-GitHubRepositoryBranchProtectionRule',
+        'Delete-GitHubTeam',
         'Fork-GitHubGist',
         'Get-GitHubAsset',
         'Get-GitHubBranch',
