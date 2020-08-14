@@ -8,6 +8,23 @@
         <TypeName>GitHub.TeamSummary</TypeName>
       </ViewSelectedBy>
       <TableControl>
+        <TableHeaders>
+          <TableColumnHeader>
+            <Label>name</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>description</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>privacy</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>permission</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>OrganizationName</Label>
+          </TableColumnHeader>
+        </TableHeaders>
         <TableRowEntries>
           <TableRowEntry>
             <TableColumnItems>
@@ -57,7 +74,7 @@
                 <PropertyName>created_at</PropertyName>
               </ListItem>
               <ListItem>
-                <PropertyName>updated_at</PropertyName>
+                <PropertyName>created_at</PropertyName>
               </ListItem>
               <ListItem>
                 <PropertyName>members_count</PropertyName>
@@ -66,7 +83,8 @@
                 <PropertyName>repos_count</PropertyName>
               </ListItem>
               <ListItem>
-                <PropertyName>parent</PropertyName>
+                <Label>parent.name</Label>
+                <ScriptBlock>$_.parent.name</ScriptBlock>
               </ListItem>
               <ListItem>
                 <PropertyName>OrganizationName</PropertyName>

@@ -33,13 +33,15 @@ filter Get-GitHubTeam
         them individually.
 
     .PARAMETER OrganizationName
-        The name of the organization
+        The name of the organization.
 
     .PARAMETER TeamName
-        The name of the specific team to retrieve
+        The name of the specific team to retrieve.
+        Note: This will be slower than querying by TeamSlug since it requires retrieving
+        all teams first.
 
-    .PARAMETER TeamId
-        The ID of the specific team to retrieve
+    .PARAMETER TeamSlug
+        The slug (a unique key based on the team name) of the specific team to retrieve.
 
     .PARAMETER AccessToken
         If provided, this will be used as the AccessToken for authentication with the
@@ -78,15 +80,20 @@ filter Get-GitHubTeam
     param
     (
         [Parameter(ParameterSetName='Elements')]
+        [Parameter(ParameterSetName='TeamName')]
         [string] $OwnerName,
 
         [Parameter(ParameterSetName='Elements')]
+        [Parameter(ParameterSetName='TeamName')]
         [string] $RepositoryName,
 
         [Parameter(
             Mandatory,
             ValueFromPipelineByPropertyName,
             ParameterSetName='Uri')]
+        [Parameter(
+            ValueFromPipelineByPropertyName,
+            ParameterSetName='TeamName')]
         [Alias('RepositoryUrl')]
         [string] $Uri,
 
@@ -94,20 +101,28 @@ filter Get-GitHubTeam
             Mandatory,
             ValueFromPipelineByPropertyName,
             ParameterSetName='Organization')]
+        [Parameter(
+            ValueFromPipelineByPropertyName,
+            ParameterSetName='TeamName')]
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            ParameterSetName='TeamSlug')]
         [ValidateNotNullOrEmpty()]
         [string] $OrganizationName,
 
-        [Parameter(ParameterSetName='Organization')]
-        [Parameter(ParameterSetName='Elements')]
-        [Parameter(ParameterSetName='Uri')]
+        [Parameter(
+            Mandatory,
+            ParameterSetName='TeamName')]
+        [ValidateNotNullOrEmpty()]
         [string] $TeamName,
 
         [Parameter(
             Mandatory,
             ValueFromPipelineByPropertyName,
-            ParameterSetName='Single')]
+            ParameterSetName='TeamSlug')]
         [ValidateNotNullOrEmpty()]
-        [string] $TeamId,
+        [string] $TeamSlug,
 
         [string] $AccessToken
     )
@@ -119,12 +134,18 @@ filter Get-GitHubTeam
     $uriFragment = [String]::Empty
     $description = [String]::Empty
     $teamType = [String]::Empty
-    if ($PSCmdlet.ParameterSetName -in ('Elements', 'Uri'))
+
+    if ($PSBoundParameters.ContainsKey('TeamName') -and
+        (-not $PSBoundParameters.ContainsKey('OrganizationName')))
     {
         $elements = Resolve-RepositoryElements
         $OwnerName = $elements.ownerName
         $RepositoryName = $elements.repositoryName
+    }
 
+    if ((-not [String]::IsNullOrEmpty($OwnerName)) -and
+        (-not [String]::IsNullOrEmpty($RepositoryName)))
+    {
         $telemetryProperties['OwnerName'] = Get-PiiSafeString -PlainText $OwnerName
         $telemetryProperties['RepositoryName'] = Get-PiiSafeString -PlainText $RepositoryName
 
@@ -132,21 +153,21 @@ filter Get-GitHubTeam
         $description = "Getting teams for $RepositoryName"
         $teamType = $script:GitHubTeamSummaryTypeName
     }
-    elseif ($PSCmdlet.ParameterSetName -eq 'Organization')
+    elseif ($PSCmdlet.ParameterSetName -eq 'TeamSlug')
+    {
+        $telemetryProperties['TeamSlug'] = Get-PiiSafeString -PlainText $TeamSlug
+
+        $uriFragment = "/orgs/$OrganizationName/teams/$TeamSlug"
+        $description = "Getting team $TeamSlug"
+        $teamType = $script:GitHubTeamTypeName
+    }
+    else
     {
         $telemetryProperties['OrganizationName'] = Get-PiiSafeString -PlainText $OrganizationName
 
         $uriFragment = "/orgs/$OrganizationName/teams"
         $description = "Getting teams in $OrganizationName"
         $teamType = $script:GitHubTeamSummaryTypeName
-    }
-    else
-    {
-        $telemetryProperties['TeamId'] = Get-PiiSafeString -PlainText $TeamId
-
-        $uriFragment = "/teams/$TeamId"
-        $description = "Getting team $TeamId"
-        $teamType = $script:GitHubTeamTypeName
     }
 
     $params = @{
@@ -204,13 +225,13 @@ filter Get-GitHubTeamMember
         The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
 
     .PARAMETER OrganizationName
-        The name of the organization
+        The name of the organization.
 
     .PARAMETER TeamName
-        The name of the team in the organization
+        The name of the team in the organization.
 
-    .PARAMETER TeamId
-        The ID of the team in the organization
+    .PARAMETER TeamSlug
+        The slug (a unique key based on the team name) of the team in the organization.
 
     .PARAMETER AccessToken
         If provided, this will be used as the AccessToken for authentication with the
@@ -239,7 +260,7 @@ filter Get-GitHubTeamMember
     .EXAMPLE
         $members = Get-GitHubTeamMember -Organization PowerShell -TeamName Everybody
 #>
-    [CmdletBinding(DefaultParameterSetName = 'ID')]
+    [CmdletBinding(DefaultParameterSetName = 'Slug')]
     [OutputType({$script:GitHubUserTypeName})]
     param
     (
@@ -259,8 +280,8 @@ filter Get-GitHubTeamMember
         [Parameter(
             Mandatory,
             ValueFromPipelineByPropertyName,
-            ParameterSetName='ID')]
-        [int64] $TeamId,
+            ParameterSetName='Slug')]
+        [string] $TeamSlug,
 
         [string] $AccessToken
     )
@@ -278,18 +299,18 @@ filter Get-GitHubTeamMember
             throw $message
         }
 
-        $TeamId = $team.id
+        $TeamSlug = $team.slug
     }
 
     $telemetryProperties = @{
         'OrganizationName' = (Get-PiiSafeString -PlainText $OrganizationName)
         'TeamName' = (Get-PiiSafeString -PlainText $TeamName)
-        'TeamId' = (Get-PiiSafeString -PlainText $TeamId)
+        'TeamSlug' = (Get-PiiSafeString -PlainText $TeamSlug)
     }
 
     $params = @{
-        'UriFragment' = "teams/$TeamId/members"
-        'Description' = "Getting members of team $TeamId"
+        'UriFragment' = "orgs/$OrganizationName/teams/$TeamSlug/members"
+        'Description' = "Getting members of team $TeamSlug"
         'AccessToken' = $AccessToken
         'TelemetryEventName' = $MyInvocation.MyCommand.Name
         'TelemetryProperties' = $telemetryProperties
@@ -330,6 +351,9 @@ function New-GitHubTeam
     .PARAMETER ParentTeamName
         The name of a team to set as the parent team.
 
+    .PARAMETER ParentTeamId
+        The ID of the team to set as the parent team.
+
     .PARAMETER AccessToken
         If provided, this will be used as the AccessToken for authentication with the
         REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
@@ -361,7 +385,8 @@ function New-GitHubTeam
 #>
     [CmdletBinding(
         SupportsShouldProcess,
-        PositionalBinding = $false
+        PositionalBinding = $false,
+        DefaultParameterSetName = 'ParentId'
     )]
     [OutputType({$script:GitHubTeamTypeName})]
     param
@@ -391,7 +416,14 @@ function New-GitHubTeam
         [ValidateSet('Secret', 'Closed')]
         [string] $Privacy,
 
+        [Parameter(ParameterSetName='ParentName')]
         [string] $ParentTeamName,
+
+        [Parameter(
+            ValueFromPipelineByPropertyName,
+            ParameterSetName='ParentId')]
+        [Alias('TeamId')]
+        [int64] $ParentTeamId,
 
         [string] $AccessToken
     )
@@ -451,8 +483,12 @@ function New-GitHubTeam
             }
 
             $team = Get-GitHubTeam @getGitHubTeamParms
+            $ParentTeamId = $team.id
+        }
 
-            $hashBody['parent_team_id'] = $team.id
+        if ($ParentTeamId -gt 0)
+        {
+            $hashBody['parent_team_id'] = $ParentTeamId
         }
 
         if (-not $PSCmdlet.ShouldProcess($TeamName, 'Create GitHub Team'))
@@ -491,6 +527,14 @@ filter Set-GitHubTeam
     .PARAMETER TeamName
         The name of the team.
 
+        When TeamSlug is specified, specifying a name here that is different from the existing
+        name will cause the team to be renamed. TeamSlug and TeamName are specified for you
+        automatically when piping in a GitHub.Team object, so a rename would only occur if
+        intentionally specify this parameter and provide a different name.
+
+    .PARAMETER TeamSlug
+        The slug (a unique key based on the team name) of the team to update.
+
     .PARAMETER Description
         The description for the team.
 
@@ -499,6 +543,9 @@ filter Set-GitHubTeam
 
     .PARAMETER ParentTeamName
         The name of a team to set as the parent team.
+
+    .PARAMETER ParentTeamId
+        The ID of the team to set as the parent team.
 
     .PARAMETER PassThru
         Returns the updated GitHub Team.  By default, this cmdlet does not generate any output.
@@ -529,7 +576,8 @@ filter Set-GitHubTeam
 #>
     [CmdletBinding(
         SupportsShouldProcess,
-        PositionalBinding = $false
+        PositionalBinding = $false,
+        DefaultParameterSetName = 'ParentName'
     )]
     [OutputType( { $script:GitHubTeamTypeName } )]
     param
@@ -548,12 +596,20 @@ filter Set-GitHubTeam
         [ValidateNotNullOrEmpty()]
         [string] $TeamName,
 
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateNotNullOrEmpty()]
+        [string] $TeamSlug,
+
         [string] $Description,
 
         [ValidateSet('Secret','Closed')]
         [string] $Privacy,
 
+        [Parameter(ParameterSetName='ParentTeamName')]
         [string] $ParentTeamName,
+
+        [Parameter(ParameterSetName='ParentTeamId')]
+        [int64] $ParentTeamId,
 
         [switch] $PassThru,
 
@@ -564,22 +620,31 @@ filter Set-GitHubTeam
 
     $telemetryProperties = @{
         OrganizationName = (Get-PiiSafeString -PlainText $OrganizationName)
+        TeamSlug = (Get-PiiSafeString -PlainText $TeamSlug)
         TeamName = (Get-PiiSafeString -PlainText $TeamName)
     }
 
-    $getGitHubTeamParms = @{
-        OrganizationName = $OrganizationName
-    }
-    if ($PSBoundParameters.ContainsKey('AccessToken'))
+    if ((-not $PSBoundParameters.ContainsKey('TeamSlug')) -or
+        $PSBoundParameters.ContainsKey('ParentTeamName'))
     {
-        $getGitHubTeamParms['AccessToken'] = $AccessToken
+        $getGitHubTeamParms = @{
+            OrganizationName = $OrganizationName
+        }
+        if ($PSBoundParameters.ContainsKey('AccessToken'))
+        {
+            $getGitHubTeamParms['AccessToken'] = $AccessToken
+        }
+
+        $orgTeams = Get-GitHubTeam @getGitHubTeamParms
+
+        if ($PSBoundParameters.ContainsKey('TeamName'))
+        {
+            $team = $orgTeams | Where-Object -Property name -eq $TeamName
+            $TeamSlug = $team.slug
+        }
     }
 
-    $orgTeams = Get-GitHubTeam @getGitHubTeamParms
-
-    $team = $orgTeams | Where-Object -Property name -eq $TeamName
-
-    $uriFragment = "/orgs/$OrganizationName/teams/$($team.slug)"
+    $uriFragment = "/orgs/$OrganizationName/teams/$TeamSlug"
 
     $hashBody = @{
         name = $TeamName
@@ -590,11 +655,21 @@ filter Set-GitHubTeam
     if ($PSBoundParameters.ContainsKey('ParentTeamName'))
     {
         $parentTeam = $orgTeams | Where-Object -Property name -eq $ParentTeamName
-
         $hashBody['parent_team_id'] = $parentTeam.id
     }
+    elseif ($PSBoundParameters.ContainsKey('ParentTeamId'))
+    {
+        if ($ParentTeamId -gt 0)
+        {
+            $hashBody['parent_team_id'] = $ParentTeamId
+        }
+        else
+        {
+            $hashBody['parent_team_id'] = $null
+        }
+    }
 
-    if (-not $PSCmdlet.ShouldProcess($TeamName, 'Set GitHub Team'))
+    if (-not $PSCmdlet.ShouldProcess($TeamSlug, 'Set GitHub Team'))
     {
         return
     }
@@ -616,6 +691,118 @@ filter Set-GitHubTeam
     }
 }
 
+filter Rename-GitHubTeam
+{
+<#
+    .SYNOPSIS
+        Renames a team within an organization on GitHub.
+
+    .DESCRIPTION
+        Renames a team within an organization on GitHub.
+
+        The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
+
+    .PARAMETER OrganizationName
+        The name of the team's organization.
+
+    .PARAMETER TeamName
+        The existing name of the team.
+
+    .PARAMETER TeamSlug
+        The slug (a unique key based on the team name) of the team to update.
+
+    .PARAMETER NewTeamName
+        The new name for the team.
+
+    .PARAMETER PassThru
+        Returns the updated GitHub Team.  By default, this cmdlet does not generate any output.
+        You can use "Set-GitHubConfiguration -DefaultPassThru" to control the default behavior
+        of this switch.
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .INPUTS
+        GitHub.Organization
+        GitHub.Team
+
+    .OUTPUTS
+        GitHub.Team
+
+    .EXAMPLE
+        Rename-GitHubTeam -OrganizationName PowerShell -TeamName Developers -NewTeamName DeveloperTeam
+
+        Renames the 'Developers' GitHub team in the 'PowerShell' organization to be 'DeveloperTeam'.
+
+    .EXAMPLE
+        $team = Get-GitHubTeam -OrganizationName PowerShell -TeamName Developers
+        $team | Rename-GitHubTeam -NewTeamName 'DeveloperTeam'
+
+        You can also pipe in a GitHub team that was returned from a previous command.
+
+    .NOTES
+        This is a helper/wrapper for Set-GitHubTeam which can also rename a GitHub Team.
+#>
+    [CmdletBinding(
+        PositionalBinding = $false,
+        DefaultParameterSetName = 'TeamSlug')]
+    [OutputType( { $script:GitHubTeamTypeName } )]
+    param
+    (
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            Position = 1)]
+        [ValidateNotNullOrEmpty()]
+        [string] $OrganizationName,
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            Position = 2,
+            ParameterSetName='TeamName')]
+        [ValidateNotNullOrEmpty()]
+        [string] $TeamName,
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            ParameterSetName='TeamSlug')]
+        [ValidateNotNullOrEmpty()]
+        [string] $TeamSlug,
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            Position = 3)]
+        [ValidateNotNullOrEmpty()]
+        [string] $NewTeamName,
+
+        [switch] $PassThru,
+
+        [string] $AccessToken
+    )
+
+    Write-InvocationLog
+
+    if (-not $PSBoundParameters.ContainsKey('TeamSlug'))
+    {
+        $team = Get-GitHubTeam -OrganizationName $OrganizationName -TeamName $TeamName -AccessToken:$AccessToken
+        $TeamSlug = $team.slug
+    }
+
+    $params = @{
+        OrganizationName = $OrganizationName
+        TeamSlug = $TeamSlug
+        TeamName = $NewTeamName
+        PassThru = (Resolve-ParameterWithDefaultConfigurationValue -Name PassThru -ConfigValueName DefaultPassThru)
+        AccessToken = $AccessToken
+    }
+
+    return Set-GitHubTeam @params
+}
+
 filter Remove-GitHubTeam
 {
 <#
@@ -631,7 +818,10 @@ filter Remove-GitHubTeam
         The name of the organization the team is in.
 
     .PARAMETER TeamName
-        The name of the team.
+        The name of the team to remove.
+
+    .PARAMETER TeamSlug
+        The slug (a unique key based on the team name) of the team to remove.
 
     .PARAMETER Force
         If this switch is specified, you will not be prompted for confirmation of command execution.
@@ -666,8 +856,8 @@ filter Remove-GitHubTeam
     [CmdletBinding(
         SupportsShouldProcess,
         PositionalBinding = $false,
-        ConfirmImpact = 'High'
-    )]
+        ConfirmImpact = 'High',
+        DefaultParameterSetName = 'TeamSlug')]
     [Alias('Delete-GitHubTeam')]
     param
     (
@@ -683,9 +873,17 @@ filter Remove-GitHubTeam
             Mandatory,
             ValueFromPipeline,
             ValueFromPipelineByPropertyName,
-            Position = 2)]
+            Position = 2,
+            ParameterSetName='TeamName')]
         [ValidateNotNullOrEmpty()]
         [string] $TeamName,
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            ParameterSetName='TeamSlug')]
+        [ValidateNotNullOrEmpty()]
+        [string] $TeamSlug,
 
         [switch] $Force,
 
@@ -696,21 +894,26 @@ filter Remove-GitHubTeam
 
     $telemetryProperties = @{
         OrganizationName = (Get-PiiSafeString -PlainText $RepositoryName)
+        TeamSlug = (Get-PiiSafeString -PlainText $TeamSlug)
         TeamName = (Get-PiiSafeString -PlainText $TeamName)
     }
 
-    $getGitHubTeamParms = @{
-        OrganizationName = $OrganizationName
-        TeamName = $TeamName
-    }
-    if ($PSBoundParameters.ContainsKey('AccessToken'))
+    if ($PSBoundParameters.ContainsKey('TeamName'))
     {
-        $getGitHubTeamParms['AccessToken'] = $AccessToken
+        $getGitHubTeamParms = @{
+            OrganizationName = $OrganizationName
+            TeamName = $TeamName
+        }
+        if ($PSBoundParameters.ContainsKey('AccessToken'))
+        {
+            $getGitHubTeamParms['AccessToken'] = $AccessToken
+        }
+
+        $team = Get-GitHubTeam @getGitHubTeamParms
+        $TeamSlug = $team.slug
     }
 
-    $team = Get-GitHubTeam @getGitHubTeamParms
-
-    $uriFragment = "/orgs/$OrganizationName/teams/$($team.slug)"
+    $uriFragment = "/orgs/$OrganizationName/teams/$TeamSlug"
 
     if ($Force -and (-not $Confirm))
     {
@@ -725,7 +928,7 @@ filter Remove-GitHubTeam
     $params = @{
         UriFragment = $uriFragment
         Method = 'Delete'
-        Description =  "Deleting $TeamName"
+        Description =  "Deleting $TeamSlug"
         AccessToken = $AccessToken
         TelemetryEventName = $MyInvocation.MyCommand.Name
         TelemetryProperties = $telemetryProperties
@@ -774,6 +977,7 @@ filter Add-GitHubTeamAdditionalProperties
         {
             Add-Member -InputObject $item -Name 'TeamName' -Value $item.name -MemberType NoteProperty -Force
             Add-Member -InputObject $item -Name 'TeamId' -Value $item.id -MemberType NoteProperty -Force
+            Add-Member -InputObject $item -Name 'TeamSlug' -Value $item.slug -MemberType NoteProperty -Force
 
             $organizationName = [String]::Empty
             if ($item.organization)

@@ -59,7 +59,7 @@ try
                 $team.description | Should -Be $description
                 $team.parent | Should -BeNullOrEmpty
                 $team.privacy | Should -Be $privacy
-                $team.TeamName | Should -Be $teamName
+                $team.TeamName | Should -Be $team.name
                 $team.TeamId | Should -Be $team.id
                 $team.OrganizationName | Should -Be $organizationName
             }
@@ -79,25 +79,25 @@ try
                     $team.updated_at | Should -Not -BeNullOrEmpty
                     $team.members_count | Should -Be 1
                     $team.repos_count | Should -Be 0
-                    $team.TeamName | Should -Be $teamName
+                    $team.TeamName | Should -Be $team.name
                     $team.TeamId | Should -Be $team.id
                     $team.OrganizationName | Should -Be $organizationName
                 }
             }
 
-            Context 'When specifying the "OrganizationName" parameter through the pipeline' {
+            Context 'When specifying the "OrganizationName" and "TeamSlug" through the pipeline' {
                 BeforeAll {
                     $orgTeams = $team | Get-GitHubTeam
                     $team = $orgTeams | Where-Object -Property name -eq $teamName
                 }
 
                 It 'Should have the expected type and additional properties' {
-                    $team.PSObject.TypeNames[0] | Should -Be 'GitHub.TeamSummary'
+                    $team.PSObject.TypeNames[0] | Should -Be 'GitHub.Team'
                     $team.name | Should -Be $teamName
                     $team.description | Should -Be $description
                     $team.parent | Should -BeNullOrEmpty
                     $team.privacy | Should -Be $privacy
-                    $team.TeamName | Should -Be $teamName
+                    $team.TeamName | Should -Be $team.name
                     $team.TeamId | Should -Be $team.id
                     $team.OrganizationName | Should -Be $organizationName
                 }
@@ -141,7 +141,7 @@ try
                 $team.description | Should -Be $description
                 $team.parent | Should -BeNullOrEmpty
                 $team.privacy | Should -Be $privacy
-                $team.TeamName | Should -Be $teamName
+                $team.TeamName | Should -Be $team.name
                 $team.TeamId | Should -Be $team.id
                 $team.OrganizationName | Should -Be $organizationName
             }
@@ -167,7 +167,7 @@ try
                     $team.updated_at | Should -Not -BeNullOrEmpty
                     $team.members_count | Should -Be 1
                     $team.repos_count | Should -Be 1
-                    $team.TeamName | Should -Be $teamName
+                    $team.TeamName | Should -Be $team.name
                     $team.TeamId | Should -Be $team.id
                     $team.OrganizationName | Should -Be $organizationName
                 }
@@ -190,7 +190,7 @@ try
                     $team.members_count | Should -Be 1
                     $team.repos_count | Should -Be 1
                     $team.privacy | Should -Be $privacy
-                    $team.TeamName | Should -Be $teamName
+                    $team.TeamName | Should -Be $team.name
                     $team.TeamId | Should -Be $team.id
                     $team.OrganizationName | Should -Be $organizationName
                 }
@@ -209,7 +209,7 @@ try
             }
         }
 
-        Context 'When getting a GitHub Team by TeamId' {
+        Context 'When getting a GitHub Team by TeamSlug' {
             BeforeAll {
                 $teamName = [Guid]::NewGuid().Guid
                 $description = 'Team Description'
@@ -225,11 +225,10 @@ try
                 }
 
                 $newTeam = New-GitHubTeam @newGithubTeamParms
-
-                $team = Get-GitHubTeam -TeamId $newTeam.id
             }
 
-            It 'Should have the expected type and additional properties' {
+            It 'Should have the expected type and additional properties as a parameter' {
+                $team = Get-GitHubTeam -OrganizationName  $script:organizationName -TeamSlug $newTeam.slug
                 $team.PSObject.TypeNames[0] | Should -Be 'GitHub.Team'
                 $team.name | Should -Be $teamName
                 $team.description | Should -Be $description
@@ -240,15 +239,32 @@ try
                 $team.members_count | Should -Be 1
                 $team.repos_count | Should -Be 0
                 $team.privacy | Should -Be $privacy
-                $team.TeamName | Should -Be $teamName
+                $team.TeamName | Should -Be $team.name
+                $team.TeamId | Should -Be $team.id
+                $team.OrganizationName | Should -Be $organizationName
+            }
+
+            It 'Should have the expected type and additional properties via the pipeline' {
+                $team = $newTeam | Get-GitHubTeam
+                $team.PSObject.TypeNames[0] | Should -Be 'GitHub.Team'
+                $team.name | Should -Be $teamName
+                $team.description | Should -Be $description
+                $team.organization.login | Should -Be $organizationName
+                $team.parent | Should -BeNullOrEmpty
+                $team.created_at | Should -Not -BeNullOrEmpty
+                $team.updated_at | Should -Not -BeNullOrEmpty
+                $team.members_count | Should -Be 1
+                $team.repos_count | Should -Be 0
+                $team.privacy | Should -Be $privacy
+                $team.TeamName | Should -Be $team.name
                 $team.TeamId | Should -Be $team.id
                 $team.OrganizationName | Should -Be $organizationName
             }
 
             AfterAll {
-                if (Get-Variable -Name team -ErrorAction SilentlyContinue)
+                if (Get-Variable -Name newTeam -ErrorAction SilentlyContinue)
                 {
-                    $team | Remove-GitHubTeam -Force
+                    $newTeam | Remove-GitHubTeam -Force
                 }
             }
         }
@@ -278,7 +294,7 @@ try
                 $team.parent | Should -BeNullOrEmpty
                 $team.members_count | Should -Be 1
                 $team.repos_count | Should -Be 0
-                $team.TeamName | Should -Be $teamName
+                $team.TeamName | Should -Be $team.name
                 $team.TeamId | Should -Be $team.id
                 $team.OrganizationName | Should -Be $organizationName
             }
@@ -329,7 +345,7 @@ try
                 $team.members_count | Should -Be 1
                 $team.repos_count | Should -Be 1
                 $team.privacy | Should -Be $privacy
-                $team.TeamName | Should -Be $teamName
+                $team.TeamName | Should -Be $team.name
                 $team.TeamId | Should -Be $team.id
                 $team.OrganizationName | Should -Be $organizationName
             }
@@ -347,7 +363,7 @@ try
             }
         }
 
-        Context 'When creating a child GitHub team' {
+        Context 'When creating a child GitHub team using the Parent TeamName' {
             BeforeAll {
                 $parentTeamName = [Guid]::NewGuid().Guid
                 $privacy = 'Closed'
@@ -378,7 +394,7 @@ try
                 $childTeam.organization.login | Should -Be $organizationName
                 $childTeam.parent.name | Should -Be $parentTeamName
                 $childTeam.privacy | Should -Be $privacy
-                $childTeam.TeamName | Should -Be $childTeamName
+                $childTeam.TeamName | Should -Be $childTeam.name
                 $childTeam.TeamId | Should -Be $childTeam.id
                 $childTeam.OrganizationName | Should -Be $organizationName
             }
@@ -396,44 +412,98 @@ try
             }
         }
 
-        Context 'When specifying the "Organization" parameter through the pipeline' {
+        Context 'When creating a child GitHub team using the Parent TeamId' {
             BeforeAll {
-                $teamName1 = [Guid]::NewGuid().Guid
-                $teamName2 = [Guid]::NewGuid().Guid
+                $parentTeamName = [Guid]::NewGuid().Guid
+                $privacy = 'Closed'
 
                 $newGithubTeamParms = @{
                     OrganizationName = $organizationName
-                    TeamName = $teamName1
+                    TeamName = $parentTeamName
+                    Privacy = $privacy
                 }
 
-                $team1 = New-GitHubTeam @newGithubTeamParms
+                $parentTeam = New-GitHubTeam @newGithubTeamParms
 
-                $team2 = $team1 | New-GitHubTeam -TeamName $teamName2
+                $childTeamName = [Guid]::NewGuid().Guid
+
+                $newGithubTeamParms = @{
+                    OrganizationName = $organizationName
+                    TeamName = $childTeamName
+                    ParentTeamId = $parentTeam.id
+                    Privacy = $privacy
+                }
+
+                $childTeam = New-GitHubTeam @newGithubTeamParms
             }
 
             It 'Should have the expected type and additional properties' {
-                $team2.PSObject.TypeNames[0] | Should -Be 'GitHub.Team'
-                $team2.name | Should -Be $teamName2
-                $team2.organization.login | Should -Be $organizationName
-                $team2.parent | Should -BeNullOrEmpty
-                $team2.created_at | Should -Not -BeNullOrEmpty
-                $team2.updated_at | Should -Not -BeNullOrEmpty
-                $team2.members_count | Should -Be 1
-                $team2.repos_count | Should -Be 0
-                $team2.TeamName | Should -Be $teamName2
-                $team2.TeamId | Should -Be $team2.id
-                $team2.OrganizationName | Should -Be $organizationName
+                $childTeam.PSObject.TypeNames[0] | Should -Be 'GitHub.Team'
+                $childTeam.name | Should -Be $childTeamName
+                $childTeam.organization.login | Should -Be $organizationName
+                $childTeam.parent.name | Should -Be $parentTeamName
+                $childTeam.privacy | Should -Be $privacy
+                $childTeam.TeamName | Should -Be $childTeam.name
+                $childTeam.TeamId | Should -Be $childTeam.id
+                $childTeam.OrganizationName | Should -Be $organizationName
             }
 
             AfterAll {
-                if (Get-Variable -Name team1 -ErrorAction SilentlyContinue)
+                if (Get-Variable -Name childTeam -ErrorAction SilentlyContinue)
                 {
-                    $team1 | Remove-GitHubTeam -Force
+                    $childTeam | Remove-GitHubTeam -Force
                 }
 
-                if (Get-Variable -Name team2 -ErrorAction SilentlyContinue)
+                if (Get-Variable -Name parentTeam -ErrorAction SilentlyContinue)
                 {
-                    $team2 | Remove-GitHubTeam -Force
+                    $parentTeam | Remove-GitHubTeam -Force
+                }
+            }
+        }
+
+        Context 'When creating a child GitHub team using the Parent TeamId on the pipeline' {
+            BeforeAll {
+                $parentTeamName = [Guid]::NewGuid().Guid
+                $privacy = 'Closed'
+
+                $newGithubTeamParms = @{
+                    OrganizationName = $organizationName
+                    TeamName = $parentTeamName
+                    Privacy = $privacy
+                }
+
+                $parentTeam = New-GitHubTeam @newGithubTeamParms
+
+                $childTeamName = [Guid]::NewGuid().Guid
+
+                $newGithubTeamParms = @{
+                    TeamName = $childTeamName
+                    Privacy = $privacy
+                }
+
+                $childTeam = $parentTeam | New-GitHubTeam @newGithubTeamParms
+            }
+
+            It 'Should have the expected type and additional properties' {
+                $childTeam.PSObject.TypeNames[0] | Should -Be 'GitHub.Team'
+                $childTeam.name | Should -Be $childTeamName
+                $childTeam.organization.login | Should -Be $organizationName
+                $childTeam.parent.name | Should -Be $parentTeamName
+                $childTeam.privacy | Should -Be $privacy
+                $childTeam.TeamName | Should -Be $childTeam.name
+                $childTeam.TeamId | Should -Be $childTeam.id
+                $childTeam.OrganizationName | Should -Be $organizationName
+            }
+
+            AfterAll {
+                if (Get-Variable -Name childTeam -ErrorAction SilentlyContinue)
+                {
+                    $childTeam | Remove-GitHubTeam -Force
+                }
+
+                if (Get-Variable -Name parentTeam -ErrorAction SilentlyContinue)
+                {
+                    $parentTeam | Remove-GitHubTeam -Force
                 }
             }
         }
@@ -454,7 +524,7 @@ try
                 $team.updated_at | Should -Not -BeNullOrEmpty
                 $team.members_count | Should -Be 1
                 $team.repos_count | Should -Be 0
-                $team.TeamName | Should -Be $teamName
+                $team.TeamName | Should -Be $team.name
                 $team.TeamId | Should -Be $team.id
                 $team.OrganizationName | Should -Be $organizationName
             }
@@ -484,7 +554,7 @@ try
                 $team.updated_at | Should -Not -BeNullOrEmpty
                 $team.members_count | Should -Be 1
                 $team.repos_count | Should -Be 0
-                $team.TeamName | Should -Be $teamName
+                $team.TeamName | Should -Be $team.name
                 $team.TeamId | Should -Be $team.id
                 $team.OrganizationName | Should -Be $organizationName
             }
@@ -544,7 +614,7 @@ try
                 $updatedTeam.description | Should -Be $description
                 $updatedTeam.parent.name | Should -Be $parentTeamName
                 $updatedTeam.privacy | Should -Be $privacy
-                $updatedTeam.TeamName | Should -Be $teamName
+                $updatedTeam.TeamName | Should -Be $team.name
                 $updatedTeam.TeamId | Should -Be $team.id
                 $updatedTeam.OrganizationName | Should -Be $organizationName
             }
@@ -597,7 +667,7 @@ try
                 $updatedTeam.updated_at | Should -Not -BeNullOrEmpty
                 $updatedTeam.members_count | Should -Be 1
                 $updatedTeam.repos_count | Should -Be 0
-                $updatedTeam.TeamName | Should -Be $teamName
+                $updatedTeam.TeamName | Should -Be $team.name
                 $updatedTeam.TeamId | Should -Be $team.id
                 $updatedTeam.OrganizationName | Should -Be $organizationName
             }
@@ -606,6 +676,65 @@ try
                 if (Get-Variable -Name team -ErrorAction SilentlyContinue)
                 {
                     $team | Remove-GitHubTeam -Force
+                }
+            }
+        }
+
+        Context 'When updating a GitHub team to be a child using the Parent TeamId' {
+            BeforeAll {
+                $teamName = [Guid]::NewGuid().Guid
+                $parentTeamName = [Guid]::NewGuid().Guid
+                $description = 'Team Description'
+                $privacy = 'Closed'
+
+                $newGithubTeamParms = @{
+                    OrganizationName = $organizationName
+                    TeamName = $parentTeamName
+                    Privacy = $privacy
+                }
+
+                $parentTeam = New-GitHubTeam @newGithubTeamParms
+
+                $newGithubTeamParms = @{
+                    OrganizationName = $organizationName
+                    TeamName = $teamName
+                    Privacy = $privacy
+                }
+
+                $team = New-GitHubTeam @newGithubTeamParms
+
+                $updateGitHubTeamParms = @{
+                    OrganizationName = $organizationName
+                    TeamName = $teamName
+                    Description = $description
+                    Privacy = $privacy
+                    ParentTeamId = $parentTeam.id
+                }
+
+                $updatedTeam = Set-GitHubTeam @updateGitHubTeamParms -PassThru
+            }
+
+            It 'Should have the expected type and additional properties' {
+                $updatedTeam.PSObject.TypeNames[0] | Should -Be 'GitHub.Team'
+                $updatedTeam.name | Should -Be $teamName
+                $updatedTeam.organization.login | Should -Be $organizationName
+                $updatedTeam.description | Should -Be $description
+                $updatedTeam.parent.name | Should -Be $parentTeamName
+                $updatedTeam.privacy | Should -Be $privacy
+                $updatedTeam.TeamName | Should -Be $team.name
+                $updatedTeam.TeamId | Should -Be $team.id
+                $updatedTeam.OrganizationName | Should -Be $organizationName
+            }
+
+            AfterAll {
+                if (Get-Variable -Name team -ErrorAction SilentlyContinue)
+                {
+                    $team | Remove-GitHubTeam -Force
+                }
+
+                if (Get-Variable -Name parentTeam -ErrorAction SilentlyContinue)
+                {
+                    $parentTeam | Remove-GitHubTeam -Force
                 }
             }
         }
@@ -620,7 +749,7 @@ try
                     TeamName = $teamName
                 }
 
-                $team = New-GitHubTeam -OrganizationName $organizationName -TeamName $teamName
+                $team = New-GitHubTeam @newGithubTeamParms
 
                 $updatedTeam = $team | Set-GitHubTeam -Description $description -PassThru
             }
@@ -635,7 +764,7 @@ try
                 $updatedTeam.updated_at | Should -Not -BeNullOrEmpty
                 $updatedTeam.members_count | Should -Be 1
                 $updatedTeam.repos_count | Should -Be 0
-                $updatedTeam.TeamName | Should -Be $teamName
+                $updatedTeam.TeamName | Should -Be $team.name
                 $updatedTeam.TeamId | Should -Be $updatedTeam.id
                 $updatedTeam.OrganizationName | Should -Be $organizationName
             }
@@ -649,12 +778,113 @@ try
         }
     }
 
+    Describe 'GitHubTeams\Rename-GitHubTeam' {
+        BeforeAll {
+            $organizationName = $script:organizationName
+            $teamName = [Guid]::NewGuid().Guid
+            $newTeamName = [Guid]::NewGuid().Guid
+        }
+
+        Context 'When renaming a GitHub team with the TeamName' {
+            BeforeAll {
+                $team = New-GitHubTeam -OrganizationName $organizationName -TeamName $teamName
+            }
+
+            $updatedTeam = Rename-GitHubTeam -OrganizationName $organizationName -TeamName $teamName -NewTeamName $newTeamName -PassThru
+            It 'Should have the expected type and additional properties' {
+                $updatedTeam.PSObject.TypeNames[0] | Should -Be 'GitHub.Team'
+                $updatedTeam.name | Should -Be $newTeamName
+                $updatedTeam.organization.login | Should -Be $OrganizationName
+                $updatedTeam.description | Should -BeNullOrEmpty
+                $updatedTeam.parent.name | Should -BeNullOrEmpty
+                $updatedTeam.created_at | Should -Not -BeNullOrEmpty
+                $updatedTeam.updated_at | Should -Not -BeNullOrEmpty
+                $updatedTeam.members_count | Should -Be 1
+                $updatedTeam.repos_count | Should -Be 0
+                $updatedTeam.TeamName | Should -Be $updatedTeam.name
+                $updatedTeam.TeamId | Should -Be $updatedTeam.id
+                $updatedTeam.OrganizationName | Should -Be $organizationName
+            }
+
+            It 'Should find the renamed team' {
+                { Get-GitHubTeam -OrganizationName $organizationName -TeamName $newTeamName } |
+                    Should -Not -Throw
+            }
+
+            AfterAll {
+                Remove-GitHubTeam -OrganizationName $organizationName -TeamName $newTeamName -Force
+            }
+        }
+
+        Context 'When renaming a GitHub team with the TeamSlug' {
+            BeforeAll {
+                $team = New-GitHubTeam -OrganizationName $organizationName -TeamName $teamName
+            }
+
+            $updatedTeam = Rename-GitHubTeam -OrganizationName $organizationName -TeamSlug $team.slug -NewTeamName $newTeamName -PassThru
+            It 'Should have the expected type and additional properties' {
+                $updatedTeam.PSObject.TypeNames[0] | Should -Be 'GitHub.Team'
+                $updatedTeam.name | Should -Be $newTeamName
+                $updatedTeam.organization.login | Should -Be $OrganizationName
+                $updatedTeam.description | Should -BeNullOrEmpty
+                $updatedTeam.parent.name | Should -BeNullOrEmpty
+                $updatedTeam.created_at | Should -Not -BeNullOrEmpty
+                $updatedTeam.updated_at | Should -Not -BeNullOrEmpty
+                $updatedTeam.members_count | Should -Be 1
+                $updatedTeam.repos_count | Should -Be 0
+                $updatedTeam.TeamName | Should -Be $updatedTeam.name
+                $updatedTeam.TeamId | Should -Be $updatedTeam.id
+                $updatedTeam.OrganizationName | Should -Be $organizationName
+            }
+
+            It 'Should find the renamed team' {
+                { Get-GitHubTeam -OrganizationName $organizationName -TeamName $newTeamName } |
+                    Should -Not -Throw
+            }
+
+            AfterAll {
+                Remove-GitHubTeam -OrganizationName $organizationName -TeamName $newTeamName -Force
+            }
+        }
+
+        Context 'When renaming a GitHub team with the TeamSlug on the pipeline' {
+            BeforeAll {
+                $team = New-GitHubTeam -OrganizationName $organizationName -TeamName $teamName
+            }
+
+            $updatedTeam = $team | Rename-GitHubTeam -NewTeamName $newTeamName -PassThru
+            It 'Should have the expected type and additional properties' {
+                $updatedTeam.PSObject.TypeNames[0] | Should -Be 'GitHub.Team'
+                $updatedTeam.name | Should -Be $newTeamName
+                $updatedTeam.organization.login | Should -Be $OrganizationName
+                $updatedTeam.description | Should -BeNullOrEmpty
+                $updatedTeam.parent.name | Should -BeNullOrEmpty
+                $updatedTeam.created_at | Should -Not -BeNullOrEmpty
+                $updatedTeam.updated_at | Should -Not -BeNullOrEmpty
+                $updatedTeam.members_count | Should -Be 1
+                $updatedTeam.repos_count | Should -Be 0
+                $updatedTeam.TeamName | Should -Be $updatedTeam.name
+                $updatedTeam.TeamId | Should -Be $updatedTeam.id
+                $updatedTeam.OrganizationName | Should -Be $organizationName
+            }
+
+            It 'Should find the renamed team' {
+                { Get-GitHubTeam -OrganizationName $organizationName -TeamName $newTeamName } |
+                    Should -Not -Throw
+            }
+
+            AfterAll {
+                Remove-GitHubTeam -OrganizationName $organizationName -TeamName $newTeamName -Force
+            }
+        }
+    }
+
     Describe 'GitHubTeams\Remove-GitHubTeam' {
         BeforeAll {
             $organizationName = $script:organizationName
         }
 
-        Context 'When removing a GitHub team' {
+        Context 'When removing a GitHub team with the TeamName' {
             BeforeAll {
                 $teamName = [Guid]::NewGuid().Guid
 
@@ -677,21 +907,90 @@ try
             }
         }
 
-        Context 'When specifying the "Organization" and "TeamName" parameters through the pipeline' {
+        Context 'When removing a GitHub team with the TeamSlug' {
             BeforeAll {
                 $teamName = [Guid]::NewGuid().Guid
-                $description = 'Team Description'
 
                 $team = New-GitHubTeam -OrganizationName $organizationName -TeamName $teamName
             }
 
             It 'Should not throw an exception' {
-                { $team |Remove-GitHubTeam -Force } | Should -Not -Throw
+                $removeGitHubTeamParms = @{
+                    OrganizationName = $organizationName
+                    TeamSlug = $team.slug
+                    Confirm = $false
+                }
+
+                { Remove-GitHubTeam @RemoveGitHubTeamParms } | Should -Not -Throw
             }
 
             It 'Should have removed the team' {
-                { Get-GitHubTeam -OrganizationName $organizationName -TeamName $teamName } |
+                { Get-GitHubTeam -OrganizationName $organizationName -TeamSlug $team.slug } |
                     Should -Throw
+            }
+        }
+
+        Context 'When removing a GitHub team with the TeamSlug on the pipeline' {
+            BeforeAll {
+                $teamName = [Guid]::NewGuid().Guid
+
+                $team = New-GitHubTeam -OrganizationName $organizationName -TeamName $teamName
+            }
+
+            It 'Should not throw an exception' {
+                { $team | Remove-GitHubTeam -Force } | Should -Not -Throw
+            }
+
+            It 'Should have removed the team' {
+                { $team | Get-GitHubTeam } | Should -Throw
+            }
+        }
+    }
+
+    Describe 'GitHubTeams\Get-GitHubTeamMember' {
+        BeforeAll {
+            $organizationName = $script:organizationName
+            $teamName = [Guid]::NewGuid().Guid
+            $team = New-GitHubTeam -OrganizationName $organizationName -TeamName $teamName
+        }
+
+        AfterAll {
+            $team | Remove-GitHubTeam -Force
+        }
+
+        Context 'Getting team members using TeamName' {
+            $members = @(Get-GitHubTeamMember -OrganizationName $organizationName -TeamName $teamName)
+
+            It 'Should have the expected type number of members' {
+                $members.Count | Should -Be 1
+            }
+
+            It 'Should have the expected type and additional properties' {
+                $members[0].PSObject.TypeNames[0] | Should -Be 'GitHub.User'
+            }
+        }
+
+        Context 'Getting team members using TeamSlug' {
+            $members = @(Get-GitHubTeamMember -OrganizationName $organizationName -TeamSlug $team.slug)
+
+            It 'Should have the expected type number of members' {
+                $members.Count | Should -Be 1
+            }
+
+            It 'Should have the expected type and additional properties' {
+                $members[0].PSObject.TypeNames[0] | Should -Be 'GitHub.User'
+            }
+        }
+
+        Context 'Getting team members using TeamSlug on the pipeline' {
+            $members = @($team | Get-GitHubTeamMember)
+
+            It 'Should have the expected type number of members' {
+                $members.Count | Should -Be 1
+            }
+
+            It 'Should have the expected type and additional properties' {
+                $members[0].PSObject.TypeNames[0] | Should -Be 'GitHub.User'
             }
         }
     }
