@@ -18,6 +18,7 @@
 #### Table of Contents
 
 *   [Overview](#overview)
+*   [What's New](#whats-new)
 *   [Current API Support](#current-api-support)
 *   [Installation](#installation)
 *   [Configuration](#configuration)
@@ -43,15 +44,24 @@ virtually any command into any other command within the module.**
 
 ----------
 
+## What's New
+
+Check out [CHANGELOG.md](./CHANGELOG.md) to review the details of the current release as well as
+all past releases.
+
+----------
+
 ## Current API Support
 
 At present, this module can:
  * Query, create, update and remove [Repositories](https://developer.github.com/v3/repos/) including
-      * Query [Branches](https://developer.github.com/v3/repos/branches/)
+      * Query, create and remove [Branches](https://developer.github.com/v3/repos/branches/), as well
+        as the associated branch protection rules.
       * Query and create new [Forks](https://developer.github.com/v3/repos/forks/)
-      * Query/retrieve [Content](https://developer.github.com/v3/repos/contents/) from a repo.
+      * Query and create [Content](https://developer.github.com/v3/repos/contents/) in a repo.
       * Query the languages and tags in a repository, and and query/update its topics.
       * Change repository ownership.
+      * Query, enable and disable security and vulnerability alerts.
       * Query various [traffic reports](https://developer.github.com/v3/repos/traffic/) including
         referral sources and paths, page views and clones.
  * Query, create, edit, lock/unlock [Issues](https://developer.github.com/v3/issues/) and
@@ -67,11 +77,17 @@ At present, this module can:
  * Query [contributors](https://developer.github.com/v3/repos/statistics/)
  * Query [organizations](https://developer.github.com/v3/orgs/) and their members.
  * Query and update [Users](https://developer.github.com/v3/users/)
- * Query [Teams](https://developer.github.com/v3/teams/) and their members.
+ * Query, create, edit and remove [Teams](https://developer.github.com/v3/teams/),
+   and Query their members.
  * Query, create, edit and remove [Projects](https://developer.github.com/v3/projects/), along with
    [Project Columns](https://developer.github.com/v3/projects/columns/) and
    [Project Cards](https://developer.github.com/v3/projects/cards/)
- * Query [Releases](https://developer.github.com/v3/repos/releases/)
+ * Query, create, edit and remove [Releases](https://developer.github.com/v3/repos/releases/) and
+   associated content/assets.
+ * Query, create, edit, remove, fork, and (un)star [gists](https://developer.github.com/v3/gists/),
+   as well as gist comments.
+ * Query, edit and remove [reactions](https://developer.github.com/v3/reactions/) on Issues and
+   Pull Requests.
  * Miscellaneous functionality:
       * Get all [Codes of Conduct](https://developer.github.com/v3/codes_of_conduct/) as well as that
         of a specific repo.
