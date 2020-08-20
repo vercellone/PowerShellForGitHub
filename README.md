@@ -22,7 +22,6 @@
 *   [Installation](#installation)
 *   [Configuration](#configuration)
 *   [Usage](#usage)
-*   [Logging](#logging)
 *   [Developing and Contributing](#developing-and-contributing)
 *   [Legal and Licensing](#legal-and-licensing)
 *   [Governance](#governance)
