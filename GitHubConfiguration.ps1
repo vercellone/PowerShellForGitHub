@@ -6,7 +6,7 @@
 
 # The location of the file that we'll store any settings that can/should roam with the user.
 [string] $script:configurationFilePath = [System.IO.Path]::Combine(
-    [Environment]::GetFolderPath('ApplicationData'),
+    [System.Environment]::GetFolderPath('ApplicationData'),
     'Microsoft',
     'PowerShellForGitHub',
     'config.json')
@@ -14,7 +14,7 @@
 # The location of the file that we'll store the Access Token SecureString
 # which cannot/should not roam with the user.
 [string] $script:accessTokenFilePath = [System.IO.Path]::Combine(
-    [Environment]::GetFolderPath('LocalApplicationData'),
+    [System.Environment]::GetFolderPath('LocalApplicationData'),
     'Microsoft',
     'PowerShellForGitHub',
     'accessToken.txt')
@@ -650,10 +650,16 @@ function Import-GitHubConfiguration
     # Create a configuration object with all the default values.  We can then update the values
     # with any that we find on disk.
     $logPath = [String]::Empty
+    $logName = 'PowerShellForGitHub.log'
     $documentsFolder = [System.Environment]::GetFolderPath('MyDocuments')
-    if (-not [System.String]::IsNullOrEmpty($documentsFolder))
+    $logToLocalAppDataFolder = [System.String]::IsNullOrEmpty($documentsFolder)
+    if ($logToLocalAppDataFolder)
     {
-        $logPath = Join-Path -Path $documentsFolder -ChildPath 'PowerShellForGitHub.log'
+        $logPath = Join-Path -Path ([System.Environment]::GetFolderPath('LocalApplicationData')) -ChildPath $logName
+    }
+    else
+    {
+        $logPath = Join-Path -Path $documentsFolder -ChildPath $logName
     }
 
     $config = [PSCustomObject]@{
@@ -696,6 +702,17 @@ function Import-GitHubConfiguration
             $type = $config.$name.GetType().Name
             $config.$name = Resolve-PropertyValue -InputObject $jsonObject -Name $name -Type $type -DefaultValue $config.$name
         }
+
+    # Let the user know when we had to revert to using the LocalApplicationData folder for the
+    # log location (if they haven't already changed its path in their local config).
+    $configuredLogPath = $config.logPath
+    if ($logToLocalAppDataFolder -and ($logPath -eq $configuredLogPath))
+    {
+        # Limited instance where we write the warning directly instead of using Write-Log, since
+        # Write-Log won't yet be configured.
+        $message = "Storing log at non-default location: [$logPath] (no user profile path was found).  You can change this location by calling Set-GitHubConfiguration -LogPath <desiredPathToLogFile>"
+        Write-Verbose -Message $message
+    }
 
     return $config
 }
