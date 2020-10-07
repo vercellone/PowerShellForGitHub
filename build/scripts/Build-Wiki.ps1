@@ -146,6 +146,7 @@ function Build-SideBar
     .EXAMPLE
         Build-SideBar -Path ./docs -ModuleRootPageFileName 'root.md' -ModuleName 'PowerShellForGitHub' -ModulePages @('Foo', 'Bar')
 #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseApprovedVerbs", "", Justification="It's an approved verb in PS Core, just not Windows PowerShell.  Plus, this is an internal helper.")]
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -226,6 +227,7 @@ function Build-Footer
     .EXAMPLE
         Build-Footer -Path ./docs -ModuleRootPageFileName 'root.md' -ModuleName 'PowerShellForGitHub'
 #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseApprovedVerbs", "", Justification="It's an approved verb in PS Core, just not Windows PowerShell.  Plus, this is an internal helper.")]
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -290,6 +292,7 @@ function Build-HomePage
     .EXAMPLE
         Build-HomePage -Path ./docs -ModuleRootPageFileName 'root.md'
 #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseApprovedVerbs", "", Justification="It's an approved verb in PS Core, just not Windows PowerShell.  Plus, this is an internal helper.")]
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
