@@ -1016,7 +1016,8 @@ Remove-GitHubReleaseAsset -OwnerName PowerShell -RepositoryName PowerShell -Asse
 or with pipelining...
 
 ```powershell
-$asset | Remove-GitHubReleaseAsset -force
+$asset | Remove-GitHubReleaseAsset -Force
+```
 
 ----------
 
@@ -1202,4 +1203,3 @@ $issue | New-GitHubIssueComment -Body $CommentBody
 # Close issue
 $issue | Set-GitHubIssue -State Closed
 ```
-
