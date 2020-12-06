@@ -1379,6 +1379,115 @@ try
             Remove-GitHubRepository -Uri $repo.svn_url -Force
         }
     }
+
+    Describe 'GitHubRepositories\Get-GitHubRepositoryActionsPermission' {
+        BeforeAll {
+            $repoName = [Guid]::NewGuid().Guid
+            $repo = New-GitHubRepository -RepositoryName $repoName
+
+            $allowedActions = 'All', 'LocalOnly', 'Selected', 'Disabled'
+        }
+
+        foreach ($allowedAction in $allowedActions)
+        {
+            Context "When the AllowedAction is $allowedAction" {
+                BeforeAll {
+                    $setGitHubRepositoryActionsPermissionParms = @{
+                        Uri = $repo.svn_url
+                        AllowedActions = $allowedAction
+                    }
+
+                    Set-GitHubRepositoryActionsPermission @setGitHubRepositoryActionsPermissionParms
+
+                    $permissions = Get-GitHubRepositoryActionsPermission -Uri $repo.svn_url
+                }
+
+                It 'Should return the correct type and properties' {
+                    $permissions.PSObject.TypeNames[0] | Should -Be 'GitHub.RepositoryActionsPermission'
+
+                    $permissions.RepositoryName | Should -Be $repoName
+                    $permissions.RepositoryUrl | Should -Be $repo.svn_url
+
+                    if ($allowedAction -eq 'Disabled')
+                    {
+                        $permissions.Enabled | Should -BeFalse
+                    }
+                    else
+                    {
+                        $permissions.Enabled | Should -BeTrue
+                        $permissions.AllowedActions | Should -Be $allowedAction
+                    }
+                }
+            }
+        }
+
+        Context "When specifiying the 'URI' Parameter from the Pipeline" {
+            BeforeAll {
+                $permissions = $repo | Get-GitHubRepositoryActionsPermission
+            }
+
+            It 'Should return an object of the correct type' {
+                $permissions.PSObject.TypeNames[0] | Should -Be 'GitHub.RepositoryActionsPermission'
+            }
+        }
+
+        AfterAll {
+            if (Get-Variable -Name repo -ErrorAction SilentlyContinue)
+            {
+                $repo | Remove-GitHubRepository -Force
+            }
+        }
+    }
+
+    Describe 'GitHubRepositories\Set-GitHubRepositoryActionsPermission' {
+        BeforeAll {
+            $repo = New-GitHubRepository -RepositoryName ([Guid]::NewGuid().Guid)
+
+            $allowedActions = 'All', 'LocalOnly', 'Selected', 'Disabled'
+        }
+
+        foreach ($allowedAction in $allowedActions)
+        {
+            Context "When the AllowedAction Parameter is $allowedAction" {
+                BeforeAll {
+                    $setGitHubRepositoryActionsPermissionParms = @{
+                        Uri = $repo.svn_url
+                        AllowedActions = $allowedAction
+                    }
+
+                    Set-GitHubRepositoryActionsPermission @setGitHubRepositoryActionsPermissionParms
+                }
+
+                It 'Should have set the expected permissions' {
+                    $permissions = Get-GitHubRepositoryActionsPermission -Uri $repo.svn_url
+
+                    if ($allowedAction -eq 'Disabled')
+                    {
+                        $permissions.Enabled | Should -BeFalse
+                    }
+                    else
+                    {
+                        $permissions.Enabled | Should -BeTrue
+                        $permissions.AllowedActions | Should -Be $allowedAction
+                    }
+                }
+            }
+        }
+
+        Context "When specifiying the 'URI' Parameter from the Pipeline" {
+            It 'Should not throw' {
+                { $repo | Set-GitHubRepositoryActionsPermission -AllowedActions 'All' } |
+                    Should -Not -Throw
+            }
+        }
+
+        AfterAll {
+            if (Get-Variable -Name repo -ErrorAction SilentlyContinue)
+            {
+                $repo | Remove-GitHubRepository -Force
+            }
+        }
+    }
 }
 finally
 {
