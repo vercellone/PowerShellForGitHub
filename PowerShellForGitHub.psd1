@@ -15,6 +15,7 @@
 
     # Format files (.ps1xml) to be loaded when importing this module
     FormatsToProcess = @(
+        'Formatters/GitHubBranches.Format.ps1xml',
         'Formatters/GitHubGistComments.Format.ps1xml',
         'Formatters/GitHubGists.Format.ps1xml',
         'Formatters/GitHubReleases.Format.ps1xml'
@@ -37,6 +38,7 @@
         'GitHubEvents.ps1',
         'GitHubGistComments.ps1',
         'GitHubGists.ps1',
+        'GitHubGraphQl.ps1',
         'GitHubIssueComments.ps1',
         'GitHubIssues.ps1',
         'GitHubLabels.ps1',
@@ -103,6 +105,7 @@
         'Get-GitHubRepository',
         'Get-GitHubRepositoryActionsPermission',
         'Get-GitHubRepositoryBranch',
+        'Get-GitHubRepositoryBranchPatternProtectionRule',
         'Get-GitHubRepositoryBranchProtectionRule',
         'Get-GitHubRepositoryCollaborator',
         'Get-GitHubRepositoryContributor',
@@ -120,6 +123,7 @@
         'Group-GitHubIssue',
         'Group-GitHubPullRequest',
         'Initialize-GitHubLabel',
+        'Invoke-GHGraphQl',
         'Invoke-GHRestMethod',
         'Invoke-GHRestMethodMultipleResult',
         'Join-GitHubUri',
@@ -142,6 +146,7 @@
         'New-GitHubRepository',
         'New-GitHubRepositoryFromTemplate',
         'New-GitHubRepositoryBranch',
+        'New-GitHubRepositoryBranchPatternProtectionRule',
         'New-GitHubRepositoryBranchProtectionRule',
         'New-GitHubRepositoryFork',
         'New-GitHubTeam',
@@ -163,6 +168,7 @@
         'Remove-GitHubReleaseAsset',
         'Remove-GitHubRepository',
         'Remove-GitHubRepositoryBranch'
+        'Remove-GitHubRepositoryBranchPatternProtectionRule',
         'Remove-GitHubRepositoryBranchProtectionRule',
         'Remove-GitHubRepositoryTeamPermission',
         'Remove-GitHubTeam',
@@ -223,6 +229,7 @@
         'Delete-GitHubReleaseAsset',
         'Delete-GitHubRepository',
         'Delete-GitHubRepositoryBranch',
+        'Delete-GitHubRepositoryBranchPatternProtectionRule',
         'Delete-GitHubRepositoryBranchProtectionRule',
         'Delete-GitHubRepositoryTeamPermission',
         'Delete-GitHubTeam',
