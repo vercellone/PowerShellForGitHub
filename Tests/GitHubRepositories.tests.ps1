@@ -785,6 +785,7 @@ Describe 'GitHubRepositories\Set-GitHubRepository' {
                     AllowUpdateBranch = $true
                     DeleteBranchOnMerge = $true
                     IsTemplate = $true
+                    WebCommitSignoffRequired = $true
                 }
 
                 $updatedRepo = Set-GitHubRepository @updateGithubRepositoryParms -PassThru
@@ -809,6 +810,7 @@ Describe 'GitHubRepositories\Set-GitHubRepository' {
                 $updatedRepo.allow_update_branch | Should -BeTrue
                 $updatedRepo.delete_branch_on_merge | Should -BeTrue
                 $updatedRepo.is_template | Should -BeTrue
+                $updatedRepo.web_commit_signoff_required | Should -BeTrue
             }
         }
 
