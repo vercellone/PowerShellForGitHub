@@ -89,6 +89,10 @@ filter New-GitHubRepository
     .PARAMETER AllowAutoMerge
         Specifies whether to allow auto-merge on pull requests.
 
+    .PARAMETER AllowUpdateBranch
+        Specifies whether to always allow a pull request head branch that is behind its base branch
+        to be updated even if it is not required to be up-to-date before merging.
+
     .PARAMETER DeleteBranchOnMerge
         Specifies the automatic deleting of head branches when pull requests are merged.
 
@@ -170,6 +174,8 @@ filter New-GitHubRepository
 
         [switch] $AllowAutoMerge,
 
+        [switch] $AllowUpdateBranch,
+
         [switch] $DeleteBranchOnMerge,
 
         [switch] $IsTemplate,
@@ -217,6 +223,7 @@ filter New-GitHubRepository
     if ($PSBoundParameters.ContainsKey('DisallowMergeCommit')) { $hashBody['allow_merge_commit'] = (-not $DisallowMergeCommit.ToBool()) }
     if ($PSBoundParameters.ContainsKey('DisallowRebaseMerge')) { $hashBody['allow_rebase_merge'] = (-not $DisallowRebaseMerge.ToBool()) }
     if ($PSBoundParameters.ContainsKey('AllowAutoMerge')) { $hashBody['allow_auto_merge'] = $AllowAutoMerge.ToBool() }
+    if ($PSBoundParameters.ContainsKey('AllowUpdateBranch')) { $hashBody['allow_update_branch'] = $AllowUpdateBranch.ToBool() }
     if ($PSBoundParameters.ContainsKey('DeleteBranchOnMerge')) { $hashBody['delete_branch_on_merge'] = $DeleteBranchOnMerge.ToBool() }
     if ($PSBoundParameters.ContainsKey('IsTemplate')) { $hashBody['is_template'] = $IsTemplate.ToBool() }
 
@@ -1075,6 +1082,10 @@ filter Set-GitHubRepository
     .PARAMETER AllowAutoMerge
         Specifies whether to allow auto-merge on pull requests.
 
+    .PARAMETER AllowUpdateBranch
+        Specifies whether to always allow a pull request head branch that is behind its base branch
+        to be updated even if it is not required to be up-to-date before merging.
+
     .PARAMETER DeleteBranchOnMerge
         Specifies the automatic deleting of head branches when pull requests are merged.
 
@@ -1181,6 +1192,8 @@ filter Set-GitHubRepository
 
         [switch] $AllowAutoMerge,
 
+        [switch] $AllowUpdateBranch,
+
         [switch] $DeleteBranchOnMerge,
 
         [switch] $IsTemplate,
@@ -1227,6 +1240,7 @@ filter Set-GitHubRepository
     if ($PSBoundParameters.ContainsKey('DisallowMergeCommit')) { $hashBody['allow_merge_commit'] = (-not $DisallowMergeCommit.ToBool()) }
     if ($PSBoundParameters.ContainsKey('DisallowRebaseMerge')) { $hashBody['allow_rebase_merge'] = (-not $DisallowRebaseMerge.ToBool()) }
     if ($PSBoundParameters.ContainsKey('AllowAutoMerge')) { $hashBody['allow_auto_merge'] = $AllowAutoMerge.ToBool() }
+    if ($PSBoundParameters.ContainsKey('AllowUpdateBranch')) { $hashBody['allow_update_branch'] = $AllowUpdateBranch.ToBool() }
     if ($PSBoundParameters.ContainsKey('DeleteBranchOnMerge')) { $hashBody['delete_branch_on_merge'] = $DeleteBranchOnMerge.ToBool() }
     if ($PSBoundParameters.ContainsKey('IsTemplate')) { $hashBody['is_template'] = $IsTemplate.ToBool() }
     if ($PSBoundParameters.ContainsKey('Archived')) { $hashBody['archived'] = $Archived.ToBool() }
