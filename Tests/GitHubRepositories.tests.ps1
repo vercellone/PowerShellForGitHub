@@ -105,7 +105,7 @@ Describe 'GitHubRepositories\New-GitHubRepository' {
             }
         }
 
-        Context -Name 'When creating a repository with all possible settings' -Fixture {
+        Context -Name 'When creating a public repository with all possible settings' -Fixture {
             BeforeAll -ScriptBlock {
                 $repoName = ([Guid]::NewGuid().Guid)
                 $testGitIgnoreTemplate = (Get-GitHubGitIgnore)[0]
@@ -122,6 +122,7 @@ Describe 'GitHubRepositories\New-GitHubRepository' {
                     DisallowSquashMerge = $true
                     DisallowMergeCommit = $true
                     DisallowRebaseMerge = $false
+                    AllowAutoMerge = $true
                     DeleteBranchOnMerge = $true
                     GitIgnoreTemplate = $testGitIgnoreTemplate
                     LicenseTemplate = $testLicenseTemplate
@@ -146,6 +147,7 @@ Describe 'GitHubRepositories\New-GitHubRepository' {
                 $repo.allow_squash_merge | Should -BeFalse
                 $repo.allow_merge_commit | Should -BeFalse
                 $repo.allow_rebase_merge | Should -BeTrue
+                $repo.allow_auto_merge | Should -BeTrue
                 $repo.delete_branch_on_merge | Should -BeTrue
                 $repo.is_template | Should -BeTrue
             }
@@ -166,7 +168,7 @@ Describe 'GitHubRepositories\New-GitHubRepository' {
             }
         }
 
-        Context -Name 'When creating a repository with alternative Merge settings' -Fixture {
+        Context -Name 'When creating a public repository with alternative Merge settings' -Fixture {
             BeforeAll -ScriptBlock {
                 $repoName = ([Guid]::NewGuid().Guid)
                 $newGitHubRepositoryParms = @{
@@ -174,6 +176,7 @@ Describe 'GitHubRepositories\New-GitHubRepository' {
                     DisallowSquashMerge = $true
                     DisallowMergeCommit = $false
                     DisallowRebaseMerge = $true
+                    AllowAutoMerge = $false
                 }
                 $repo = New-GitHubRepository @newGitHubRepositoryParms
             }
@@ -187,6 +190,7 @@ Describe 'GitHubRepositories\New-GitHubRepository' {
                 $repo.allow_squash_merge | Should -BeFalse
                 $repo.allow_merge_commit | Should -BeTrue
                 $repo.allow_rebase_merge | Should -BeFalse
+                $repo.allow_auto_merge | Should -BeFalse
             }
 
             AfterAll -ScriptBlock {
@@ -717,6 +721,48 @@ Describe 'GitHubRepositories\Set-GitHubRepository' {
         BeforeAll -ScriptBlock {
             $repoName = ([Guid]::NewGuid().Guid)
             $repo = New-GitHubRepository -RepositoryName $repoName
+        }
+
+        Context -Name 'When updating a public repository with auto-merge set to true' {
+            BeforeAll -ScriptBlock {
+                $updateGithubRepositoryParms = @{
+                    OwnerName = $repo.owner.login
+                    RepositoryName = $repoName
+                    AllowAutoMerge = $true
+                }
+
+                $updatedRepo = Set-GitHubRepository @updateGithubRepositoryParms -PassThru
+            }
+
+            It 'Should return an object of the correct type' {
+                $updatedRepo | Should -BeOfType PSCustomObject
+            }
+
+            It 'Should return the correct properties' {
+                $updatedRepo.name | Should -Be $repoName
+                $updatedRepo.allow_auto_merge | Should -BeTrue
+            }
+        }
+
+        Context -Name 'When updating a public repository with auto-merge set to false' {
+            BeforeAll -ScriptBlock {
+                $updateGithubRepositoryParms = @{
+                    OwnerName = $repo.owner.login
+                    RepositoryName = $repoName
+                    AllowAutoMerge = $false
+                }
+
+                $updatedRepo = Set-GitHubRepository @updateGithubRepositoryParms -PassThru
+            }
+
+            It 'Should return an object of the correct type' {
+                $updatedRepo | Should -BeOfType PSCustomObject
+            }
+
+            It 'Should return the correct properties' {
+                $updatedRepo.name | Should -Be $repoName
+                $updatedRepo.allow_auto_merge | Should -BeFalse
+            }
         }
 
         Context -Name 'When updating a repository with all possible settings' {
