@@ -16,6 +16,7 @@
     # Format files (.ps1xml) to be loaded when importing this module
     FormatsToProcess = @(
         'Formatters/GitHubBranches.Format.ps1xml',
+        'Formatters/GitHubCodespaces.Format.ps1xml',
         'Formatters/GitHubGistComments.Format.ps1xml',
         'Formatters/GitHubGists.Format.ps1xml',
         'Formatters/GitHubReleases.Format.ps1xml'
@@ -33,6 +34,7 @@
         'GitHubAnalytics.ps1',
         'GitHubAssignees.ps1',
         'GitHubBranches.ps1',
+        'GitHubCodespaces.ps1',
         'GitHubCore.ps1',
         'GitHubContents.ps1',
         'GitHubEvents.ps1',
@@ -78,6 +80,7 @@
         'Get-GitHubAssignee',
         'Get-GitHubCloneTraffic',
         'Get-GitHubCodeOfConduct',
+        'Get-GitHubCodespace',
         'Get-GitHubConfiguration',
         'Get-GitHubContent',
         'Get-GitHubEmoji',
