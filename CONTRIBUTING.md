@@ -624,6 +624,7 @@ Thank you to all of our contributors, no matter how big or small the contributio
 - **[Simon Heather (@X-Guardian)](https://github.com/X-Guardian)**
 - **[Neil White (@variableresistor)](https://github.com/variableresistor)**
 - **[Mark Curole(@tigerfansga)](https://github.com/tigerfansga)**
+- **[Jason Vercellone(@vercellone)](https://github.com/vercellone)**
 
 ----------
 
