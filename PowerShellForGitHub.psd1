@@ -205,6 +205,8 @@
         'Set-GitHubRepositoryTopic',
         'Set-GitHubTeam',
         'Split-GitHubUri',
+        'Start-GitHubCodespace',
+        'Stop-GitHubCodespace',
         'Test-GitHubAssignee',
         'Test-GitHubAuthenticationConfigured',
         'Test-GitHubGistStar',

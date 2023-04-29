@@ -78,6 +78,7 @@ filter Get-GitHubCodespace
 #>
     [CmdletBinding(DefaultParameterSetName = 'AuthenticatedUser')]
     [OutputType({$script:GitHubCodespaceTypeName})]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="The Uri parameter is only referenced by Resolve-RepositoryElements which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(
             Mandatory,
@@ -207,6 +208,262 @@ filter Get-GitHubCodespace
     }
 
     return ($result | Add-GitHubCodespaceAdditionalProperties)
+}
+
+function Start-GitHubCodespace
+{
+<#
+    .SYNOPSIS
+        Start a user's codespace.
+
+    .DESCRIPTION
+        You must authenticate using an access token with the codespace scope to use this endpoint.
+
+        GitHub Apps must have write access to the codespaces_lifecycle_admin repository permission to use this endpoint.
+
+        The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
+
+    .PARAMETER CodespaceName
+        The name of the codespace.
+
+    .PARAMETER PassThru
+        Returns the updated GitHub Issue.  By default, this cmdlet does not generate any output.
+        You can use "Set-GitHubConfiguration -DefaultPassThru" to control the default behavior
+        of this switch.
+
+    .PARAMETER Wait
+        If present will wait for the codespace to start.
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .INPUTS
+        GitHub.Codespace
+
+    .OUTPUTS
+        GitHub.Codespace
+
+    .EXAMPLE
+        Start-GitHubCodespace -Name vercellone-effective-goggles-qrv997q6j9929jx8
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/codespaces?apiVersion=2022-11-28#start-a-codespace-for-the-authenticated-user
+#>
+    [CmdletBinding(
+        SupportsShouldProcess,
+        ConfirmImpact='Low')]
+    [OutputType({$script:GitHubCodespaceTypeName})]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="PassThru is accessed indirectly via Resolve-ParameterWithDefaultConfigurationValue")]
+    param(
+        [Parameter(Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName)]
+        [string] $CodespaceName,
+
+        [switch] $PassThru,
+
+        [switch] $Wait,
+
+        [string] $AccessToken
+    )
+
+    process
+    {
+        Write-InvocationLog
+
+        $telemetryProperties = @{
+            'CodespaceName' = Get-PiiSafeString -PlainText $CodespaceName
+        }
+
+        $params = @{
+            'UriFragment' = "user/codespaces/$CodespaceName/start"
+            'Method' = 'POST'
+            'Description' = "Start Codespace $CodespaceName"
+            'AccessToken' = $AccessToken
+            'AcceptHeader' = $script:symmetraAcceptHeader
+            'TelemetryEventName' = $MyInvocation.MyCommand.Name
+            'TelemetryProperties' = $telemetryProperties
+        }
+
+        if (-not $PSCmdlet.ShouldProcess($CodespaceName, "Start Codespace $CodespaceName"))
+        {
+            return
+        }
+
+        $result = (Invoke-GHRestMethod @params | Add-GitHubCodespaceAdditionalProperties)
+
+        if ($Wait.IsPresent)
+        {
+            $waitParams = @{
+                'CodespaceName' = $CodespaceName
+                'AccessToken' = $AccessToken
+            }
+
+            $result = Wait-GitHubCodespaceAction @waitParams
+        }
+
+        if (Resolve-ParameterWithDefaultConfigurationValue -Name PassThru -ConfigValueName DefaultPassThru)
+        {
+            return $result
+        }
+    }
+}
+
+function Stop-GitHubCodespace
+{
+<#
+    .SYNOPSIS
+        Stop a user's codespace.
+
+    .DESCRIPTION
+        You must authenticate using an access token with the codespace scope to use this endpoint.
+
+        GitHub Apps must have write access to the codespaces_lifecycle_admin repository permission to use this endpoint.
+
+        The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
+
+    .PARAMETER CodespaceName
+        The name of the codespace.
+
+    .PARAMETER PassThru
+        Returns the updated GitHub Issue.  By default, this cmdlet does not generate any output.
+        You can use "Set-GitHubConfiguration -DefaultPassThru" to control the default behavior
+        of this switch.
+
+    .PARAMETER Wait
+        If present will wait for the codespace to stop.
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .INPUTS
+        GitHub.Codespace
+
+    .OUTPUTS
+        GitHub.Codespace
+
+    .EXAMPLE
+        Stop-GitHubCodespace -Name vercellone-effective-goggles-qrv997q6j9929jx8
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/codespaces?apiVersion=2022-11-28#stop-a-codespace-for-the-authenticated-user
+#>
+    [CmdletBinding(
+        SupportsShouldProcess,
+        ConfirmImpact='Low')]
+    [OutputType({$script:GitHubCodespaceTypeName})]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="PassThru is accessed indirectly via Resolve-ParameterWithDefaultConfigurationValue")]
+    param(
+        [Parameter(Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName)]
+        [string] $CodespaceName,
+
+        [switch] $PassThru,
+
+        [switch] $Wait,
+
+        [string] $AccessToken
+    )
+
+    process
+    {
+        Write-InvocationLog
+
+        $telemetryProperties = @{
+            'CodespaceName' = Get-PiiSafeString -PlainText $CodespaceName
+        }
+
+        $params = @{
+            'UriFragment' = "user/codespaces/$CodespaceName/stop"
+            'Method' = 'POST'
+            'Description' = "Stop Codespace $CodespaceName"
+            'AccessToken' = $AccessToken
+            'AcceptHeader' = $script:symmetraAcceptHeader
+            'TelemetryEventName' = $MyInvocation.MyCommand.Name
+            'TelemetryProperties' = $telemetryProperties
+        }
+
+        if (-not $PSCmdlet.ShouldProcess($CodespaceName, "Stop Codespace $CodespaceName"))
+        {
+            return
+        }
+
+        $result = (Invoke-GHRestMethod @params | Add-GitHubCodespaceAdditionalProperties)
+
+        if ($Wait.IsPresent)
+        {
+            $waitParams = @{
+                'CodespaceName' = $CodespaceName
+                'AccessToken' = $AccessToken
+            }
+
+            $result = Wait-GitHubCodespaceAction @waitParams
+        }
+
+        if (Resolve-ParameterWithDefaultConfigurationValue -Name PassThru -ConfigValueName DefaultPassThru)
+        {
+            return $result
+        }
+    }
+}
+
+function Wait-GitHubCodespaceAction
+{
+    <#
+    .SYNOPSIS
+        Wait for a Codespace start or stop action.
+
+    .PARAMETER CodespaceName
+        The name of the codespace.
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .INPUTS
+        GitHub.Codespace
+
+    .OUTPUTS
+        GitHub.Codespace
+
+    .EXAMPLE
+        Wait-GitHubCodespace -Name vercellone-effective-goggles-qrv997q6j9929jx8
+#>
+    [CmdletBinding()]
+    [OutputType({$script:GitHubCodespaceTypeName})]
+    param(
+        [Parameter(Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName)]
+        [string] $CodespaceName,
+
+        [string] $AccessToken
+    )
+
+    begin {
+        # 2s minimum
+        $sleepSeconds = $(Get-GitHubConfiguration -Name 'StateChangeDelaySeconds')
+        if ($sleepSeconds -eq 0)
+        {
+            $sleepSeconds = 2
+        }
+    }
+
+    process
+    {
+        Write-InvocationLog
+
+        do
+        {
+            Start-Sleep -Seconds $sleepSeconds
+            $codespace = (Get-GitHubCodespace @PSBoundParameters)
+        } until($codespace.state -notmatch 'Queued|ing')
+
+        return $codespace
+    }
 }
 
 filter Add-GitHubCodespaceAdditionalProperties
