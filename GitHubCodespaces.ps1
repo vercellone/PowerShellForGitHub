@@ -214,7 +214,7 @@ function Start-GitHubCodespace
 {
     <#
     .SYNOPSIS
-        Start a user's codespace.
+        Start a Codespace for the currently authenticated user.
 
     .DESCRIPTION
         You must authenticate using an access token with the codespace scope to use this endpoint.
@@ -313,7 +313,7 @@ function Stop-GitHubCodespace
 {
     <#
     .SYNOPSIS
-        Stop a user's codespace.
+        Stop a Codespace for the currently authenticated user.
 
     .DESCRIPTION
         You must authenticate using an access token with the codespace scope to use this endpoint.
