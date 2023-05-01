@@ -196,7 +196,6 @@ filter Get-GitHubCodespace
     $params = @{
         'UriFragment' = $uriFragment
         'Description' = $description
-        'AcceptHeader' = "$script:nebulaAcceptHeader,$script:baptisteAcceptHeader,$script:mercyAcceptHeader"
         'AccessToken' = $AccessToken
         'TelemetryEventName' = $MyInvocation.MyCommand.Name
         'TelemetryProperties' = $telemetryProperties
@@ -282,7 +281,6 @@ function Start-GitHubCodespace
             'Method' = 'POST'
             'Description' = "Start Codespace $CodespaceName"
             'AccessToken' = $AccessToken
-            'AcceptHeader' = $script:symmetraAcceptHeader
             'TelemetryEventName' = $MyInvocation.MyCommand.Name
             'TelemetryProperties' = $telemetryProperties
         }
@@ -382,7 +380,6 @@ function Stop-GitHubCodespace
             'Method' = 'POST'
             'Description' = "Stop Codespace $CodespaceName"
             'AccessToken' = $AccessToken
-            'AcceptHeader' = $script:symmetraAcceptHeader
             'TelemetryEventName' = $MyInvocation.MyCommand.Name
             'TelemetryProperties' = $telemetryProperties
         }
