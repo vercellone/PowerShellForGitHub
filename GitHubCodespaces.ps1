@@ -45,6 +45,7 @@ filter Get-GitHubCodespace
         REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
 
     .INPUTS
+        GitHub.Codespace
         GitHub.Project
         GitHub.Repository
         GitHub.User
