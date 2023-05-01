@@ -156,21 +156,6 @@ filter Get-GitHubCodespace
             break
         }
 
-        'Elements'
-        {
-            $elements = Resolve-RepositoryElements
-            $OwnerName = $elements.ownerName
-            $RepositoryName = $elements.repositoryName
-
-            $telemetryProperties['OwnerName'] = Get-PiiSafeString -PlainText $OwnerName
-            $telemetryProperties['RepositoryName'] = Get-PiiSafeString -PlainText $RepositoryName
-
-            $uriFragment = "repos/$OwnerName/$RepositoryName/codespaces"
-            $description = "Getting $OwnerName/$RepositoryName/codespaces"
-
-            break
-        }
-
         'Organization'
         {
             # /orgs/{org}/codespaces
@@ -192,7 +177,7 @@ filter Get-GitHubCodespace
             break
         }
 
-        'Uri'
+        { $_ -in ('Elements', 'Uri') }
         {
             $elements = Resolve-RepositoryElements
             $OwnerName = $elements.ownerName
