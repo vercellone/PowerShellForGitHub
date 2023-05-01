@@ -217,9 +217,7 @@ function Start-GitHubCodespace
         Start a Codespace for the currently authenticated user.
 
     .DESCRIPTION
-        You must authenticate using an access token with the codespace scope to use this endpoint.
-
-        GitHub Apps must have write access to the codespaces_lifecycle_admin repository permission to use this endpoint.
+        Start a Codespace for the currently authenticated user.
 
         The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
 
@@ -249,6 +247,10 @@ function Start-GitHubCodespace
 
     .LINK
         https://docs.github.com/en/rest/codespaces/codespaces?apiVersion=2022-11-28#start-a-codespace-for-the-authenticated-user
+
+    .NOTES
+        You must authenticate using an access token with the codespace scope to use this endpoint.
+        GitHub Apps must have write access to the codespaces_lifecycle_admin repository permission to use this endpoint.
 #>
     [CmdletBinding(
         SupportsShouldProcess,
@@ -316,9 +318,7 @@ function Stop-GitHubCodespace
         Stop a Codespace for the currently authenticated user.
 
     .DESCRIPTION
-        You must authenticate using an access token with the codespace scope to use this endpoint.
-
-        GitHub Apps must have write access to the codespaces_lifecycle_admin repository permission to use this endpoint.
+        Stop a Codespace for the currently authenticated user.
 
         The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
 
@@ -348,6 +348,10 @@ function Stop-GitHubCodespace
 
     .LINK
         https://docs.github.com/en/rest/codespaces/codespaces?apiVersion=2022-11-28#stop-a-codespace-for-the-authenticated-user
+
+    .NOTES
+        You must authenticate using an access token with the codespace scope to use this endpoint.
+        GitHub Apps must have write access to the codespaces_lifecycle_admin repository permission to use this endpoint.
 #>
     [CmdletBinding(
         SupportsShouldProcess,
