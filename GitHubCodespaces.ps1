@@ -22,9 +22,9 @@ filter Get-GitHubCodespace
         Owner of the Codespace.
         If not supplied here, the DefaultOwnerName configuration property value will be used.
 
-    .PARAMETER CodespaceName
-        Name of the Codespace.
-        If not supplied here, the DefaultCodespaceName configuration property value will be used.
+    .PARAMETER RepositoryName
+        Name of the repository.
+        If not supplied here, the DefaultRepositoryName configuration property value will be used.
 
     .PARAMETER Uri
         Uri for the Codespace.
@@ -33,6 +33,12 @@ filter Get-GitHubCodespace
 
     .PARAMETER OrganizationName
         The name of the organization to retrieve the codespaces for.
+
+    .PARAMETER UserName
+        The handle for the GitHub user account.
+
+    .PARAMETER CodespaceName
+        Name of the Codespace.
 
     .PARAMETER AccessToken
         If provided, this will be used as the AccessToken for authentication with the
@@ -95,8 +101,9 @@ filter Get-GitHubCodespace
         [Parameter(
             Mandatory,
             ValueFromPipelineByPropertyName,
-            ParameterSetName = 'CodespaceName')]
-        [string] $CodespaceName,
+            ParameterSetName = 'Uri')]
+        [Alias('RepositoryUrl')]
+        [string] $Uri,
 
         [Parameter(
             ValueFromPipelineByPropertyName,
@@ -112,9 +119,8 @@ filter Get-GitHubCodespace
         [Parameter(
             Mandatory,
             ValueFromPipelineByPropertyName,
-            ParameterSetName = 'Uri')]
-        [Alias('RepositoryUrl')]
-        [string] $Uri,
+            ParameterSetName = 'CodespaceName')]
+        [string] $CodespaceName,
 
         [string] $AccessToken
     )
@@ -234,13 +240,13 @@ function Start-GitHubCodespace
     .PARAMETER CodespaceName
         The name of the codespace.
 
+    .PARAMETER Wait
+        If present will wait for the codespace to start.
+
     .PARAMETER PassThru
         Returns the updated GitHub Issue.  By default, this cmdlet does not generate any output.
         You can use "Set-GitHubConfiguration -DefaultPassThru" to control the default behavior
         of this switch.
-
-    .PARAMETER Wait
-        If present will wait for the codespace to start.
 
     .PARAMETER AccessToken
         If provided, this will be used as the AccessToken for authentication with the
@@ -269,9 +275,9 @@ function Start-GitHubCodespace
             ValueFromPipelineByPropertyName)]
         [string] $CodespaceName,
 
-        [switch] $PassThru,
-
         [switch] $Wait,
+
+        [switch] $PassThru,
 
         [string] $AccessToken
     )
@@ -334,13 +340,13 @@ function Stop-GitHubCodespace
     .PARAMETER CodespaceName
         The name of the codespace.
 
+    .PARAMETER Wait
+        If present will wait for the codespace to stop.
+
     .PARAMETER PassThru
         Returns the updated GitHub Issue.  By default, this cmdlet does not generate any output.
         You can use "Set-GitHubConfiguration -DefaultPassThru" to control the default behavior
         of this switch.
-
-    .PARAMETER Wait
-        If present will wait for the codespace to stop.
 
     .PARAMETER AccessToken
         If provided, this will be used as the AccessToken for authentication with the
@@ -369,9 +375,9 @@ function Stop-GitHubCodespace
             ValueFromPipelineByPropertyName)]
         [string] $CodespaceName,
 
-        [switch] $PassThru,
-
         [switch] $Wait,
+
+        [switch] $PassThru,
 
         [string] $AccessToken
     )
