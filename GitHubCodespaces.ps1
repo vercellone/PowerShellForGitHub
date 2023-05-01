@@ -463,6 +463,14 @@ function Wait-GitHubCodespaceAction
     {
         Write-InvocationLog
 
+        # Expected states for happy paths:
+        # Shutdown  > Queued > Starting     > Available
+        # Available > Queued > ShuttingDown > ShutDown
+        #
+        # To allow for unexpected results, loop until the state is something other than Queued or *ing
+        # All known states:
+        # *ings: Awaiting, Exporting, Provisioning, Rebuilding, ShuttingDown, Starting, Updating
+        # Other: Archived, Available, Created, Deleted, Failed, Moved, Queued, Shutdown, Unavailable, Unknown
         do
         {
             Start-Sleep -Seconds $sleepSeconds
