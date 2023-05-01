@@ -521,6 +521,7 @@ filter Add-GitHubCodespaceAdditionalProperties
         [ValidateNotNullOrEmpty()]
         [string] $TypeName = $script:GitHubCodespaceTypeName
     )
+
     foreach ($item in $InputObject)
     {
         $item.PSObject.TypeNames.Insert(0, $TypeName)
