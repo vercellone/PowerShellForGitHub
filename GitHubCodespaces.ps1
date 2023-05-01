@@ -210,7 +210,7 @@ filter Get-GitHubCodespace
     return ($result | Add-GitHubCodespaceAdditionalProperties)
 }
 
-function Start-GitHubCodespace
+filter Start-GitHubCodespace
 {
     <#
     .SYNOPSIS
@@ -270,48 +270,45 @@ function Start-GitHubCodespace
         [string] $AccessToken
     )
 
-    process
+    Write-InvocationLog
+
+    $telemetryProperties = @{
+        'CodespaceName' = Get-PiiSafeString -PlainText $CodespaceName
+    }
+
+    $params = @{
+        'UriFragment' = "user/codespaces/$CodespaceName/start"
+        'Method' = 'POST'
+        'Description' = "Start Codespace $CodespaceName"
+        'AccessToken' = $AccessToken
+        'TelemetryEventName' = $MyInvocation.MyCommand.Name
+        'TelemetryProperties' = $telemetryProperties
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($CodespaceName, "Start Codespace $CodespaceName"))
     {
-        Write-InvocationLog
+        return
+    }
 
-        $telemetryProperties = @{
-            'CodespaceName' = Get-PiiSafeString -PlainText $CodespaceName
-        }
+    $result = (Invoke-GHRestMethod @params | Add-GitHubCodespaceAdditionalProperties)
 
-        $params = @{
-            'UriFragment' = "user/codespaces/$CodespaceName/start"
-            'Method' = 'POST'
-            'Description' = "Start Codespace $CodespaceName"
+    if ($Wait.IsPresent)
+    {
+        $waitParams = @{
+            'CodespaceName' = $CodespaceName
             'AccessToken' = $AccessToken
-            'TelemetryEventName' = $MyInvocation.MyCommand.Name
-            'TelemetryProperties' = $telemetryProperties
         }
 
-        if (-not $PSCmdlet.ShouldProcess($CodespaceName, "Start Codespace $CodespaceName"))
-        {
-            return
-        }
+        $result = Wait-GitHubCodespaceAction @waitParams
+    }
 
-        $result = (Invoke-GHRestMethod @params | Add-GitHubCodespaceAdditionalProperties)
-
-        if ($Wait.IsPresent)
-        {
-            $waitParams = @{
-                'CodespaceName' = $CodespaceName
-                'AccessToken' = $AccessToken
-            }
-
-            $result = Wait-GitHubCodespaceAction @waitParams
-        }
-
-        if (Resolve-ParameterWithDefaultConfigurationValue -Name PassThru -ConfigValueName DefaultPassThru)
-        {
-            return $result
-        }
+    if (Resolve-ParameterWithDefaultConfigurationValue -Name PassThru -ConfigValueName DefaultPassThru)
+    {
+        return $result
     }
 }
 
-function Stop-GitHubCodespace
+filter Stop-GitHubCodespace
 {
     <#
     .SYNOPSIS
@@ -371,44 +368,41 @@ function Stop-GitHubCodespace
         [string] $AccessToken
     )
 
-    process
+    Write-InvocationLog
+
+    $telemetryProperties = @{
+        'CodespaceName' = Get-PiiSafeString -PlainText $CodespaceName
+    }
+
+    $params = @{
+        'UriFragment' = "user/codespaces/$CodespaceName/stop"
+        'Method' = 'POST'
+        'Description' = "Stop Codespace $CodespaceName"
+        'AccessToken' = $AccessToken
+        'TelemetryEventName' = $MyInvocation.MyCommand.Name
+        'TelemetryProperties' = $telemetryProperties
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($CodespaceName, "Stop Codespace $CodespaceName"))
     {
-        Write-InvocationLog
+        return
+    }
 
-        $telemetryProperties = @{
-            'CodespaceName' = Get-PiiSafeString -PlainText $CodespaceName
-        }
+    $result = (Invoke-GHRestMethod @params | Add-GitHubCodespaceAdditionalProperties)
 
-        $params = @{
-            'UriFragment' = "user/codespaces/$CodespaceName/stop"
-            'Method' = 'POST'
-            'Description' = "Stop Codespace $CodespaceName"
+    if ($Wait.IsPresent)
+    {
+        $waitParams = @{
+            'CodespaceName' = $CodespaceName
             'AccessToken' = $AccessToken
-            'TelemetryEventName' = $MyInvocation.MyCommand.Name
-            'TelemetryProperties' = $telemetryProperties
         }
 
-        if (-not $PSCmdlet.ShouldProcess($CodespaceName, "Stop Codespace $CodespaceName"))
-        {
-            return
-        }
+        $result = Wait-GitHubCodespaceAction @waitParams
+    }
 
-        $result = (Invoke-GHRestMethod @params | Add-GitHubCodespaceAdditionalProperties)
-
-        if ($Wait.IsPresent)
-        {
-            $waitParams = @{
-                'CodespaceName' = $CodespaceName
-                'AccessToken' = $AccessToken
-            }
-
-            $result = Wait-GitHubCodespaceAction @waitParams
-        }
-
-        if (Resolve-ParameterWithDefaultConfigurationValue -Name PassThru -ConfigValueName DefaultPassThru)
-        {
-            return $result
-        }
+    if (Resolve-ParameterWithDefaultConfigurationValue -Name PassThru -ConfigValueName DefaultPassThru)
+    {
+        return $result
     }
 }
 
