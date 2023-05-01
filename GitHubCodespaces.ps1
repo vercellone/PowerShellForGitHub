@@ -107,6 +107,7 @@ filter Get-GitHubCodespace
         [string] $Uri,
 
         [Parameter(
+            Mandatory,
             ValueFromPipelineByPropertyName,
             ParameterSetName = 'Organization')]
         [string] $OrganizationName,
