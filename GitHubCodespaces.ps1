@@ -433,6 +433,9 @@ function Wait-GitHubCodespaceAction
 
     .EXAMPLE
         Wait-GitHubCodespace -Name vercellone-effective-goggles-qrv997q6j9929jx8
+
+     .NOTES
+        Internal-only helper method.
 #>
     [CmdletBinding()]
     [OutputType({ $script:GitHubCodespaceTypeName })]
