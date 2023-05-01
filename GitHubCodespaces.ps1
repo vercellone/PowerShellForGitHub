@@ -3,13 +3,13 @@
 
 @{
     GitHubCodespaceTypeName = 'GitHub.Codespace'
- }.GetEnumerator() | ForEach-Object {
-     Set-Variable -Scope Script -Option ReadOnly -Name $_.Key -Value $_.Value
- }
+}.GetEnumerator() | ForEach-Object {
+    Set-Variable -Scope Script -Option ReadOnly -Name $_.Key -Value $_.Value
+}
 
 filter Get-GitHubCodespace
 {
-<#
+    <#
     .SYNOPSIS
         Retrieves information about a Codespace or list of codespaces on GitHub.
 
@@ -77,42 +77,42 @@ filter Get-GitHubCodespace
         Gets all of the codespaces in the PowerShell organization.
 #>
     [CmdletBinding(DefaultParameterSetName = 'AuthenticatedUser')]
-    [OutputType({$script:GitHubCodespaceTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="The Uri parameter is only referenced by Resolve-RepositoryElements which get access to it from the stack via Get-Variable -Scope 1.")]
+    [OutputType({ $script:GitHubCodespaceTypeName })]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification = "The Uri parameter is only referenced by Resolve-RepositoryElements which get access to it from the stack via Get-Variable -Scope 1.")]
     param(
         [Parameter(
             Mandatory,
             ValueFromPipelineByPropertyName,
-            ParameterSetName='Repository')]
+            ParameterSetName = 'Repository')]
         [string] $OwnerName,
 
         [Parameter(
             Mandatory,
             ValueFromPipelineByPropertyName,
-            ParameterSetName='Repository')]
+            ParameterSetName = 'Repository')]
         [string] $RepositoryName,
 
         [Parameter(
             Mandatory,
             ValueFromPipelineByPropertyName,
-            ParameterSetName='CodespaceName')]
+            ParameterSetName = 'CodespaceName')]
         [string] $CodespaceName,
 
         [Parameter(
             ValueFromPipelineByPropertyName,
-            ParameterSetName='Organization')]
+            ParameterSetName = 'Organization')]
         [string] $OrganizationName,
 
         [Parameter(
             ValueFromPipelineByPropertyName,
-            ParameterSetName='Organization')]
+            ParameterSetName = 'Organization')]
         [ValidateNotNullOrEmpty()]
         [String] $UserName,
 
         [Parameter(
             Mandatory,
             ValueFromPipelineByPropertyName,
-            ParameterSetName='Uri')]
+            ParameterSetName = 'Uri')]
         [Alias('RepositoryUrl')]
         [string] $Uri,
 
@@ -129,7 +129,8 @@ filter Get-GitHubCodespace
     $description = [String]::Empty
     switch ($PSCmdlet.ParameterSetName)
     {
-        'AuthenticatedUser' {
+        'AuthenticatedUser'
+        {
             # /user/codespaces
             $uriFragment = 'user/codespaces'
             $description = 'Getting codespaces for current authenticated user'
@@ -137,7 +138,8 @@ filter Get-GitHubCodespace
             break
         }
 
-        'CodespaceName' {
+        'CodespaceName'
+        {
             $telemetryProperties['CodespaceName'] = Get-PiiSafeString -PlainText $CodespaceName
 
             $uriFragment = "user/codespaces/$CodespaceName"
@@ -146,16 +148,19 @@ filter Get-GitHubCodespace
             break
         }
 
-        'Organization' {
+        'Organization'
+        {
             # /orgs/{org}/codespaces
             # /orgs/{org}/members/{username}/codespaces
 
             $telemetryProperties['OrganizationName'] = Get-PiiSafeString -PlainText $OrganizationName
-            if ([string]::IsNullOrWhiteSpace($UserName)) {
+            if ([string]::IsNullOrWhiteSpace($UserName))
+            {
                 $uriFragment = "orgs/$OrganizationName/codespaces"
                 $description = "Getting codespaces for $OrganizationName"
             }
-            else {
+            else
+            {
                 $telemetryProperties['UserName'] = Get-PiiSafeString -PlainText $UserName
                 $uriFragment = "orgs/$OrganizationName/members/$UserName/codespaces"
                 $description = "Getting codespaces for $OrganizationName"
@@ -164,7 +169,8 @@ filter Get-GitHubCodespace
             break
         }
 
-        'Repository' {
+        'Repository'
+        {
             $elements = Resolve-RepositoryElements
             $OwnerName = $elements.ownerName
             $RepositoryName = $elements.repositoryName
@@ -178,7 +184,8 @@ filter Get-GitHubCodespace
             break
         }
 
-        'Uri' {
+        'Uri'
+        {
             $elements = Resolve-RepositoryElements
             $OwnerName = $elements.ownerName
             $RepositoryName = $elements.repositoryName
@@ -203,7 +210,8 @@ filter Get-GitHubCodespace
     }
 
     $result = Invoke-GHRestMethodMultipleResult @params
-    if ($result.codespaces) {
+    if ($result.codespaces)
+    {
         $result = $result.codespaces
     }
 
@@ -212,7 +220,7 @@ filter Get-GitHubCodespace
 
 function Start-GitHubCodespace
 {
-<#
+    <#
     .SYNOPSIS
         Start a user's codespace.
 
@@ -252,9 +260,9 @@ function Start-GitHubCodespace
 #>
     [CmdletBinding(
         SupportsShouldProcess,
-        ConfirmImpact='Low')]
-    [OutputType({$script:GitHubCodespaceTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="PassThru is accessed indirectly via Resolve-ParameterWithDefaultConfigurationValue")]
+        ConfirmImpact = 'Low')]
+    [OutputType({ $script:GitHubCodespaceTypeName })]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification = "PassThru is accessed indirectly via Resolve-ParameterWithDefaultConfigurationValue")]
     param(
         [Parameter(Mandatory,
             ValueFromPipeline,
@@ -312,7 +320,7 @@ function Start-GitHubCodespace
 
 function Stop-GitHubCodespace
 {
-<#
+    <#
     .SYNOPSIS
         Stop a user's codespace.
 
@@ -352,9 +360,9 @@ function Stop-GitHubCodespace
 #>
     [CmdletBinding(
         SupportsShouldProcess,
-        ConfirmImpact='Low')]
-    [OutputType({$script:GitHubCodespaceTypeName})]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification="PassThru is accessed indirectly via Resolve-ParameterWithDefaultConfigurationValue")]
+        ConfirmImpact = 'Low')]
+    [OutputType({ $script:GitHubCodespaceTypeName })]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification = "PassThru is accessed indirectly via Resolve-ParameterWithDefaultConfigurationValue")]
     param(
         [Parameter(Mandatory,
             ValueFromPipeline,
@@ -433,7 +441,7 @@ function Wait-GitHubCodespaceAction
         Wait-GitHubCodespace -Name vercellone-effective-goggles-qrv997q6j9929jx8
 #>
     [CmdletBinding()]
-    [OutputType({$script:GitHubCodespaceTypeName})]
+    [OutputType({ $script:GitHubCodespaceTypeName })]
     param(
         [Parameter(Mandatory,
             ValueFromPipeline,
@@ -443,7 +451,8 @@ function Wait-GitHubCodespaceAction
         [string] $AccessToken
     )
 
-    begin {
+    begin
+    {
         # 2s minimum
         $sleepSeconds = $(Get-GitHubConfiguration -Name 'StateChangeDelaySeconds')
         if ($sleepSeconds -eq 0)
@@ -468,7 +477,7 @@ function Wait-GitHubCodespaceAction
 
 filter Add-GitHubCodespaceAdditionalProperties
 {
-<#
+    <#
     .SYNOPSIS
         Adds type name and additional properties to ease pipelining to GitHub Repository objects.
 
@@ -493,7 +502,7 @@ filter Add-GitHubCodespaceAdditionalProperties
         GitHub.Repository
 #>
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseSingularNouns", "", Justification="Internal helper that is definitely adding more than one property.")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseSingularNouns", "", Justification = "Internal helper that is definitely adding more than one property.")]
     param(
         [Parameter(
             Mandatory,
