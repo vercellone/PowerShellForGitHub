@@ -467,7 +467,8 @@ function Wait-GitHubCodespaceAction
         {
             Start-Sleep -Seconds $sleepSeconds
             $codespace = (Get-GitHubCodespace @PSBoundParameters)
-        } until($codespace.state -notmatch 'Queued|ing')
+        }
+        until ($codespace.state -notmatch 'Queued|ing')
 
         return $codespace
     }
