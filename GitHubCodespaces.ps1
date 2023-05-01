@@ -90,13 +90,13 @@ filter Get-GitHubCodespace
         [Parameter(
             Mandatory,
             ValueFromPipelineByPropertyName,
-            ParameterSetName = 'Repository')]
+            ParameterSetName = 'Elements')]
         [string] $OwnerName,
 
         [Parameter(
             Mandatory,
             ValueFromPipelineByPropertyName,
-            ParameterSetName = 'Repository')]
+            ParameterSetName = 'Elements')]
         [string] $RepositoryName,
 
         [Parameter(
@@ -156,6 +156,21 @@ filter Get-GitHubCodespace
             break
         }
 
+        'Elements'
+        {
+            $elements = Resolve-RepositoryElements
+            $OwnerName = $elements.ownerName
+            $RepositoryName = $elements.repositoryName
+
+            $telemetryProperties['OwnerName'] = Get-PiiSafeString -PlainText $OwnerName
+            $telemetryProperties['RepositoryName'] = Get-PiiSafeString -PlainText $RepositoryName
+
+            $uriFragment = "repos/$OwnerName/$RepositoryName/codespaces"
+            $description = "Getting $OwnerName/$RepositoryName/codespaces"
+
+            break
+        }
+
         'Organization'
         {
             # /orgs/{org}/codespaces
@@ -173,21 +188,6 @@ filter Get-GitHubCodespace
                 $uriFragment = "orgs/$OrganizationName/members/$UserName/codespaces"
                 $description = "Getting codespaces for $OrganizationName"
             }
-
-            break
-        }
-
-        'Repository'
-        {
-            $elements = Resolve-RepositoryElements
-            $OwnerName = $elements.ownerName
-            $RepositoryName = $elements.repositoryName
-
-            $telemetryProperties['OwnerName'] = Get-PiiSafeString -PlainText $OwnerName
-            $telemetryProperties['RepositoryName'] = Get-PiiSafeString -PlainText $RepositoryName
-
-            $uriFragment = "repos/$OwnerName/$RepositoryName/codespaces"
-            $description = "Getting $OwnerName/$RepositoryName/codespaces"
 
             break
         }
