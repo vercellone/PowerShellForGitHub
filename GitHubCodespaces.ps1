@@ -450,9 +450,10 @@ function Wait-GitHubCodespaceAction
 
     begin
     {
-        # 2s minimum
         $sleepSeconds = $(Get-GitHubConfiguration -Name 'StateChangeDelaySeconds')
-        if ($sleepSeconds -eq 0)
+
+        # 2s minimum
+        if ($sleepSeconds -lt 2)
         {
             $sleepSeconds = 2
         }
