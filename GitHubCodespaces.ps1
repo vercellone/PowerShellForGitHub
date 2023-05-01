@@ -202,7 +202,7 @@ filter Get-GitHubCodespace
     }
 
     $result = Invoke-GHRestMethodMultipleResult @params
-    if ($result.codespaces)
+    if ($null -ne $result.codespaces)
     {
         $result = $result.codespaces
     }
