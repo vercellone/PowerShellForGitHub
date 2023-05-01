@@ -137,6 +137,7 @@
         'Move-GitHubProjectCard',
         'Move-GitHubProjectColumn',
         'Move-GitHubRepositoryOwnership',
+        'New-GitHubCodespace',
         'New-GitHubDeploymentEnvironment',
         'New-GitHubGist',
         'New-GitHubGistComment',
@@ -158,6 +159,7 @@
         'New-GitHubRepositoryFork',
         'New-GitHubTeam',
         'Remove-GitHubAssignee',
+        'Remove-GitHubCodespace',
         'Remove-GitHubComment',
         'Remove-GitHubDeploymentEnvironment'
         'Remove-GitHubGist',

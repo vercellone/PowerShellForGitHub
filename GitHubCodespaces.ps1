@@ -130,7 +130,7 @@ filter Get-GitHubCodespace
     Write-InvocationLog
 
     $telemetryProperties = @{
-        'UsageType' = $PSCmdlet.ParameterSetName
+        UsageType = $PSCmdlet.ParameterSetName
     }
 
     $uriFragment = [String]::Empty
@@ -139,7 +139,6 @@ filter Get-GitHubCodespace
     {
         'AuthenticatedUser'
         {
-            # /user/codespaces
             $uriFragment = 'user/codespaces'
             $description = 'Getting codespaces for current authenticated user'
 
@@ -158,9 +157,6 @@ filter Get-GitHubCodespace
 
         'Organization'
         {
-            # /orgs/{org}/codespaces
-            # /orgs/{org}/members/{username}/codespaces
-
             $telemetryProperties['OrganizationName'] = Get-PiiSafeString -PlainText $OrganizationName
             if ([string]::IsNullOrWhiteSpace($UserName))
             {
@@ -194,11 +190,11 @@ filter Get-GitHubCodespace
     }
 
     $params = @{
-        'UriFragment' = $uriFragment
-        'Description' = $description
-        'AccessToken' = $AccessToken
-        'TelemetryEventName' = $MyInvocation.MyCommand.Name
-        'TelemetryProperties' = $telemetryProperties
+        UriFragment = $uriFragment
+        Description = $description
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+        TelemetryProperties = $telemetryProperties
     }
 
     $result = Invoke-GHRestMethodMultipleResult @params
@@ -208,6 +204,376 @@ filter Get-GitHubCodespace
     }
 
     return ($result | Add-GitHubCodespaceAdditionalProperties)
+}
+
+function New-GitHubCodespace
+{
+    <#
+    .SYNOPSIS
+        Creates a codespace.
+
+    .DESCRIPTION
+        Creates a codespace.
+
+        The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
+
+    .PARAMETER OwnerName
+        Owner of the Codespace.
+        If not supplied here, the DefaultOwnerName configuration property value will be used.
+
+    .PARAMETER RepositoryName
+        Name of the repository.
+        If not supplied here, the DefaultRepositoryName configuration property value will be used.
+
+    .PARAMETER Uri
+        Uri for the Codespace.
+        The OwnerName and CodespaceName will be extracted from here instead of needing to provide
+        them individually.
+
+    .PARAMETER PullRequest
+        The pull request number for this codespace.
+
+    .PARAMETER RepositoryId
+        The ID for a Repository.  Only applicable when creating a codespace for the current authenticated user.
+
+    .PARAMETER Ref
+        Git ref (typically a branch name) for this codespace
+
+    .PARAMETER ClientIp
+        IP for location auto-detection when proxying a request.
+
+    .PARAMETER Devcontainer
+        Path to devcontainer.json config to use for this codespace.
+
+    .PARAMETER DisplayName
+        Display name for this codespace
+
+    .PARAMETER Location
+        The requested location for a new codespace.
+        Best efforts are made to respect this upon creation.
+        Assigned by IP if not provided.
+
+    .PARAMETER Machine
+        Machine type to use for this codespace.
+
+    .PARAMETER NoMultipleRepoPermissions
+        Whether to authorize requested permissions to other repos from devcontainer.json.
+
+    .PARAMETER RetentionPeriod
+        Duration in minutes (up to 30 days) after codespace has gone idle in which it will be deleted.
+
+    .PARAMETER Timeout
+        Time in minutes before codespace stops from inactivity.
+
+    .PARAMETER WorkingDirectory
+        Working directory for this codespace.
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .INPUTS
+        GitHub.Codespace
+        GitHub.Project
+        GitHub.PullRequest
+        GitHub.Repository
+
+    .OUTPUTS
+        GitHub.Codespace
+
+    .EXAMPLE
+        New-GitHubCodespace -RepositoryId 582779513
+
+        Creates a new codespace for the current authenticated user in the specified repository.
+
+    .EXAMPLE
+        New-GitHubCodespace -RepositoryId 582779513 -PullRequest 508
+
+        Creates a new codespace for the current authenticated user in the specified repository from a pull request.
+
+    .EXAMPLE
+        New-GitHubCodespace -OwnerName marykay -RepositoryName one
+
+        Creates a codespace owned by the authenticated user in the specified repository.
+#>
+    [CmdletBinding(
+        SupportsShouldProcess,
+        DefaultParameterSetName = 'AuthenticatedUser')]
+    [OutputType({ $script:GitHubCodespaceTypeName })]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification = "The Uri parameter is only referenced by Resolve-RepositoryElements which get access to it from the stack via Get-Variable -Scope 1.")]
+    param(
+        [Parameter(
+            Mandatory,
+            ParameterSetName = 'Elements')]
+        [Parameter(
+            Mandatory,
+            ParameterSetName = 'ElementsPullRequest')]
+        [string] $OwnerName,
+
+        [Parameter(
+            Mandatory,
+            ParameterSetName = 'Elements')]
+        [Parameter(
+            Mandatory,
+            ParameterSetName = 'ElementsPullRequest')]
+        [string] $RepositoryName,
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            ParameterSetName = 'Uri')]
+        [Alias('RepositoryUrl')]
+        [Alias('PullRequestUrl')]
+        [string] $Uri,
+
+        [Parameter(
+            ParameterSetName = 'AuthenticatedUser')]
+        [Parameter(
+            Mandatory,
+            ParameterSetName = 'ElementsPullRequest')]
+        [Alias('PullRequestNumber')]
+        [int64] $PullRequest,
+
+        [Parameter(
+            Mandatory,
+            ParameterSetName = 'AuthenticatedUser')]
+        [Int64] $RepositoryId,
+
+        [Parameter(
+            ParameterSetName = 'AuthenticatedUser')]
+        [Parameter(
+            ParameterSetName = 'Elements')]
+        [string]$Ref,
+
+        [string]$ClientIp,
+
+        [string]$Devcontainer,
+
+        [string]$DisplayName,
+
+        [string]$Location,
+
+        [string]$Machine,
+
+        [switch]$NoMultipleRepoPermissions,
+
+        [ValidateRange(0, 43200)]
+        [int]$RetentionPeriod,
+
+        [int]$Timeout,
+
+        [string]$WorkingDirectory,
+
+        [string] $AccessToken
+    )
+
+    begin
+    {
+        Write-InvocationLog
+
+        $propertyMap = @{
+            ClientIp = 'client_ip'
+            Devcontainer = 'devcontainer_path'
+            DisplayName = 'display_name'
+            Location = 'location'
+            Machine = 'machine'
+            Ref = 'ref'
+            RetentionPeriod = 'retention_period_minutes'
+            Timeout = 'idle_timeout_minutes'
+            WorkingDirectory = 'working_directory'
+        }
+    }
+
+    process
+    {
+
+        $telemetryProperties = @{
+            UsageType = $PSCmdlet.ParameterSetName
+        }
+
+        $uriFragment = [String]::Empty
+        $description = [String]::Empty
+        if ($PSCmdlet.ParameterSetName -eq 'AuthenticatedUser')
+        {
+            $uriFragment = 'user/codespaces'
+            $description = 'Create a codespace for current authenticated user'
+        }
+        else
+        {
+            # ParameterSets: Elements, ElementsPullRequest, Uri
+            # ElementsPullRequest prevents Ref for /repos/{owner}/{repo}/pulls/{pull_number}/codespaces
+            $elements = Resolve-RepositoryElements
+            $OwnerName = $elements.ownerName
+            $RepositoryName = $elements.repositoryName
+
+            $telemetryProperties['OwnerName'] = Get-PiiSafeString -PlainText $OwnerName
+            $telemetryProperties['RepositoryName'] = Get-PiiSafeString -PlainText $RepositoryName
+
+            if ($PSCmdlet.ParameterSetName -eq 'ElementsPullRequest')
+            {
+                $description = "Create a codespace from $OwnerName/$RepositoryName/pulls/$PullRequest"
+                $telemetryProperties['PullRequest'] = $PullRequest
+                $uriFragment = "repos/$OwnerName/$RepositoryName/pulls/$PullRequest/codespaces"
+            }
+            else
+            {
+                $description = "Create a codepace in $OwnerName/$RepositoryName"
+                $uriFragment = "repos/$OwnerName/$RepositoryName/codespaces"
+            }
+        }
+
+        $hashBody = @{
+            multi_repo_permissions_opt_out = $NoMultipleRepoPermissions.IsPresent
+        }
+
+        # Map params to hashBody properties
+        foreach ($p in $PSBoundParameters.GetEnumerator())
+        {
+            if ($propertyMap.ContainsKey($p.Key) -and -not [string]::IsNullOrWhiteSpace($p.Value))
+            {
+                $hashBody.Add($propertyMap[$p.Key], $p.Value)
+            }
+        }
+
+        if ($PSCmdlet.ParameterSetName -eq 'AuthenticatedUser')
+        {
+            if ($PSBoundParameters.ContainsKey('PullRequest'))
+            {
+                $hashBody.Add('pull_request',
+                    [PSCustomObject]@{
+                        pull_request_number = $PullRequest
+                        repository_id = $RepositoryId
+                    }
+                )
+            }
+            else
+            {
+                $hashBody.Add('repository_id', $RepositoryId)
+            }
+        }
+
+        $params = @{
+            UriFragment = $uriFragment
+            Body = (ConvertTo-Json -InputObject $hashBody)
+            Method = 'POST'
+            Description = $description
+            AccessToken = $AccessToken
+            TelemetryEventName = $MyInvocation.MyCommand.Name
+            TelemetryProperties = $telemetryProperties
+        }
+
+        if (-not $PSCmdlet.ShouldProcess($RepositoryName, 'Create GitHub Codespace'))
+        {
+            return
+        }
+
+        return (Invoke-GHRestMethod @params | Add-GitHubCodespaceAdditionalProperties)
+
+    }
+}
+
+filter Remove-GitHubCodespace
+{
+    <#
+    .SYNOPSIS
+        Remove a Codespace.
+
+    .DESCRIPTION
+        Remove a Codespace.
+
+        The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
+
+    .PARAMETER OrganizationName
+        The name of the organization to retrieve the codespaces for.
+
+    .PARAMETER UserName
+        The handle for the GitHub user account.
+
+    .PARAMETER CodespaceName
+        The name of the codespace.
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .INPUTS
+        GitHub.Codespace
+
+    .OUTPUTS
+        None
+
+    .EXAMPLE
+        Get-GitHubCodespace -Name vercellone-effective-goggles-qrv997q6j9929jx8 | Remove-GitHubCodespace
+
+    .EXAMPLE
+        Remove-GitHubCodespace -Name vercellone-effective-goggles-qrv997q6j9929jx8
+
+    .EXAMPLE
+        Remove-GitHubCodespace -OrganizationName myorg -UserName jetsong -Name jetsong-button-masher-zzz788y6j8288xp1
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/codespaces?apiVersion=2022-11-28#delete-a-codespace-for-the-authenticated-user
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/organizations?apiVersion=2022-11-28#delete-a-codespace-from-the-organization
+#>
+    [CmdletBinding(
+        DefaultParameterSetName = 'AuthenticatedUser',
+        SupportsShouldProcess)]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification = "PassThru is accessed indirectly via Resolve-ParameterWithDefaultConfigurationValue")]
+    [Alias('Delete-GitHubCodespace')]
+    param(
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            ParameterSetName = 'Organization')]
+        [string] $OrganizationName,
+
+        [Parameter(
+            ValueFromPipelineByPropertyName,
+            ParameterSetName = 'Organization')]
+        [ValidateNotNullOrEmpty()]
+        [String] $UserName,
+
+        [Parameter(Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName)]
+        [string] $CodespaceName,
+
+        [string] $AccessToken
+    )
+
+    Write-InvocationLog
+
+    $telemetryProperties = @{
+        CodespaceName = Get-PiiSafeString -PlainText $CodespaceName
+    }
+
+    $uriFragment = [String]::Empty
+    if ($PSCmdlet.ParameterSetName -eq 'AuthenticatedUser')
+    {
+        $uriFragment = "user/codespaces/$CodespaceName"
+    }
+    else
+    {
+        $uriFragment = "orgs/$OrganizationName/members/$UserName/codespaces/$CodespaceName"
+    }
+
+    $params = @{
+        UriFragment = $uriFragment
+        Method = 'DELETE'
+        Description = "Remove Codespace $CodespaceName"
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+        TelemetryProperties = $telemetryProperties
+    }
+
+    if (-not $PSCmdlet.ShouldProcess($CodespaceName, "Remove Codespace $CodespaceName"))
+    {
+        return
+    }
+
+    Invoke-GHRestMethod @params | Out-Null
 }
 
 filter Start-GitHubCodespace
@@ -273,16 +639,16 @@ filter Start-GitHubCodespace
     Write-InvocationLog
 
     $telemetryProperties = @{
-        'CodespaceName' = Get-PiiSafeString -PlainText $CodespaceName
+        CodespaceName = Get-PiiSafeString -PlainText $CodespaceName
     }
 
     $params = @{
-        'UriFragment' = "user/codespaces/$CodespaceName/start"
-        'Method' = 'POST'
-        'Description' = "Start Codespace $CodespaceName"
-        'AccessToken' = $AccessToken
-        'TelemetryEventName' = $MyInvocation.MyCommand.Name
-        'TelemetryProperties' = $telemetryProperties
+        UriFragment = "user/codespaces/$CodespaceName/start"
+        Method = 'POST'
+        Description = "Start Codespace $CodespaceName"
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+        TelemetryProperties = $telemetryProperties
     }
 
     if (-not $PSCmdlet.ShouldProcess($CodespaceName, "Start Codespace $CodespaceName"))
@@ -295,8 +661,8 @@ filter Start-GitHubCodespace
     if ($Wait.IsPresent)
     {
         $waitParams = @{
-            'CodespaceName' = $CodespaceName
-            'AccessToken' = $AccessToken
+            CodespaceName = $CodespaceName
+            AccessToken = $AccessToken
         }
 
         $result = Wait-GitHubCodespaceAction @waitParams
@@ -371,16 +737,16 @@ filter Stop-GitHubCodespace
     Write-InvocationLog
 
     $telemetryProperties = @{
-        'CodespaceName' = Get-PiiSafeString -PlainText $CodespaceName
+        CodespaceName = Get-PiiSafeString -PlainText $CodespaceName
     }
 
     $params = @{
-        'UriFragment' = "user/codespaces/$CodespaceName/stop"
-        'Method' = 'POST'
-        'Description' = "Stop Codespace $CodespaceName"
-        'AccessToken' = $AccessToken
-        'TelemetryEventName' = $MyInvocation.MyCommand.Name
-        'TelemetryProperties' = $telemetryProperties
+        UriFragment = "user/codespaces/$CodespaceName/stop"
+        Method = 'POST'
+        Description = "Stop Codespace $CodespaceName"
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+        TelemetryProperties = $telemetryProperties
     }
 
     if (-not $PSCmdlet.ShouldProcess($CodespaceName, "Stop Codespace $CodespaceName"))
@@ -393,8 +759,8 @@ filter Stop-GitHubCodespace
     if ($Wait.IsPresent)
     {
         $waitParams = @{
-            'CodespaceName' = $CodespaceName
-            'AccessToken' = $AccessToken
+            CodespaceName = $CodespaceName
+            AccessToken = $AccessToken
         }
 
         $result = Wait-GitHubCodespaceAction @waitParams
