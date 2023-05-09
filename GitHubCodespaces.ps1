@@ -899,14 +899,10 @@ filter Add-GitHubCodespaceAdditionalProperties
                 $null = Add-GitHubUserAdditionalProperties -InputObject $item.owner
             }
 
-            if ($null -ne $item.organization)
-            {
-                $null = Add-GitHubOrganizationAdditionalProperties -InputObject $item.organization
-            }
-
             if ($null -ne $item.repository)
             {
                 $null = Add-GitHubRepositoryAdditionalProperties -InputObject $item.repository
+                Add-Member -InputObject $item -Name 'RepositoryUrl' -Value $item.repository.RepositoryUrl -MemberType NoteProperty -Force
             }
         }
 
