@@ -343,26 +343,26 @@ function New-GitHubCodespace
             ParameterSetName = 'AuthenticatedUser')]
         [Parameter(
             ParameterSetName = 'Elements')]
-        [string]$Ref,
+        [string] $Ref,
 
-        [string]$ClientIp,
+        [string] $ClientIp,
 
-        [string]$Devcontainer,
+        [string] $Devcontainer,
 
-        [string]$DisplayName,
+        [string] $DisplayName,
 
-        [string]$Location,
+        [string] $Location,
 
-        [string]$Machine,
+        [string] $Machine,
 
-        [switch]$NoMultipleRepoPermissions,
+        [switch] $NoMultipleRepoPermissions,
 
         [ValidateRange(0, 43200)]
-        [int]$RetentionPeriod,
+        [int] $RetentionPeriod,
 
-        [int]$Timeout,
+        [int] $Timeout,
 
-        [string]$WorkingDirectory,
+        [string] $WorkingDirectory,
 
         [string] $AccessToken
     )
@@ -540,6 +540,8 @@ filter Remove-GitHubCodespace
             ValueFromPipelineByPropertyName)]
         [string] $CodespaceName,
 
+        [switch] $Force,
+
         [string] $AccessToken
     )
 
@@ -566,6 +568,11 @@ filter Remove-GitHubCodespace
         AccessToken = $AccessToken
         TelemetryEventName = $MyInvocation.MyCommand.Name
         TelemetryProperties = $telemetryProperties
+    }
+
+    if ($Force -and (-not $Confirm))
+    {
+        $ConfirmPreference = 'None'
     }
 
     if (-not $PSCmdlet.ShouldProcess($CodespaceName, "Remove Codespace $CodespaceName"))
