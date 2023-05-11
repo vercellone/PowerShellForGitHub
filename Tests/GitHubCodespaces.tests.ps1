@@ -25,7 +25,6 @@ BeforeAll {
 }
 
 Describe 'GitHubCodespaces\Get-GitHubCodespace' {
-
     BeforeAll {
         $newGitHubRepositoryParms = @{
             AutoInit = $true
@@ -44,14 +43,6 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
         }
         $null = New-GitHubCodespace @newGitHubCodespaceParms
         Start-Sleep -Seconds 5
-    }
-
-    AfterAll {
-        if (Get-Variable -Name repo -ErrorAction SilentlyContinue)
-        {
-            # Should delete any corresponding codespaces along with it
-            $repo | Remove-GitHubRepository -Confirm:$false
-        }
     }
 
     Context 'When getting codespaces for the authenticated user' {
@@ -143,6 +134,43 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
 
         It 'Should return the correct properties' {
             $codespace.owner.login | Should -Be $script:OwnerName
+        }
+    }
+
+    Context 'When specifiying the Uri parameter' {
+        BeforeAll {
+            $codespace = Get-GitHubCodespace -Uri $repo.RepositoryUrl
+        }
+
+        It 'Should return objects of the correct type' {
+            $codespace.PSObject.TypeNames[0] | Should -Be 'GitHub.Codespace'
+        }
+
+        It 'Should return the correct properties' {
+            $codespace.owner.login | Should -Be $script:OwnerName
+            $codespace.repository.name | Should -Be $repo.name
+        }
+    }
+
+    Context "When specifiying the Uri parameter from the pipeline" {
+        BeforeAll {
+            $codespace = $repo | Get-GitHubCodespace
+        }
+
+        It 'Should return objects of the correct type' {
+            $codespace.PSObject.TypeNames[0] | Should -Be 'GitHub.Codespace'
+        }
+
+        It 'Should return the correct properties' {
+            $codespace.repository.name | Should -Be $repo.name
+        }
+    }
+
+    AfterAll {
+        if (Get-Variable -Name repo -ErrorAction SilentlyContinue)
+        {
+            # Should delete any corresponding codespaces along with it
+            $repo | Remove-GitHubRepository -Confirm:$false
         }
     }
 }
