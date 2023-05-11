@@ -22,18 +22,18 @@ BeforeAll {
     }.GetEnumerator() | ForEach-Object {
         Set-Variable -Force -Scope Script -Option ReadOnly -Visibility Private -Name $_.Key -Value $_.Value
     }
+
+    $newGitHubRepositoryParms = @{
+        AutoInit = $true
+        Private = $true
+        RepositoryName = $defaultRepositoryName
+        OrganizationName = $script:organizationName
+    }
+    $repo = New-GitHubRepository @newGitHubRepositoryParms
 }
 
 Describe 'GitHubCodespaces\Get-GitHubCodespace' {
     BeforeAll {
-        $newGitHubRepositoryParms = @{
-            AutoInit = $true
-            Private = $true
-            RepositoryName = $defaultRepositoryName
-            OrganizationName = $script:organizationName
-        }
-        $repo = New-GitHubRepository @newGitHubRepositoryParms
-
         # Suppress HTTP 202 warning for codespace creation
         $WarningPreference = 'SilentlyContinue'
 
@@ -165,17 +165,77 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
             $codespace.repository.name | Should -Be $repo.name
         }
     }
+}
 
-    AfterAll {
-        if (Get-Variable -Name repo -ErrorAction SilentlyContinue)
-        {
-            # Should delete any corresponding codespaces along with it
-            $repo | Remove-GitHubRepository -Confirm:$false
+Describe 'GitHubCodespaces\Start-GitHubCodespace' {
+    BeforeAll {
+        # Suppress HTTP 202 warning for codespace creation
+        $WarningPreference = 'SilentlyContinue'
+
+        $newGitHubCodespaceParms = @{
+            OwnerName = $script:organizationName
+            RepositoryName = $defaultRepositoryName
+        }
+        $null = New-GitHubCodespace @newGitHubCodespaceParms
+        Start-Sleep -Seconds 5
+    }
+
+    Context 'When starting a codespace for the authenticated user' {
+        BeforeAll {
+            $codespace = Get-GitHubCodespace @newGitHubCodespaceParms
+        }
+
+        It 'Should not throw' {
+            # Also asserts pipeline input
+            { $codespace | Start-GitHubCodespace } | Should -Not -Throw
+        }
+
+        It 'Should become Available' {
+            # Also asserts Wait and PassThru
+            $result = $codespace | Start-GitHubCodespace -Wait -PassThru
+            $result.State | Should -Be 'Available'
+        }
+    }
+}
+
+Describe 'GitHubCodespaces\Stop-GitHubCodespace' {
+    BeforeAll {
+        # Suppress HTTP 202 warning for codespace creation
+        $WarningPreference = 'SilentlyContinue'
+
+        $newGitHubCodespaceParms = @{
+            OwnerName = $script:organizationName
+            RepositoryName = $defaultRepositoryName
+        }
+        $null = New-GitHubCodespace @newGitHubCodespaceParms
+        Start-Sleep -Seconds 5
+    }
+
+    Context 'When stopping a codespace for the authenticated user' {
+        BeforeAll {
+            $codespace = Get-GitHubCodespace @newGitHubCodespaceParms
+        }
+
+        It 'Should not throw' {
+            # Also asserts pipeline input
+            { $codespace | Stop-GitHubCodespace } | Should -Not -Throw
+        }
+
+        It 'Should become Shutdown' {
+            # Also asserts Wait and PassThru
+            $result = $codespace | Stop-GitHubCodespace -Wait -PassThru
+            $result.State | Should -Be 'Shutdown'
         }
     }
 }
 
 AfterAll {
+    if (Get-Variable -Name repo -ErrorAction SilentlyContinue)
+    {
+        # Should delete any corresponding codespaces along with it
+        $repo | Remove-GitHubRepository -Confirm:$false
+    }
+
     if (Test-Path -Path $script:originalConfigFile -PathType Leaf)
     {
         # Restore the user's configuration to its pre-test state
