@@ -32,6 +32,36 @@ BeforeAll {
     $repo = New-GitHubRepository @newGitHubRepositoryParms
 }
 
+Describe 'GitHubCodespaces\Delete-GitHubCodespace' {
+
+    Context 'When deleting a codespace for the authenticated user' {
+        BeforeEach {
+            # Suppress HTTP 202 warning for codespace creation
+            # TODO: Suppression is not working as intended here.
+            $WarningPreference = 'SilentlyContinue'
+
+            $newGitHubCodespaceParms = @{
+                OwnerName = $script:organizationName
+                RepositoryName = $defaultRepositoryName
+            }
+            $codespace = New-GitHubCodespace @newGitHubCodespaceParms
+            Start-Sleep -Seconds 3
+        }
+
+        It 'Should get no content using -Confirm:$false' {
+            # Also asserts pipeline input
+            $codespace | Remove-GitHubCodespace -Confirm:$false
+            { Get-GitHubCodespace -CodespaceName $codespace.name } | Should -Throw
+        }
+
+        It 'Should get no content using -Force' {
+            # Also assert CodespaceName input
+            Remove-GitHubCodespace -CodespaceName $codespace.name -Force
+            { Get-GitHubCodespace -CodespaceName $codespace.name } | Should -Throw
+        }
+    }
+}
+
 Describe 'GitHubCodespaces\Get-GitHubCodespace' {
     BeforeAll {
         # Suppress HTTP 202 warning for codespace creation
@@ -42,7 +72,7 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
             RepositoryName = $defaultRepositoryName
         }
         $null = New-GitHubCodespace @newGitHubCodespaceParms
-        Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 3
     }
 
     Context 'When getting codespaces for the authenticated user' {
@@ -177,7 +207,7 @@ Describe 'GitHubCodespaces\Start-GitHubCodespace' {
             RepositoryName = $defaultRepositoryName
         }
         $null = New-GitHubCodespace @newGitHubCodespaceParms
-        Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 3
     }
 
     Context 'When starting a codespace for the authenticated user' {
@@ -208,7 +238,7 @@ Describe 'GitHubCodespaces\Stop-GitHubCodespace' {
             RepositoryName = $defaultRepositoryName
         }
         $null = New-GitHubCodespace @newGitHubCodespaceParms
-        Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 3
     }
 
     Context 'When stopping a codespace for the authenticated user' {
