@@ -530,6 +530,7 @@ filter Remove-GitHubCodespace
         [string] $OrganizationName,
 
         [Parameter(
+            Mandatory,
             ValueFromPipelineByPropertyName,
             ParameterSetName = 'Organization')]
         [ValidateNotNullOrEmpty()]
