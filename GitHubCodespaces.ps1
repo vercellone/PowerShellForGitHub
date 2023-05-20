@@ -82,6 +82,21 @@ filter Get-GitHubCodespace
         Get-GitHubCodespace -OrganizationName PowerShell
 
         Gets all of the codespaces in the PowerShell organization.
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/codespaces?apiVersion=2022-11-28#get-a-codespace-for-the-authenticated-user
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/codespaces?apiVersion=2022-11-28#list-codespaces-in-a-repository-for-the-authenticated-user
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/codespaces?apiVersion=2022-11-28#list-codespaces-for-the-authenticated-user
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/organizations?apiVersion=2022-11-28#list-codespaces-for-the-organization
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/organizations?apiVersion=2022-11-28#list-codespaces-for-a-user-in-organization
 #>
     [CmdletBinding(DefaultParameterSetName = 'AuthenticatedUser')]
     [OutputType({ $script:GitHubCodespaceTypeName })]
@@ -295,6 +310,15 @@ function New-GitHubCodespace
         New-GitHubCodespace -OwnerName marykay -RepositoryName one
 
         Creates a codespace owned by the authenticated user in the specified repository.
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/codespaces?apiVersion=2022-11-28#create-a-codespace-for-the-authenticated-user
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/codespaces?apiVersion=2022-11-28#create-a-codespace-in-a-repository
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/codespaces?apiVersion=2022-11-28#create-a-codespace-from-a-pull-request
 #>
     [CmdletBinding(
         SupportsShouldProcess,
