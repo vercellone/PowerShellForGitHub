@@ -45,7 +45,7 @@ Describe 'GitHubCodespaces\Delete-GitHubCodespace' {
                 RepositoryName = $defaultRepositoryName
             }
             $codespace = New-GitHubCodespace @newGitHubCodespaceParms
-            Start-Sleep -Seconds 3
+            Start-Sleep -Seconds 2
         }
 
         It 'Should get no content using -Confirm:$false' {
@@ -72,7 +72,7 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
             RepositoryName = $defaultRepositoryName
         }
         $null = New-GitHubCodespace @newGitHubCodespaceParms
-        Start-Sleep -Seconds 3
+        Start-Sleep -Seconds 2
     }
 
     Context 'When getting codespaces for the authenticated user' {
@@ -197,6 +197,181 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
     }
 }
 
+
+Describe 'GitHubCodespaces\New-GitHubCodespace' {
+
+    Context -Name 'When creating a repository for the authenticated user' {
+
+        Context -Name 'When creating a codespace with default settings with RepositoryId' {
+            BeforeAll {
+                $newGitHubCodespaceParms = @{
+                    RepositoryId = $repo.Id
+                }
+                $codespace = New-GitHubCodespace @newGitHubCodespaceParms
+                Start-Sleep -Seconds 2
+            }
+
+            It 'Should return an object of the correct type' {
+                $codespace | Should -BeOfType PSCustomObject
+            }
+
+            It 'Should return the correct properties' {
+                $codespace.display_name | Should -Not -BeNullOrEmpty
+                $codespace.repository.name | Should -Be $repo.name
+                $codespace.idle_timeout_minutes | Should -Be 30
+                $codespace.owner.UserName | Should -Be $script:OwnerName
+                $codespace.template | Should -BeNullOrEmpty
+            }
+
+            AfterAll {
+                if ($codespace)
+                {
+                    Remove-GitHubCodespace -CodespaceName $codespace.name -Confirm:$false
+                }
+            }
+        }
+
+        Context -Name 'When creating a codespace with default settings with Ref' {
+            BeforeAll {
+                $repoWithPR = Get-GitHubRepository -OrganizationName 'super-fake-not-real-org' |
+                    Where-Object { $_ | Get-GitHubPullRequest } |
+                    Select-Object -First 1
+                $pullRequest = $repoWithPR | Get-GitHubPullRequest | Select-Object -First 1
+                $newGitHubCodespaceParms = @{
+                    Ref = $pullRequest.head.ref
+                    RepositoryId = $repoWithPR.Id
+                }
+                $codespace = New-GitHubCodespace @newGitHubCodespaceParms
+                Start-Sleep -Seconds 2
+            }
+
+            It 'Should return an object of the correct type' {
+                $codespace | Should -BeOfType PSCustomObject
+            }
+
+            It 'Should return the correct properties' {
+                $codespace.display_name | Should -Not -BeNullOrEmpty
+                $codespace.git_status.ref | Should -Be $pullRequest.head.ref
+                $codespace.repository.name | Should -Be $repoWithPR.name
+                $codespace.idle_timeout_minutes | Should -Be 30
+                $codespace.owner.UserName | Should -Be $script:OwnerName
+                $codespace.template | Should -BeNullOrEmpty
+            }
+
+            AfterAll {
+                if ($codespace)
+                {
+                    Remove-GitHubCodespace -CodespaceName $codespace.name -Confirm:$false
+                }
+            }
+        }
+
+        Context -Name 'When creating a codespace with default settings from a PullRequest' {
+            BeforeAll {
+                  $repoWithPR = Get-GitHubRepository -OrganizationName 'super-fake-not-real-org' |
+                      Where-Object { $_ | Get-GitHubPullRequest } |
+                      Select-Object -First 1
+                $pullRequest = $repoWithPR | Get-GitHubPullRequest | Select-Object -First 1
+                $newGitHubCodespaceParms = @{
+                    PullRequest = $pullRequest.number
+                    RepositoryId = $repoWithPR.Id
+                }
+                $codespace = New-GitHubCodespace @newGitHubCodespaceParms
+                Start-Sleep -Seconds 2
+            }
+
+            It 'Should return an object of the correct type' {
+                $codespace | Should -BeOfType PSCustomObject
+            }
+
+            It 'Should return the correct properties' {
+                $codespace.display_name | Should -Not -BeNullOrEmpty
+                $codespace.repository.name | Should -Be $repoWithPR.name
+                $codespace.idle_timeout_minutes | Should -Be 30
+                $codespace.owner.UserName | Should -Be $script:OwnerName
+                $codespace.pulls_url | Should -Be $pullRequest.url
+                $codespace.template | Should -BeNullOrEmpty
+            }
+
+            AfterAll {
+                if ($codespace)
+                {
+                    Remove-GitHubCodespace -CodespaceName $codespace.name -Confirm:$false
+                }
+            }
+        }
+
+        Context -Name 'When creating a codespace with all possible settings' {
+            BeforeAll {
+                $newGitHubCodespaceParms = @{
+                    # ClientIp = 'TODO ???? - should be instead of rather than in addition to Location, perhaps add some param validation to the function'
+                    # Devcontainer = 'Will add to test in the future when Get-GitHubDevContainer is implemented and the test repo includes one'
+                    DisplayName = 'PowerShellForGitHub pester test'
+                    Location = 'WestUs2'
+                    Machine = 'basicLinux32gb'
+                    NoMultipleRepoPermissions = $true # Not sure how to assert this, but this proves it accepts the switch without error
+                    RetentionPeriod = 10
+                    Timeout = 5
+                    # WorkingDirectory = 'TODO ???? - not sure how to handle this'
+                }
+                $codespace = $repo | New-GitHubCodespace @newGitHubCodespaceParms
+            }
+
+            It 'Should return an object of the correct type' {
+                $codespace | Should -BeOfType PSCustomObject
+            }
+
+            It 'Should return the correct properties' {
+                # $codespace.devcontainer_path | Should -Be
+                $codespace.display_name | Should -Be $newGitHubCodespaceParms.DisplayName
+                $codespace.idle_timeout_minutes | Should -Be 5
+                $codespace.location | Should -Be $newGitHubCodespaceParms.Location
+                $codespace.machine.name | Should -Be $newGitHubCodespaceParms.Machine
+                $codespace.owner.UserName | Should -Be $script:OwnerName
+                $codespace.repository.name | Should -Be $repo.name
+                $codespace.retention_period_minutes | Should -Be 10
+                $codespace.template | Should -BeNullOrEmpty
+            }
+
+            AfterAll {
+                if ($codespace)
+                {
+                    Remove-GitHubCodespace -CodespaceName $codespace.name -Confirm:$false
+                }
+            }
+        }
+
+        Context -Name 'When creating a codespace with default settings with Repository Elements' {
+            BeforeAll {
+                $newGitHubCodespaceParms = @{
+                    RepositoryName = $repo.name
+                    OwnerName = $script:organizationName
+                }
+                $codespace = New-GitHubCodespace @newGitHubCodespaceParms
+            }
+
+            It 'Should return an object of the correct type' {
+                $codespace | Should -BeOfType PSCustomObject
+            }
+
+            It 'Should return the correct properties' {
+                $codespace.display_name | Should -Not -BeNullOrEmpty
+                $codespace.repository.name | Should -Be $repo.name
+                $codespace.idle_timeout_minutes | Should -Be 30
+                $codespace.owner.UserName | Should -Be $script:OwnerName
+                $codespace.template | Should -BeNullOrEmpty
+            }
+
+            AfterAll {
+                if ($codespace)
+                {
+                    Remove-GitHubCodespace -CodespaceName $codespace.name -Confirm:$false
+                }
+            }
+        }
+    }
+}
+
 Describe 'GitHubCodespaces\Start-GitHubCodespace' {
     BeforeAll {
         # Suppress HTTP 202 warning for codespace creation
@@ -207,7 +382,7 @@ Describe 'GitHubCodespaces\Start-GitHubCodespace' {
             RepositoryName = $defaultRepositoryName
         }
         $null = New-GitHubCodespace @newGitHubCodespaceParms
-        Start-Sleep -Seconds 3
+        Start-Sleep -Seconds 2
     }
 
     Context 'When starting a codespace for the authenticated user' {
@@ -238,7 +413,7 @@ Describe 'GitHubCodespaces\Stop-GitHubCodespace' {
             RepositoryName = $defaultRepositoryName
         }
         $null = New-GitHubCodespace @newGitHubCodespaceParms
-        Start-Sleep -Seconds 3
+        Start-Sleep -Seconds 2
     }
 
     Context 'When stopping a codespace for the authenticated user' {
