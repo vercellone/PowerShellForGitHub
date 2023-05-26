@@ -141,6 +141,13 @@
         * [Removing an environment](#removing-an-environment)
     *   [Advanced](#advanced)
         *   [Migrating blog comments to GitHub issues](#migrating-blog-comments-to-github-issues)
+        aces
+    *   [Codespaces](#codespaces)
+        *   [Getting codespaces](#getting-codespaces)
+        *   [Creating a codespace](#creating-a-codespace)
+        *   [Removing a codespace](#removing-a-codespace)
+        *   [Starting a codespace](#updating-a-codespace)
+        *   [Stopping a codespace](#starting-a-codespace)
 
 ----------
 
@@ -1287,4 +1294,89 @@ $issue | New-GitHubIssueComment -Body $CommentBody
 
 # Close issue
 $issue | Set-GitHubIssue -State Closed
+```
+
+----------
+
+### Codespaces
+
+#### Getting codespaces
+```powershell
+# Get all codespaces for the current authenticated user
+Get-GitHubCodespace
+
+# Get all codespaces for the current authenticated user in a repository
+Get-GitHubCodespace -OwnerName microsoft -RepositoryName TestRepo
+
+# Get all codespaces for an Organizaion
+Get-GitHubCodespace -OrganizationName microsoft
+
+# Get all codespaces for a specific organization user
+Get-GitHubCodespace -OrganizationName microsoft -UserName octocat
+
+# Get a codespace by name
+Get-GitHubCodespace -CodespaceName 'microsoft-symmetrical-chainsaw-7q4vp6v7q3pwqq'
+```
+
+#### Create a codespace
+```powershell
+# Create a codespace in the specified repository by id
+New-GitHubCodespace -RepositoryId 582779513
+
+# Create a codespace in the specified repository by name
+New-GitHubCodespace -OwnerName microsoft -RepositoryName TestRepo
+
+# Create a codespace in the specified repository by id from a pull request
+New-GitHubCodespace -RepositoryId 582779513 -PullRequest 508
+
+# Create a codespace in the specified repository by name from a pull request
+New-GitHubCodespace -OwnerName microsoft -RepositoryName TestRepo -PullRequest 42
+
+# Create a codespace in repository from pipeline
+$repo = Get-GitHubRepository -OwnerName microsoft -RepositoryName TestRepo
+$repo | New-GitHubCodespace
+
+# Create a codespace in repository from pipeline with options
+$newGitHubCodespaceParms = @{
+    DisplayName = 'PowerShellForGitHub usage'
+    Location = 'WestUs2'
+    Machine = 'basicLinux32gb'
+    NoMultipleRepoPermissions = $true
+    RetentionPeriod = 10
+    Timeout = 5
+}
+$codespace = $repo | New-GitHubCodespace @newGitHubCodespaceParms
+```
+
+#### Removing a codespace
+```powershell
+$codespaceName = 'microsoft-symmetrical-chainsaw-7q4vp6v7q3pwqq'
+
+# Remove a codespace for the current authenticated user
+Remove-GitHubCodespace -CodespaceName $codespaceName
+
+# Remove a codespace for an organization user
+Remove-GitHubCodespace -Organization microsoft -UserName octocat -CodespaceName $codespaceName
+```
+
+#### Starting a codespace
+```powershell
+$codespaceName = 'microsoft-symmetrical-chainsaw-7q4vp6v7q3pwqq'
+
+# Starting a codespace (asynchronous)
+Start-GithubCodespace -CodespaceName $codespaceName
+
+# Starting a codespace (wait for Available)
+Start-GithubCodespace -CodespaceName $codespaceName -Wait
+```
+
+#### Stopping a codespace
+```powershell
+$codespaceName = 'microsoft-symmetrical-chainsaw-7q4vp6v7q3pwqq'
+
+# Stopping a codespace (asynchronous)
+Stop-GithubCodespace -CodespaceName $codespaceName
+
+# Stopping a codespace (wait for Shutdown)
+Stop-GithubCodespace -CodespaceName $codespaceName -Wait
 ```
