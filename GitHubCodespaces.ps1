@@ -384,6 +384,7 @@ function New-GitHubCodespace
         [ValidateRange(0, 43200)]
         [int] $RetentionPeriod,
 
+        [ValidateRange(5, 240)]
         [int] $Timeout,
 
         [string] $WorkingDirectory,
