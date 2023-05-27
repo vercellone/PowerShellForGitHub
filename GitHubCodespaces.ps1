@@ -32,7 +32,7 @@ filter Get-GitHubCodespace
         them individually.
 
     .PARAMETER OrganizationName
-        The name of the organization to retrieve the codespaces for.
+        Name of the Organization.
 
     .PARAMETER UserName
         The handle for the GitHub user account.
@@ -509,7 +509,7 @@ filter Remove-GitHubCodespace
         The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
 
     .PARAMETER OrganizationName
-        The name of the organization to retrieve the codespaces for.
+        Name of the Organization.
 
     .PARAMETER UserName
         The handle for the GitHub user account.
@@ -719,6 +719,12 @@ filter Stop-GitHubCodespace
 
         The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
 
+    .PARAMETER OrganizationName
+        Name of the Organization.
+
+    .PARAMETER UserName
+        The handle for the GitHub user account(s).
+
     .PARAMETER CodespaceName
         The name of the codespace.
 
@@ -751,11 +757,20 @@ filter Stop-GitHubCodespace
         GitHub Apps must have write access to the codespaces_lifecycle_admin repository permission to use this endpoint.
 #>
     [CmdletBinding(
+        DefaultParameterSetName = 'AuthenticatedUser',
         SupportsShouldProcess,
         ConfirmImpact = 'Low')]
     [OutputType({ $script:GitHubCodespaceTypeName })]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification = "PassThru is accessed indirectly via Resolve-ParameterWithDefaultConfigurationValue")]
     param(
+        [Parameter(Mandatory,
+            ParameterSetName = 'Organization')]
+        [string] $OrganizationName,
+
+        [Parameter(Mandatory,
+	    ParameterSetName = 'Organization')]
+        [string] $UserName,
+
         [Parameter(Mandatory,
             ValueFromPipeline,
             ValueFromPipelineByPropertyName)]
@@ -772,10 +787,24 @@ filter Stop-GitHubCodespace
 
     $telemetryProperties = @{
         CodespaceName = Get-PiiSafeString -PlainText $CodespaceName
+        UsageType = $PSCmdlet.ParameterSetName
+    }
+
+    $uriFragment = [String]::Empty
+
+    if ($PSCmdlet.ParameterSetName -eq 'Organization')
+    {
+        $telemetryProperties['OrganizationName'] = Get-PiiSafeString -PlainText $OrganizationName
+        $telemetryProperties['UserName'] = Get-PiiSafeString -PlainText $UserName
+        $uriFragment = "orgs/$OrganizationName/members/$UserName/codespaces/$CodespaceName/stop"
+    }
+    else
+    {
+        $uriFragment = "user/codespaces/$CodespaceName/stop"
     }
 
     $params = @{
-        UriFragment = "user/codespaces/$CodespaceName/stop"
+        UriFragment = $UriFragment
         Method = 'POST'
         Description = "Stop Codespace $CodespaceName"
         AccessToken = $AccessToken
@@ -873,6 +902,238 @@ function Wait-GitHubCodespaceAction
         until ($codespace.state -notmatch 'Queued|ing')
 
         return $codespace
+    }
+}
+
+filter Add-GitHubCodespaceUser
+{
+    <#
+    .SYNOPSIS
+        Add user(s) to Codespaces billing for an organization.
+
+    .DESCRIPTION
+        Add user(s) to Codespaces billing for an organization.
+
+        The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
+
+    .PARAMETER OrganizationName
+        Name of the Organization.
+
+    .PARAMETER UserName
+        The handle for the GitHub user account(s).
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .EXAMPLE
+        Add-GitHubCodespaceUser -OrganizationName microsoft -UserName HowardWolosky
+
+    .OUTPUTS
+        [PSObject[]]
+
+    .NOTES
+        To use this endpoint, the billing settings for the organization must be set to selected_members.
+        For information on how to change this setting please see [these docs](https://docs.github.com/rest/codespaces/organizations#manage-access-control-for-organization-codespaces)
+
+    .NOTES
+        You must authenticate using an access token with the admin:org scope to use this endpoint.
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/organizations?apiVersion=2022-11-28#add-users-to-codespaces-billing-for-an-organization
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        [Parameter(Mandatory)]
+        [string] $OrganizationName,
+
+        [Parameter(Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName)]
+        [string[]] $UserName,
+
+        [string] $AccessToken
+    )
+
+    Write-InvocationLog
+
+    $hashBody = @{
+        selected_usernames = @($UserName)
+    }
+
+    $params = @{
+        UriFragment = "orgs/$OrganizationName/codespaces/billing/selected_users"
+        Body = ConvertTo-Json -InputObject $hashBody
+        Method = 'POST'
+        Description = 'Add users to GitHub codespace billing'
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+    }
+
+    if (-not $PSCmdlet.ShouldProcess(($UserName -join ','), 'Add Codespace Users'))
+    {
+        return
+    }
+    Invoke-GHRestMethod @params
+}
+
+filter Remove-GitHubCodespaceUser
+{
+    <#
+    .SYNOPSIS
+        Remove user(s) from Codespaces billing for an organization.
+
+    .DESCRIPTION
+        Remove user(s) from Codespaces billing for an organization.
+
+        The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
+
+    .PARAMETER OrganizationName
+        Name of the Organization.
+
+    .PARAMETER UserName
+        The handle for the GitHub user account(s).
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .EXAMPLE
+        Remove-GitHubCodespaceUser -OrganizationName microsoft -UserName HowardWolosky
+
+    .OUTPUTS
+        [PSObject[]]
+
+    .NOTES
+        To use this endpoint, the billing settings for the organization must be set to selected_members.
+        For information on how to change this setting please see [these docs](https://docs.github.com/rest/codespaces/organizations#manage-access-control-for-organization-codespaces)
+
+    .NOTES
+        You must authenticate using an access token with the admin:org scope to use this endpoint.
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/organizations?apiVersion=2022-11-28#removes-users-from-codespaces-billing-for-an-organization
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        [Parameter(Mandatory)]
+        [string] $OrganizationName,
+
+        [Parameter(Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName)]
+        [string[]] $UserName,
+
+        [string] $AccessToken
+    )
+
+    Write-InvocationLog
+
+    $hashBody = @{
+        selected_usernames = @($UserName)
+    }
+
+    $params = @{
+        UriFragment = "orgs/$OrganizationName/codespaces/billing/selected_users"
+        Body = ConvertTo-Json -InputObject $hashBody
+        Method = 'DELETE'
+        Description = 'Remove users from GitHub codespace billing'
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+    }
+
+    if (-not $PSCmdlet.ShouldProcess(($UserName -join ','), 'Remove Codespace Users'))
+    {
+        return
+    }
+    Invoke-GHRestMethod @params
+}
+
+filter Set-GitHubCodespaceVisibility
+{
+    <#
+    .SYNOPSIS
+        Manage access control for organization codespaces.
+
+    .DESCRIPTION
+        Manage access control for organization codespaces.
+
+        The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
+
+    .PARAMETER OrganizationName
+        Name of the Organization.
+
+    .PARAMETER Visibility
+        Which users can access codespaces in the organization.
+        Disabled means that no users can access codespaces in the organization.
+
+    .PARAMETER UserName
+        The handle for the GitHub user account(s).
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .EXAMPLE
+        Set-GitHubCodespaceVisibility -Visibility selected_members -User HowardWolosky -Force
+
+    .NOTES
+        You must authenticate using an access token with the admin:org scope to use this endpoint.
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/organizations?apiVersion=2022-11-28#manage-access-control-for-organization-codespaces
+    #>
+    [CmdletBinding(SupportsShouldProcess,
+        ConfirmImpact = 'High')]
+    param (
+        [Parameter(Mandatory)]
+        [string] $OrganizationName,
+
+        [ValidateSet('disabled', 'selected_members', 'all_members', 'all_members_and_outside_collaborators')]
+        [string] $Visibility,
+
+        [Parameter(ValueFromPipeline,
+            ValueFromPipelineByPropertyName)]
+        [string[]] $UserName,
+
+        [switch] $Force,
+
+        [string] $AccessToken
+    )
+
+    Write-InvocationLog
+
+    if ($UserName.Count -gt 0 -and $Visibility -ne 'selected_members')
+    {
+        $message = 'You can only specify the UserName parameter when the Visibility is set to ''selected_members'''
+        Write-Log -Message $message -Level Error
+        throw $message
+    }
+
+    $hashBody = @{ visibility = $Visibility }
+
+    if ($Visibility -eq 'selected_members')
+    {
+        $hashBody.Add('selected_usernames', @($UserName))
+    }
+
+    $params = @{
+        UriFragment = "orgs/$OrganizationName/codespaces/billing"
+        Body = ConvertTo-Json -InputObject $hashBody
+        Method = 'PUT'
+        Description = 'Set Codespace Visiblity'
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+    }
+
+    if ($Force -and (-not $Confirm))
+    {
+        $ConfirmPreference = 'None'
+    }
+
+    if ($PSCmdLet.ShouldProcess($Visibility, 'Set Codespace Visibility'))
+    {
+        Invoke-GHRestMethod @params
     }
 }
 
