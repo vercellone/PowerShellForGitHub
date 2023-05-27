@@ -69,6 +69,7 @@
     # Functions to export from this module
     FunctionsToExport = @(
         'Add-GitHubAssignee',
+        'Add-GitHubCodespaceUser',
         'Add-GitHubIssueLabel',
         'Add-GitHubGistStar',
         'Backup-GitHubConfiguration',
@@ -160,6 +161,7 @@
         'New-GitHubTeam',
         'Remove-GitHubAssignee',
         'Remove-GitHubCodespace',
+        'Remove-GitHubCodespaceUser',
         'Remove-GitHubComment',
         'Remove-GitHubDeploymentEnvironment'
         'Remove-GitHubGist',
@@ -188,6 +190,7 @@
         'Reset-GitHubConfiguration',
         'Restore-GitHubConfiguration',
         'Set-GitHubAuthentication',
+        'Set-GitHubCodespaceVisibility',
         'Set-GitHubConfiguration',
         'Set-GitHubContent',
         'Set-GitHubGist',
