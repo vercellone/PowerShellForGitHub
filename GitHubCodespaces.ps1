@@ -515,7 +515,7 @@ filter Remove-GitHubCodespace
         The handle for the GitHub user account.
 
     .PARAMETER CodespaceName
-        The name of the codespace.
+        Name of the Codespace.
 
     .PARAMETER AccessToken
         If provided, this will be used as the AccessToken for authentication with the
@@ -622,7 +622,7 @@ filter Start-GitHubCodespace
         The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
 
     .PARAMETER CodespaceName
-        The name of the codespace.
+        Name of the Codespace.
 
     .PARAMETER Wait
         If present will wait for the codespace to start.
@@ -726,7 +726,7 @@ filter Stop-GitHubCodespace
         The handle for the GitHub user account(s).
 
     .PARAMETER CodespaceName
-        The name of the codespace.
+        Name of the Codespace.
 
     .PARAMETER Wait
         If present will wait for the codespace to stop.
@@ -842,7 +842,7 @@ function Wait-GitHubCodespaceAction
         Wait for a Codespace start or stop action.
 
     .PARAMETER CodespaceName
-        The name of the codespace.
+        Name of the Codespace.
 
     .PARAMETER AccessToken
         If provided, this will be used as the AccessToken for authentication with the
