@@ -146,8 +146,15 @@
         *   [Getting codespaces](#getting-codespaces)
         *   [Creating a codespace](#creating-a-codespace)
         *   [Removing a codespace](#removing-a-codespace)
-        *   [Starting a codespace](#updating-a-codespace)
-        *   [Stopping a codespace](#starting-a-codespace)
+        *   [Starting a codespace](#starting-a-codespace)
+        *   [Stopping a codespace](#stopping-a-codespace)
+    *   [Codespaces/organizations](#codespaces-organizations)
+        *   [Manage access control for codespaces](#manage-organization-codespaces-billing)
+        *   [Add users to Codespaces billing](#adding-users-to-codespaces-billing)
+        *   [Removes users from Codespaces billing](#removing-users-from-codespaces-billing)
+        *   [Getting codespaces](#getting-organization-codespaces)
+        *   [Removing a codespace](#removing-an-organization-codespace)
+        *   [Stopping a codespace](#stopping-an-organization-codespace)
 
 ----------
 
@@ -1308,12 +1315,6 @@ Get-GitHubCodespace
 # Get all codespaces for the current authenticated user in a repository
 Get-GitHubCodespace -OwnerName microsoft -RepositoryName TestRepo
 
-# Get all codespaces for an Organizaion
-Get-GitHubCodespace -OrganizationName microsoft
-
-# Get all codespaces for a specific organization user
-Get-GitHubCodespace -OrganizationName microsoft -UserName octocat
-
 # Get a codespace by name
 Get-GitHubCodespace -CodespaceName 'microsoft-symmetrical-chainsaw-7q4vp6v7q3pwqq'
 ```
@@ -1354,9 +1355,6 @@ $codespaceName = 'microsoft-symmetrical-chainsaw-7q4vp6v7q3pwqq'
 
 # Remove a codespace for the current authenticated user
 Remove-GitHubCodespace -CodespaceName $codespaceName
-
-# Remove a codespace for an organization user
-Remove-GitHubCodespace -Organization microsoft -UserName octocat -CodespaceName $codespaceName
 ```
 
 #### Starting a codespace
@@ -1379,4 +1377,58 @@ Stop-GithubCodespace -CodespaceName $codespaceName
 
 # Stopping a codespace (wait for Shutdown)
 Stop-GithubCodespace -CodespaceName $codespaceName -Wait
+```
+
+----------
+
+### Codespaces organizations
+
+#### Manage organization Codespaces billing
+```powershell
+
+# Disable codespace access entirely in the organization.
+Set-GitHubCodespaceVisibility -Visibility disabled
+
+# Allow all organization members to access codespaces.
+Set-GitHubCodespaceVisibility -Visibility all_members
+
+# Limit codespace access to a selected list of organization members.
+# Care should be taken with this option, as the users specified will overwrite any active list.
+Set-GitHubCodespaceVisibility -Visibility selected_members -UserName FredFlintstone,BarneyRubble
+```
+
+#### Adding users to Codespaces billing
+```powershell
+Add-GitHubCodespaceUser -OrganizationName microsoft -UserName HowardWolosky,GeorgeJetson
+```
+
+#### Removing users from Codespaces billing
+```powershell
+Remove-GitHubCodespaceUser -OrganizationName microsoft -UserName HowardWolosky,GeorgeJetson
+```
+
+#### Getting organization Codespaces
+```powershell
+
+# Get all codespaces for an Organizaion
+Get-GitHubCodespace -OrganizationName microsoft
+
+# Get all codespaces for a specific organization user
+Get-GitHubCodespace -OrganizationName microsoft -UserName octocat
+```
+
+#### Removing an organization Codespace
+```powershell
+$codespaceName = 'microsoft-symmetrical-chainsaw-7q4vp6v7q3pwqq'
+
+# Remove a codespace for an organization user
+Remove-GitHubCodespace -OrganizationName microsoft -UserName octocat -CodespaceName $codespaceName
+```
+
+#### Stopping an organization Codespace
+```powershell
+$codespaceName = 'microsoft-symmetrical-chainsaw-7q4vp6v7q3pwqq'
+
+# Stopping a codespace (wait for Shutdown)
+Stop-GithubCodespace -OrganizationName microsoft -UserName octocat -CodespaceName $codespaceName -Wait
 ```
