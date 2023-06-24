@@ -1340,7 +1340,7 @@ $repo | New-GitHubCodespace
 # Create a codespace in repository from pipeline with options
 $newGitHubCodespaceParms = @{
     DisplayName = 'PowerShellForGitHub usage'
-    Location = 'WestUs2'
+    Geo = 'UsWest'
     Machine = 'basicLinux32gb'
     NoMultipleRepoPermissions = $true
     RetentionPeriod = 10

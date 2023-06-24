@@ -304,10 +304,10 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
         Context -Name 'When creating a codespace with all possible settings' {
             BeforeAll {
                 $newGitHubCodespaceParms = @{
-                    # ClientIp = 'TODO ???? - should be instead of rather than in addition to Location, perhaps add some param validation to the function'
-                    # Devcontainer = 'Will add to test in the future when Get-GitHubDevContainer is implemented and the test repo includes one'
+                    # ClientIp = 'TODO ???? - should be instead of rather than in addition to Geo, perhaps add some param validation to the function'
+                    # DevContainerPath = 'Will add to test in the future when Get-GitHubDevContainer is implemented and the test repo includes one'
                     DisplayName = 'PowerShellForGitHub pester test'
-                    Location = 'WestUs2'
+                    Geo = 'UsWest'
                     Machine = 'basicLinux32gb'
                     NoMultipleRepoPermissions = $true # Not sure how to assert this, but this proves it accepts the switch without error
                     RetentionPeriod = 10
@@ -325,7 +325,7 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
                 # $codespace.devcontainer_path | Should -Be
                 $codespace.display_name | Should -Be $newGitHubCodespaceParms.DisplayName
                 $codespace.idle_timeout_minutes | Should -Be 5
-                $codespace.location | Should -Be $newGitHubCodespaceParms.Location
+                $codespace.geo | Should -Be $newGitHubCodespaceParms.Geo
                 $codespace.machine.name | Should -Be $newGitHubCodespaceParms.Machine
                 $codespace.owner.UserName | Should -Be $script:OwnerName
                 $codespace.repository.name | Should -Be $repo.name

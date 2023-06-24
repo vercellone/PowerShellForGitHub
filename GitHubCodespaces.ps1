@@ -255,18 +255,18 @@ function New-GitHubCodespace
         Git ref (typically a branch name) for this codespace
 
     .PARAMETER ClientIp
-        IP for location auto-detection when proxying a request.
+        IP for geo auto-detection when proxying a request.
 
-    .PARAMETER Devcontainer
+    .PARAMETER DevContainerPath
         Path to devcontainer.json config to use for this codespace.
 
     .PARAMETER DisplayName
         Display name for this codespace
 
-    .PARAMETER Location
-        The requested location for a new codespace.
-        Best efforts are made to respect this upon creation.
+    .PARAMETER Geo
+        The geographic area for this codespace.
         Assigned by IP if not provided.
+        Can be one of: EuropeWest, SoutheastAsia, UsEast, UsWest
 
     .PARAMETER Machine
         Machine type to use for this codespace.
@@ -371,11 +371,11 @@ function New-GitHubCodespace
 
         [string] $ClientIp,
 
-        [string] $Devcontainer,
+        [string] $DevContainerPath,
 
         [string] $DisplayName,
 
-        [string] $Location,
+        [string] $Geo,
 
         [string] $Machine,
 
@@ -398,9 +398,9 @@ function New-GitHubCodespace
 
         $propertyMap = @{
             ClientIp = 'client_ip'
-            Devcontainer = 'devcontainer_path'
+            DevContainerPath = 'devcontainer_path'
             DisplayName = 'display_name'
-            Location = 'location'
+            Geo = 'geo'
             Machine = 'machine'
             Ref = 'ref'
             RetentionPeriod = 'retention_period_minutes'
@@ -411,7 +411,6 @@ function New-GitHubCodespace
 
     process
     {
-
         $telemetryProperties = @{
             UsageType = $PSCmdlet.ParameterSetName
         }
