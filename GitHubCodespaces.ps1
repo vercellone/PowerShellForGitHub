@@ -627,7 +627,7 @@ filter Start-GitHubCodespace
         If present will wait for the codespace to start.
 
     .PARAMETER PassThru
-        Returns the updated GitHub Issue.  By default, this cmdlet does not generate any output.
+        Returns the start action result.  By default, this cmdlet does not generate any output.
         You can use "Set-GitHubConfiguration -DefaultPassThru" to control the default behavior
         of this switch.
 
@@ -731,7 +731,7 @@ filter Stop-GitHubCodespace
         If present will wait for the codespace to stop.
 
     .PARAMETER PassThru
-        Returns the updated GitHub Issue.  By default, this cmdlet does not generate any output.
+        Returns the stop action result.  By default, this cmdlet does not generate any output.
         You can use "Set-GitHubConfiguration -DefaultPassThru" to control the default behavior
         of this switch.
 
