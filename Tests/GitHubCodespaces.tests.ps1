@@ -232,7 +232,7 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
 
         Context -Name 'When creating a codespace with default settings with Ref' {
             BeforeAll {
-                $repoWithPR = Get-GitHubRepository -OrganizationName 'super-fake-not-real-org' |
+                $repoWithPR = Get-GitHubRepository -OrganizationName $script:organizationName |
                     Where-Object { $_ | Get-GitHubPullRequest } |
                     Select-Object -First 1
                 $pullRequest = $repoWithPR | Get-GitHubPullRequest | Select-Object -First 1
@@ -266,7 +266,7 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
 
         Context -Name 'When creating a codespace with default settings from a PullRequest' {
             BeforeAll {
-                  $repoWithPR = Get-GitHubRepository -OrganizationName 'super-fake-not-real-org' |
+                  $repoWithPR = Get-GitHubRepository -OrganizationName $script:organizationName |
                       Where-Object { $_ | Get-GitHubPullRequest } |
                       Select-Object -First 1
                 $pullRequest = $repoWithPR | Get-GitHubPullRequest | Select-Object -First 1
