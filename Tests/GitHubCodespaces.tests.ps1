@@ -308,7 +308,7 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
                     Machine = 'basicLinux32gb'
                     NoMultipleRepoPermissions = $true # Not sure how to assert this, but this proves it accepts the switch without error
                     IdleRetentionPeriodMinutes = 10
-                    Timeout = 5
+                    TimeoutMinutes = 5
                     # WorkingDirectory = 'TODO ???? - not sure how to handle this'
                 }
                 $codespace = $repo | New-GitHubCodespace @newGitHubCodespaceParms

@@ -277,7 +277,7 @@ function New-GitHubCodespace
     .PARAMETER IdleRetentionPeriodMinutes
         Duration in minutes (up to 30 days) after codespace has gone idle in which it will be deleted.
 
-    .PARAMETER Timeout
+    .PARAMETER TimeoutMinutes
         Time in minutes before codespace stops from inactivity.
 
     .PARAMETER WorkingDirectory
@@ -382,7 +382,7 @@ function New-GitHubCodespace
         [int] $IdleRetentionPeriodMinutes,
 
         [ValidateRange(5, 240)]
-        [int] $Timeout,
+        [int] $TimeoutMinutes,
 
         [string] $WorkingDirectory,
 
@@ -401,7 +401,7 @@ function New-GitHubCodespace
             Machine = 'machine'
             Ref = 'ref'
             IdleRetentionPeriodMinutes = 'retention_period_minutes'
-            Timeout = 'idle_timeout_minutes'
+            TimeoutMinutes = 'idle_timeout_minutes'
             WorkingDirectory = 'working_directory'
         }
     }

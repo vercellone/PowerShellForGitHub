@@ -1344,7 +1344,7 @@ $newGitHubCodespaceParms = @{
     Machine = 'basicLinux32gb'
     NoMultipleRepoPermissions = $true
     IdleRetentionPeriodMinutes = 10
-    Timeout = 5
+    TimeoutMinutes = 5
 }
 $codespace = $repo | New-GitHubCodespace @newGitHubCodespaceParms
 ```
