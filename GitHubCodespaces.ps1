@@ -545,7 +545,6 @@ filter Remove-GitHubCodespace
         DefaultParameterSetName = 'AuthenticatedUser',
         SupportsShouldProcess,
         ConfirmImpact = 'High')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification = "PassThru is accessed indirectly via Resolve-ParameterWithDefaultConfigurationValue")]
     [Alias('Delete-GitHubCodespace')]
     param(
         [Parameter(
