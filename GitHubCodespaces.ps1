@@ -1193,6 +1193,11 @@ filter Add-GitHubCodespaceAdditionalProperties
                 Add-Member -InputObject $item -Name 'CodespaceName' -Value $item.name -MemberType NoteProperty -Force
             }
 
+            if ($null -ne $item.billable_owner)
+            {
+                $null = Add-GitHubUserAdditionalProperties -InputObject $item.billable_owner
+            }
+
             if ($null -ne $item.owner)
             {
                 $null = Add-GitHubUserAdditionalProperties -InputObject $item.owner
