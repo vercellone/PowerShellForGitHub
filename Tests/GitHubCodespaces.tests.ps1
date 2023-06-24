@@ -33,7 +33,6 @@ BeforeAll {
 }
 
 Describe 'GitHubCodespaces\Delete-GitHubCodespace' {
-
     Context 'When deleting a codespace for the authenticated user' {
         BeforeEach {
             # Suppress HTTP 202 warning for codespace creation
@@ -99,10 +98,10 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
     }
 
     Context 'When getting a codespace for a specified owner and repository' {
-
         BeforeAll {
             $codespaces = Get-GitHubCodespace @newGitHubCodespaceParms
         }
+
         It 'Should return objects of the correct type' {
             $codespaces[0].PSObject.TypeNames[0] | Should -Be 'GitHub.Codespace'
         }
@@ -121,10 +120,10 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
     }
 
     Context 'When getting all codespaces for a specified organization' {
-
         BeforeAll {
             $codespaces = Get-GitHubCodespace -OrganizationName $script:organizationName
         }
+
         It 'Should return objects of the correct type' {
             $codespaces[0].PSObject.TypeNames[0] | Should -Be 'GitHub.Codespace'
         }
@@ -199,9 +198,7 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
 
 
 Describe 'GitHubCodespaces\New-GitHubCodespace' {
-
     Context -Name 'When creating a repository for the authenticated user' {
-
         Context -Name 'When creating a codespace with default settings with RepositoryId' {
             BeforeAll {
                 $newGitHubCodespaceParms = @{
@@ -321,12 +318,12 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
             It 'Should return the correct properties' {
                 # $codespace.devcontainer_path | Should -Be
                 $codespace.display_name | Should -Be $newGitHubCodespaceParms.DisplayName
-                $codespace.idle_timeout_minutes | Should -Be 5
-                $codespace.geo | Should -Be $newGitHubCodespaceParms.Geo
+                $codespace.idle_timeout_minutes | Should -Be $newGitHubCodespaceParams.TimeoutMinutes
+                $codespace.location | Should -Be $newGitHubCodespaceParms.Geo
                 $codespace.machine.name | Should -Be $newGitHubCodespaceParms.Machine
                 $codespace.owner.UserName | Should -Be $script:OwnerName
                 $codespace.repository.name | Should -Be $repo.name
-                $codespace.retention_period_minutes | Should -Be 10
+                $codespace.retention_period_minutes | Should -Be $newGitHubCodespaceParams.IdleRetentionPeriodMinutes
                 $codespace.template | Should -BeNullOrEmpty
             }
 
