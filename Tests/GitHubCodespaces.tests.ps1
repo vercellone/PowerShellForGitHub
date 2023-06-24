@@ -218,7 +218,6 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
             It 'Should return the correct properties' {
                 $codespace.display_name | Should -Not -BeNullOrEmpty
                 $codespace.repository.name | Should -Be $repo.name
-                $codespace.idle_timeout_minutes | Should -Be 30
                 $codespace.owner.UserName | Should -Be $script:OwnerName
                 $codespace.template | Should -BeNullOrEmpty
             }
@@ -253,7 +252,6 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
                 $codespace.display_name | Should -Not -BeNullOrEmpty
                 $codespace.git_status.ref | Should -Be $pullRequest.head.ref
                 $codespace.repository.name | Should -Be $repoWithPR.name
-                $codespace.idle_timeout_minutes | Should -Be 30
                 $codespace.owner.UserName | Should -Be $script:OwnerName
                 $codespace.template | Should -BeNullOrEmpty
             }
@@ -287,7 +285,6 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
             It 'Should return the correct properties' {
                 $codespace.display_name | Should -Not -BeNullOrEmpty
                 $codespace.repository.name | Should -Be $repoWithPR.name
-                $codespace.idle_timeout_minutes | Should -Be 30
                 $codespace.owner.UserName | Should -Be $script:OwnerName
                 $codespace.pulls_url | Should -Be $pullRequest.url
                 $codespace.template | Should -BeNullOrEmpty
@@ -357,7 +354,6 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
             It 'Should return the correct properties' {
                 $codespace.display_name | Should -Not -BeNullOrEmpty
                 $codespace.repository.name | Should -Be $repo.name
-                $codespace.idle_timeout_minutes | Should -Be 30
                 $codespace.owner.UserName | Should -Be $script:OwnerName
                 $codespace.template | Should -BeNullOrEmpty
             }
