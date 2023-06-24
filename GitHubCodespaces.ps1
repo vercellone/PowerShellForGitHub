@@ -350,8 +350,7 @@ function New-GitHubCodespace
         [Alias('PullRequestUrl')]
         [string] $Uri,
 
-        [Parameter(
-            ParameterSetName = 'AuthenticatedUser')]
+        [Parameter(ParameterSetName = 'AuthenticatedUser')]
         [Parameter(
             Mandatory,
             ParameterSetName = 'ElementsPullRequest')]
@@ -363,10 +362,8 @@ function New-GitHubCodespace
             ParameterSetName = 'AuthenticatedUser')]
         [Int64] $RepositoryId,
 
-        [Parameter(
-            ParameterSetName = 'AuthenticatedUser')]
-        [Parameter(
-            ParameterSetName = 'Elements')]
+        [Parameter(ParameterSetName = 'AuthenticatedUser')]
+        [Parameter(ParameterSetName = 'Elements')]
         [string] $Ref,
 
         [string] $ClientIp,
@@ -560,7 +557,8 @@ filter Remove-GitHubCodespace
         [ValidateNotNullOrEmpty()]
         [String] $UserName,
 
-        [Parameter(Mandatory,
+        [Parameter(
+            Mandatory,
             ValueFromPipeline,
             ValueFromPipelineByPropertyName)]
         [string] $CodespaceName,
@@ -656,7 +654,8 @@ filter Start-GitHubCodespace
     [OutputType({ $script:GitHubCodespaceTypeName })]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification = "PassThru is accessed indirectly via Resolve-ParameterWithDefaultConfigurationValue")]
     param(
-        [Parameter(Mandatory,
+        [Parameter(
+            Mandatory,
             ValueFromPipeline,
             ValueFromPipelineByPropertyName)]
         [string] $CodespaceName,
@@ -761,15 +760,18 @@ filter Stop-GitHubCodespace
     [OutputType({ $script:GitHubCodespaceTypeName })]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSReviewUnusedParameter", "", Justification = "PassThru is accessed indirectly via Resolve-ParameterWithDefaultConfigurationValue")]
     param(
-        [Parameter(Mandatory,
+        [Parameter(
+            Mandatory,
             ParameterSetName = 'Organization')]
         [string] $OrganizationName,
 
-        [Parameter(Mandatory,
-	    ParameterSetName = 'Organization')]
+        [Parameter(
+            Mandatory,
+	        ParameterSetName = 'Organization')]
         [string] $UserName,
 
-        [Parameter(Mandatory,
+        [Parameter(
+            Mandatory,
             ValueFromPipeline,
             ValueFromPipelineByPropertyName)]
         [string] $CodespaceName,
@@ -861,7 +863,8 @@ function Wait-GitHubCodespaceAction
     [CmdletBinding()]
     [OutputType({ $script:GitHubCodespaceTypeName })]
     param(
-        [Parameter(Mandatory,
+        [Parameter(
+            Mandatory,
             ValueFromPipeline,
             ValueFromPipelineByPropertyName)]
         [string] $CodespaceName,
@@ -945,7 +948,8 @@ filter Add-GitHubCodespaceUser
         [Parameter(Mandatory)]
         [string] $OrganizationName,
 
-        [Parameter(Mandatory,
+        [Parameter(
+            Mandatory,
             ValueFromPipeline,
             ValueFromPipelineByPropertyName)]
         [string[]] $UserName,
@@ -1017,7 +1021,8 @@ filter Remove-GitHubCodespaceUser
         [Parameter(Mandatory)]
         [string] $OrganizationName,
 
-        [Parameter(Mandatory,
+        [Parameter(
+            Mandatory,
             ValueFromPipeline,
             ValueFromPipelineByPropertyName)]
         [string[]] $UserName,
@@ -1090,7 +1095,8 @@ filter Set-GitHubCodespaceVisibility
         [ValidateSet('disabled', 'selected_members', 'all_members', 'all_members_and_outside_collaborators')]
         [string] $Visibility,
 
-        [Parameter(ValueFromPipeline,
+        [Parameter(
+            ValueFromPipeline,
             ValueFromPipelineByPropertyName)]
         [string[]] $UserName,
 
