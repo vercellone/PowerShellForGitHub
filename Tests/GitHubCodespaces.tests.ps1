@@ -307,7 +307,7 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
                     Geo = 'UsWest'
                     Machine = 'basicLinux32gb'
                     NoMultipleRepoPermissions = $true # Not sure how to assert this, but this proves it accepts the switch without error
-                    RetentionPeriod = 10
+                    IdleRetentionPeriodMinutes = 10
                     Timeout = 5
                     # WorkingDirectory = 'TODO ???? - not sure how to handle this'
                 }

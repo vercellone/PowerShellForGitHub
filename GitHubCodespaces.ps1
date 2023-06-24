@@ -274,7 +274,7 @@ function New-GitHubCodespace
     .PARAMETER NoMultipleRepoPermissions
         Whether to authorize requested permissions to other repos from devcontainer.json.
 
-    .PARAMETER RetentionPeriod
+    .PARAMETER IdleRetentionPeriodMinutes
         Duration in minutes (up to 30 days) after codespace has gone idle in which it will be deleted.
 
     .PARAMETER Timeout
@@ -379,7 +379,7 @@ function New-GitHubCodespace
         [switch] $NoMultipleRepoPermissions,
 
         [ValidateRange(0, 43200)]
-        [int] $RetentionPeriod,
+        [int] $IdleRetentionPeriodMinutes,
 
         [ValidateRange(5, 240)]
         [int] $Timeout,
@@ -400,7 +400,7 @@ function New-GitHubCodespace
             Geo = 'geo'
             Machine = 'machine'
             Ref = 'ref'
-            RetentionPeriod = 'retention_period_minutes'
+            IdleRetentionPeriodMinutes = 'retention_period_minutes'
             Timeout = 'idle_timeout_minutes'
             WorkingDirectory = 'working_directory'
         }

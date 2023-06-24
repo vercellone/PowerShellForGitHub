@@ -1343,7 +1343,7 @@ $newGitHubCodespaceParms = @{
     Geo = 'UsWest'
     Machine = 'basicLinux32gb'
     NoMultipleRepoPermissions = $true
-    RetentionPeriod = 10
+    IdleRetentionPeriodMinutes = 10
     Timeout = 5
 }
 $codespace = $repo | New-GitHubCodespace @newGitHubCodespaceParms
