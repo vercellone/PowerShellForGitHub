@@ -30,10 +30,11 @@ BeforeAll {
         OrganizationName = $script:organizationName
     }
     $repo = New-GitHubRepository @newGitHubRepositoryParms
+    # Get the main/master branch name
+    $mainBranchName = $repo | Get-GitHubRepositoryBranch | Select-Object -ExpandProperty name -First 1
 }
 
 Describe 'GitHubCodespaces\Delete-GitHubCodespace' {
-
     Context 'When deleting a codespace for the authenticated user' {
         BeforeEach {
             # Suppress HTTP 202 warning for codespace creation
@@ -41,11 +42,10 @@ Describe 'GitHubCodespaces\Delete-GitHubCodespace' {
             $WarningPreference = 'SilentlyContinue'
 
             $newGitHubCodespaceParms = @{
-                OwnerName = $script:organizationName
+                OwnerName = $repo.owner.login
                 RepositoryName = $defaultRepositoryName
             }
-            $codespace = New-GitHubCodespace @newGitHubCodespaceParms
-            Start-Sleep -Seconds 2
+            $codespace = New-GitHubCodespace @newGitHubCodespaceParms -Wait
         }
 
         It 'Should get no content using -Confirm:$false' {
@@ -68,17 +68,16 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
         $WarningPreference = 'SilentlyContinue'
 
         $newGitHubCodespaceParms = @{
-            OwnerName = $script:organizationName
+            OwnerName = $repo.owner.login
             RepositoryName = $defaultRepositoryName
         }
-        $null = New-GitHubCodespace @newGitHubCodespaceParms
-        Start-Sleep -Seconds 2
+        $null = New-GitHubCodespace @newGitHubCodespaceParms -Wait
     }
 
     Context 'When getting codespaces for the authenticated user' {
         BeforeAll {
             $codespaces = Get-GitHubCodespace |
-            Where-Object { $_.repository.name -eq $defaultRepositoryName }
+                Where-Object { $_.repository.name -eq $defaultRepositoryName }
         }
 
         It 'Should return objects of the correct type' {
@@ -86,7 +85,7 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
         }
 
         It 'Should return one or more results' {
-            $codespaces.Count | Should -BeGreaterOrEqual 1
+            @($codespaces | Where-Object { $_ }).Count | Should -BeGreaterOrEqual 1
         }
 
         It 'Should return the correct properties' {
@@ -99,16 +98,16 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
     }
 
     Context 'When getting a codespace for a specified owner and repository' {
-
         BeforeAll {
             $codespaces = Get-GitHubCodespace @newGitHubCodespaceParms
         }
+
         It 'Should return objects of the correct type' {
             $codespaces[0].PSObject.TypeNames[0] | Should -Be 'GitHub.Codespace'
         }
 
         It 'Should return one or more results' {
-            $codespaces.Count | Should -BeGreaterOrEqual 1
+            @($codespaces | Where-Object { $_ }).Count | Should -BeGreaterOrEqual 1
         }
 
         It 'Should return the correct properties' {
@@ -130,7 +129,7 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
         }
 
         It 'Should return one or more results' {
-            $codespaces.Count | Should -BeGreaterOrEqual 1
+            @($codespaces | Where-Object { $_ }).Count | Should -BeGreaterOrEqual 1
         }
     }
 
@@ -195,20 +194,21 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
             $codespace.repository.name | Should -Be $repo.name
         }
     }
+
+    AfterAll {
+        Get-GitHubCodespace @newGitHubCodespaceParms | Remove-GitHubCodespace -Confirm:$false -Force
+    }
 }
 
 
 Describe 'GitHubCodespaces\New-GitHubCodespace' {
-
     Context -Name 'When creating a repository for the authenticated user' {
-
         Context -Name 'When creating a codespace with default settings with RepositoryId' {
             BeforeAll {
                 $newGitHubCodespaceParms = @{
                     RepositoryId = $repo.Id
                 }
-                $codespace = New-GitHubCodespace @newGitHubCodespaceParms
-                Start-Sleep -Seconds 2
+                $codespace = New-GitHubCodespace @newGitHubCodespaceParms -Wait
             }
 
             It 'Should return an object of the correct type' {
@@ -232,16 +232,22 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
 
         Context -Name 'When creating a codespace with default settings with Ref' {
             BeforeAll {
-                $repoWithPR = Get-GitHubRepository -OrganizationName $script:organizationName |
-                    Where-Object { $_ | Get-GitHubPullRequest } |
-                    Select-Object -First 1
-                $pullRequest = $repoWithPR | Get-GitHubPullRequest | Select-Object -First 1
+                $prBranchName = 'testCodespaceByRef'
+                $prBranch = $repo | New-GitHubRepositoryBranch -BranchName $mainBranchName -TargetBranchName $prBranchName
+                $setContentParms = @{
+                    Path = 'README.md'
+                    Content = 'When creating a codespace with default settings with Ref'
+                    CommitMessage = $prBranchName
+                    BranchName = $prBranchName
+                }
+                $repo | Set-GitHubContent @setContentParms
+                $pullRequest = $prBranch | New-GitHubPullRequest -Title $prBranchName -Head $prBranchName -Base $mainBranchName
+
                 $newGitHubCodespaceParms = @{
                     Ref = $pullRequest.head.ref
-                    RepositoryId = $repoWithPR.Id
+                    RepositoryId = $repo.Id
                 }
-                $codespace = New-GitHubCodespace @newGitHubCodespaceParms
-                Start-Sleep -Seconds 2
+                $codespace = New-GitHubCodespace @newGitHubCodespaceParms -Wait
             }
 
             It 'Should return an object of the correct type' {
@@ -251,7 +257,7 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
             It 'Should return the correct properties' {
                 $codespace.display_name | Should -Not -BeNullOrEmpty
                 $codespace.git_status.ref | Should -Be $pullRequest.head.ref
-                $codespace.repository.name | Should -Be $repoWithPR.name
+                $codespace.repository.name | Should -Be $repo.name
                 $codespace.owner.UserName | Should -Be $script:OwnerName
                 $codespace.template | Should -BeNullOrEmpty
             }
@@ -266,16 +272,22 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
 
         Context -Name 'When creating a codespace with default settings from a PullRequest' {
             BeforeAll {
-                  $repoWithPR = Get-GitHubRepository -OrganizationName $script:organizationName |
-                      Where-Object { $_ | Get-GitHubPullRequest } |
-                      Select-Object -First 1
-                $pullRequest = $repoWithPR | Get-GitHubPullRequest | Select-Object -First 1
+                $prBranchName = 'testCodespaceFromPR'
+                $prBranch = $repo | New-GitHubRepositoryBranch -BranchName $mainBranchName -TargetBranchName $prBranchName
+                $setContentParms = @{
+                    Path = 'README.md'
+                    Content = 'When creating a codespace with default settings from a PullRequest'
+                    CommitMessage = $prBranchName
+                    BranchName = $prBranchName
+                }
+                $repo | Set-GitHubContent @setContentParms
+                $pullRequest = $prBranch | New-GitHubPullRequest -Title $prBranchName -Head $prBranchName -Base $mainBranchName
+
                 $newGitHubCodespaceParms = @{
                     PullRequest = $pullRequest.number
-                    RepositoryId = $repoWithPR.Id
+                    RepositoryId = $repo.Id
                 }
-                $codespace = New-GitHubCodespace @newGitHubCodespaceParms
-                Start-Sleep -Seconds 2
+                $codespace = New-GitHubCodespace @newGitHubCodespaceParms -Wait
             }
 
             It 'Should return an object of the correct type' {
@@ -284,7 +296,7 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
 
             It 'Should return the correct properties' {
                 $codespace.display_name | Should -Not -BeNullOrEmpty
-                $codespace.repository.name | Should -Be $repoWithPR.name
+                $codespace.repository.name | Should -Be $repo.name
                 $codespace.owner.UserName | Should -Be $script:OwnerName
                 $codespace.pulls_url | Should -Be $pullRequest.url
                 $codespace.template | Should -BeNullOrEmpty
@@ -304,14 +316,14 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
                     # ClientIp = 'TODO ???? - should be instead of rather than in addition to Geo, perhaps add some param validation to the function'
                     # DevContainerPath = 'Will add to test in the future when Get-GitHubDevContainer is implemented and the test repo includes one'
                     DisplayName = 'PowerShellForGitHub pester test'
-                    Geo = 'UsWest'
+                    Geo = 'UsWest' # location was deprecated in favor of Geo
                     Machine = 'basicLinux32gb'
                     NoMultipleRepoPermissions = $true # Not sure how to assert this, but this proves it accepts the switch without error
                     IdleRetentionPeriodMinutes = 10
                     TimeoutMinutes = 5
                     # WorkingDirectory = 'TODO ???? - not sure how to handle this'
                 }
-                $codespace = $repo | New-GitHubCodespace @newGitHubCodespaceParms
+                $codespace = $repo | New-GitHubCodespace @newGitHubCodespaceParms -Wait
             }
 
             It 'Should return an object of the correct type' {
@@ -321,12 +333,12 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
             It 'Should return the correct properties' {
                 # $codespace.devcontainer_path | Should -Be
                 $codespace.display_name | Should -Be $newGitHubCodespaceParms.DisplayName
-                $codespace.idle_timeout_minutes | Should -Be 5
-                $codespace.geo | Should -Be $newGitHubCodespaceParms.Geo
+                $codespace.idle_timeout_minutes | Should -Be $newGitHubCodespaceParms.TimeoutMinutes
+                $codespace.location | Should -Match 'WestUs' # location should align with our requested Geo
                 $codespace.machine.name | Should -Be $newGitHubCodespaceParms.Machine
                 $codespace.owner.UserName | Should -Be $script:OwnerName
                 $codespace.repository.name | Should -Be $repo.name
-                $codespace.retention_period_minutes | Should -Be 10
+                $codespace.retention_period_minutes | Should -Be $newGitHubCodespaceParms.IdleRetentionPeriodMinutes
                 $codespace.template | Should -BeNullOrEmpty
             }
 
@@ -342,9 +354,9 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
             BeforeAll {
                 $newGitHubCodespaceParms = @{
                     RepositoryName = $repo.name
-                    OwnerName = $script:organizationName
+                    OwnerName = $repo.owner.login
                 }
-                $codespace = New-GitHubCodespace @newGitHubCodespaceParms
+                $codespace = New-GitHubCodespace @newGitHubCodespaceParms -Wait
             }
 
             It 'Should return an object of the correct type' {
@@ -374,16 +386,15 @@ Describe 'GitHubCodespaces\Start-GitHubCodespace' {
         $WarningPreference = 'SilentlyContinue'
 
         $newGitHubCodespaceParms = @{
-            OwnerName = $script:organizationName
+            OwnerName = $repo.owner.login
             RepositoryName = $defaultRepositoryName
         }
-        $null = New-GitHubCodespace @newGitHubCodespaceParms
-        Start-Sleep -Seconds 2
+        $null = New-GitHubCodespace @newGitHubCodespaceParms -Wait
     }
 
     Context 'When starting a codespace for the authenticated user' {
         BeforeAll {
-            $codespace = Get-GitHubCodespace @newGitHubCodespaceParms
+            $codespace = Get-GitHubCodespace @newGitHubCodespaceParms | Select-Object -First 1
         }
 
         It 'Should not throw' {
@@ -397,6 +408,10 @@ Describe 'GitHubCodespaces\Start-GitHubCodespace' {
             $result.State | Should -Be 'Available'
         }
     }
+
+    AfterAll {
+        Get-GitHubCodespace @newGitHubCodespaceParms | Remove-GitHubCodespace -Confirm:$false -Force
+    }
 }
 
 Describe 'GitHubCodespaces\Stop-GitHubCodespace' {
@@ -405,16 +420,15 @@ Describe 'GitHubCodespaces\Stop-GitHubCodespace' {
         $WarningPreference = 'SilentlyContinue'
 
         $newGitHubCodespaceParms = @{
-            OwnerName = $script:organizationName
+            OwnerName = $repo.owner.login
             RepositoryName = $defaultRepositoryName
         }
-        $null = New-GitHubCodespace @newGitHubCodespaceParms
-        Start-Sleep -Seconds 2
+        $null = New-GitHubCodespace @newGitHubCodespaceParms -Wait
     }
 
     Context 'When stopping a codespace for the authenticated user' {
         BeforeAll {
-            $codespace = Get-GitHubCodespace @newGitHubCodespaceParms
+            $codespace = Get-GitHubCodespace @newGitHubCodespaceParms | Select-Object -First 1
         }
 
         It 'Should not throw' {
@@ -427,6 +441,10 @@ Describe 'GitHubCodespaces\Stop-GitHubCodespace' {
             $result = $codespace | Stop-GitHubCodespace -Wait -PassThru
             $result.State | Should -Be 'Shutdown'
         }
+    }
+
+    AfterAll {
+        Get-GitHubCodespace @newGitHubCodespaceParms | Remove-GitHubCodespace -Confirm:$false -Force
     }
 }
 
