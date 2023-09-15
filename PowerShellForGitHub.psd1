@@ -84,6 +84,7 @@
         'Get-GitHubCloneTraffic',
         'Get-GitHubCodeOfConduct',
         'Get-GitHubCodespace',
+        'Get-GitHubCodespaceMachine'
         'Get-GitHubConfiguration',
         'Get-GitHubContent',
         'Get-GitHubDeploymentEnvironment',

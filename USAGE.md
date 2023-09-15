@@ -1432,3 +1432,17 @@ $codespaceName = 'microsoft-symmetrical-chainsaw-7q4vp6v7q3pwqq'
 # Stopping a codespace (wait for Shutdown)
 Stop-GithubCodespace -OrganizationName microsoft -UserName octocat -CodespaceName $codespaceName -Wait
 ```
+----------
+
+### Codespaces machines
+
+#### Getting Codespaces machines
+```powershell
+
+# Get machine types a codespace can transition to use
+Get-GitHubCodespace | Select-Object -First 1 | Get-GitHubCodespaceMachine
+
+# Get all achine types available for a given repository based on its configuration
+Get-GitHubCodespaceMachine -Owner microsoft -RepositoryName PowerShellForGitHub
+
+```

@@ -221,6 +221,151 @@ filter Get-GitHubCodespace
     return ($result | Add-GitHubCodespaceAdditionalProperties)
 }
 
+filter Get-GitHubCodespaceMachine
+{
+    <#
+    .SYNOPSIS
+        Retrieves the machine types available for a given repository or that a codespace can transition to use.
+
+    .DESCRIPTION
+        Retrieves information about codespace machine types.
+
+        The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
+
+    .PARAMETER OwnerName
+        Owner of the Codespace.
+        If not supplied here, the DefaultOwnerName configuration property value will be used.
+
+    .PARAMETER RepositoryName
+        Name of the repository.
+        If not supplied here, the DefaultRepositoryName configuration property value will be used.
+
+    .PARAMETER Uri
+        Uri for the Codespace.
+        The OwnerName and CodespaceName will be extracted from here instead of needing to provide
+        them individually.
+
+    .PARAMETER CodespaceName
+        Name of the Codespace.
+
+    .PARAMETER AccessToken
+        If provided, this will be used as the AccessToken for authentication with the
+        REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
+
+    .INPUTS
+        GitHub.Codespace
+        GitHub.Project
+        GitHub.Repository
+
+    .OUTPUTS
+        GitHub.CodespaceMachine
+
+    .EXAMPLE
+        Get-GitHubCodespaceMachine
+
+        Gets all codespaces for the current authenticated user.
+
+    .EXAMPLE
+        Get-GitHubCodespace -Uri https://github.com/microsoft/PowerShellForGitHub
+
+        Gets information about the microsoft/PowerShellForGitHub Codespace.
+
+    .EXAMPLE
+        $repo | Get-GitHubCodespace
+
+        You can pipe in a previous Codespace to get its refreshed information.
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/machines?apiVersion=2022-11-28#list-available-machine-types-for-a-repository
+
+    .LINK
+        https://docs.github.com/en/rest/codespaces/machines?apiVersion=2022-11-28#list-machine-types-for-a-codespace
+    #>
+    [CmdletBinding(DefaultParameterSetName = 'CodespaceName')]
+    [OutputType({ $script:GitHubCodespaceTypeName })]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '', Justification = 'The Uri parameter is only referenced by Resolve-RepositoryElements which get access to it from the stack via Get-Variable -Scope 1.')]
+    param(
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            ParameterSetName = 'Elements')]
+        [string] $OwnerName,
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            ParameterSetName = 'Elements')]
+        [string] $RepositoryName,
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            ParameterSetName = 'Uri')]
+        [Alias('RepositoryUrl')]
+        [string] $Uri,
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            ParameterSetName = 'CodespaceName')]
+        [string] $CodespaceName,
+
+        [string] $AccessToken
+    )
+
+    Write-InvocationLog
+
+    $telemetryProperties = @{
+        UsageType = $PSCmdlet.ParameterSetName
+    }
+
+    $uriFragment = [String]::Empty
+    $description = [String]::Empty
+    switch ($PSCmdlet.ParameterSetName)
+    {
+        'CodespaceName'
+        {
+            $telemetryProperties['CodespaceName'] = Get-PiiSafeString -PlainText $CodespaceName
+
+            $uriFragment = "user/codespaces/$CodespaceName/machines"
+            $description = "Getting user/codespaces/$CodespaceName/machines"
+
+            break
+        }
+
+        { $_ -in ('Elements', 'Uri') }
+        {
+            $elements = Resolve-RepositoryElements
+            $OwnerName = $elements.ownerName
+            $RepositoryName = $elements.repositoryName
+
+            $telemetryProperties['OwnerName'] = Get-PiiSafeString -PlainText $OwnerName
+            $telemetryProperties['RepositoryName'] = Get-PiiSafeString -PlainText $RepositoryName
+
+            $uriFragment = "repos/$OwnerName/$RepositoryName/codespaces/machines"
+            $description = "Getting repos/$OwnerName/$RepositoryName/codespaces/machines"
+
+            break
+        }
+    }
+
+    $params = @{
+        UriFragment = $uriFragment
+        Description = $description
+        AccessToken = $AccessToken
+        TelemetryEventName = $MyInvocation.MyCommand.Name
+        TelemetryProperties = $telemetryProperties
+    }
+
+    $result = Invoke-GHRestMethodMultipleResult @params
+    if ($null -ne $result.machines)
+    {
+        $result = $result.machines
+    }
+
+    return $result
+}
+
 function New-GitHubCodespace
 {
     <#
