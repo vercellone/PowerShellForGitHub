@@ -971,7 +971,7 @@ filter Stop-GitHubCodespace
     }
 
     $params = @{
-        UriFragment = "user/codespaces/$CodespaceName/stop"
+        UriFragment = $uriFragment
         Method = 'Post'
         Description = "Stop Codespace $CodespaceName"
         AccessToken = $AccessToken
