@@ -155,7 +155,9 @@
         *   [Getting codespaces](#getting-organization-codespaces)
         *   [Removing a codespace](#removing-an-organization-codespace)
         *   [Stopping a codespace](#stopping-an-organization-codespace)
-
+    *   [Codespaces/machines](#codespaces-machines)
+        *   [Getting Codespaces machines](#getting-codespaces-machines)
+        
 ----------
 
 ## Full Module Documentation
