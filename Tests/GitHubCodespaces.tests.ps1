@@ -200,6 +200,43 @@ Describe 'GitHubCodespaces\Get-GitHubCodespace' {
     }
 }
 
+Describe 'GitHubCodespaces\Get-GitHubCodespaceMachine' {
+    BeforeAll {
+        # Suppress HTTP 202 warning for codespace creation
+        $WarningPreference = 'SilentlyContinue'
+
+        $newGitHubCodespaceParms = @{
+            OwnerName = $repo.owner.login
+            RepositoryName = $defaultRepositoryName
+        }
+        $null = New-GitHubCodespace @newGitHubCodespaceParms -Wait
+    }
+
+    Context 'When listing machine types a codespace can transition to' {
+        BeforeAll {
+            $codespaceMachine = Get-GitHubCodespace @newGitHubCodespaceParms | Select-Object -First 1 | Get-GitHubCodespaceMachine
+        }
+
+        It 'Should return an object of the correct type' {
+            $codespaceMachine | Should -BeOfType PSCustomObject
+        }
+
+        It 'Should return the correct properties' {
+            $codespaceMachine.name | Should -Not -BeNullOrEmpty
+            $codespaceMachine.display_name | Should -Not -BeNullOrEmpty
+            $codespaceMachine.operating_system | Should -Not -BeNullOrEmpty
+            $codespaceMachine.storage_in_bytes | Should -Match '^\d+$'
+            $codespaceMachine.memory_in_bytes | Should -Match '^\d+$'
+            $codespaceMachine.cpus | Should -Match '^\d+$'
+            $codespaceMachine.prebuild_availability | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    AfterAll {
+        Get-GitHubCodespace @newGitHubCodespaceParms | Remove-GitHubCodespace -Confirm:$false -Force
+    }
+}
+
 
 Describe 'GitHubCodespaces\New-GitHubCodespace' {
     Context -Name 'When creating a repository for the authenticated user' {
@@ -439,6 +476,23 @@ Describe 'GitHubCodespaces\Stop-GitHubCodespace' {
         It 'Should become Shutdown' {
             # Also asserts Wait and PassThru
             $result = $codespace | Stop-GitHubCodespace -Wait -PassThru
+            $result.State | Should -Be 'Shutdown'
+        }
+    }
+
+    Context 'When stopping a codespace for an organization user' {
+        BeforeAll {
+            $userCodespace = Get-GitHubCodespace -OrganizationName $script:organizationName -UserName $script:OwnerName | Select-Object -First 1
+        }
+
+        It 'Should not throw' {
+            # Also asserts pipeline input
+            { Stop-GitHubCodespace -OrganizationName $script:organizationName -UserName $script:OwnerName -CodespaceName $userCodespace.name } | Should -Not -Throw
+        }
+
+        It 'Should become Shutdown' {
+            # Also asserts Wait and PassThru
+            $result = Stop-GitHubCodespace -OrganizationName $script:organizationName -UserName $script:OwnerName -CodespaceName $userCodespace.name -Wait -PassThru
             $result.State | Should -Be 'Shutdown'
         }
     }
