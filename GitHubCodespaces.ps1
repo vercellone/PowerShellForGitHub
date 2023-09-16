@@ -1132,7 +1132,7 @@ filter Add-GitHubCodespaceUser
     }
 
     $params = @{
-        UriFragment = "orgs/$OrganizationName/codespaces/billing/selected_users"
+        UriFragment = "orgs/$OrganizationName/codespaces/access/selected_users"
         Body = ConvertTo-Json -InputObject $hashBody
         Method = 'Post'
         Description = 'Add users to GitHub codespace billing'
@@ -1205,7 +1205,7 @@ filter Remove-GitHubCodespaceUser
     }
 
     $params = @{
-        UriFragment = "orgs/$OrganizationName/codespaces/billing/selected_users"
+        UriFragment = "orgs/$OrganizationName/codespaces/access/selected_users"
         Body = ConvertTo-Json -InputObject $hashBody
         Method = 'Delete'
         Description = 'Remove users from GitHub codespace billing'
