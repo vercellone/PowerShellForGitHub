@@ -34,6 +34,59 @@ BeforeAll {
     $mainBranchName = $repo | Get-GitHubRepositoryBranch | Select-Object -ExpandProperty name -First 1
 }
 
+Describe 'GitHubCodespaces\Set-GitHubCodespaceVisibility' {
+    Context 'When setting the visibility of a codespace' {
+
+        It 'sets the visibility successfully too ''disabled'' ' {
+            $setVisibilityParams = @{
+                Force = $true
+                OrganizationName = $script:organizationName
+                Visibility = 'disabled'
+            }
+            Set-GitHubCodespaceVisibility @setVisibilityParams
+        }
+
+        It 'sets the visibility successfully too ''all_members'' ' {
+            $setVisibilityParams = @{
+                Force = $true
+                OrganizationName = $script:organizationName
+                Visibility = 'all_members'
+            }
+            Set-GitHubCodespaceVisibility @setVisibilityParams
+        }
+        It 'sets the visibility successfully too ''selected_members'' ' {
+            $setVisibilityParams = @{
+                Force = $true
+                OrganizationName = $script:organizationName
+                UserName = $script:ownerName
+                Visibility = 'selected_members'
+            }
+            Set-GitHubCodespaceVisibility @setVisibilityParams
+        }
+
+    }
+}
+
+Describe 'GitHubCodespaces\Remove-GitHubCodespaceUser' {
+    Context 'When revoking a user''s access to codespaces for an organization' {
+
+        It 'removes a user successfully' {
+            { Remove-GitHubCodespaceUser -OrganizationName $script:organizationName -UserName $script:ownerName } | Should -Not -Throw
+        }
+
+    }
+}
+
+Describe 'GitHubCodespaces\Add-GitHubCodespaceUser' {
+    Context 'When granting a user access to codespaces for an organization' {
+
+        It 'adds a user successfully' {
+            { Add-GitHubCodespaceUser -OrganizationName $script:organizationName -UserName $script:ownerName } | Should -Not -Throw
+        }
+
+    }
+}
+
 Describe 'GitHubCodespaces\Delete-GitHubCodespace' {
     Context 'When deleting a codespace for the authenticated user' {
         BeforeEach {
