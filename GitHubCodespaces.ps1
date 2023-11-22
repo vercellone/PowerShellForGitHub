@@ -1290,7 +1290,7 @@ filter Set-GitHubCodespaceVisibility
     }
 
     $params = @{
-        UriFragment = "orgs/$OrganizationName/codespaces/billing"
+        UriFragment = "orgs/$OrganizationName/codespaces/access"
         Body = ConvertTo-Json -InputObject $hashBody
         Method = 'Put'
         Description = 'Set Codespace Visiblity'
