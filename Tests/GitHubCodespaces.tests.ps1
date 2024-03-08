@@ -74,6 +74,11 @@ Describe 'GitHubCodespaces\Remove-GitHubCodespaceUser' {
             { Remove-GitHubCodespaceUser -OrganizationName $script:organizationName -UserName $script:ownerName } | Should -Not -Throw
         }
 
+        It 'accepts user names from pipeline' {
+            # By passing in the same user, we are also proving 304 Not Modified is handled
+            { $script:OwnerName | Remove-GitHubCodespaceUser -OrganizationName $script:organizationName } | Should -Not -Throw
+        }
+
     }
 }
 
@@ -82,6 +87,11 @@ Describe 'GitHubCodespaces\Add-GitHubCodespaceUser' {
 
         It 'adds a user successfully' {
             { Add-GitHubCodespaceUser -OrganizationName $script:organizationName -UserName $script:ownerName } | Should -Not -Throw
+        }
+
+        It 'accepts user names from pipeline' {
+            # By passing in the same user, we are also proving 304 Not Modified is handled
+            { $script:OwnerName | Add-GitHubCodespaceUser -OrganizationName $script:organizationName } | Should -Not -Throw
         }
 
     }
