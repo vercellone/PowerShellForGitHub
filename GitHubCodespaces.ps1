@@ -1100,7 +1100,7 @@ filter Add-GitHubCodespaceUser
         REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
 
     .EXAMPLE
-        Add-GitHubCodespaceUser -OrganizationName microsoft -UserName HowardWolosky
+        Add-GitHubCodespaceUser -OrganizationName microsoft -UserName octocat
 
     .OUTPUTS
         None
@@ -1187,7 +1187,7 @@ filter Remove-GitHubCodespaceUser
         REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
 
     .EXAMPLE
-        Remove-GitHubCodespaceUser -OrganizationName microsoft -UserName HowardWolosky
+        Remove-GitHubCodespaceUser -OrganizationName microsoft -UserName octocat
 
     .OUTPUTS
         None
