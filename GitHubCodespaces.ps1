@@ -1148,7 +1148,21 @@ filter Add-GitHubCodespaceUser
     {
         return
     }
-    Invoke-GHRestMethod @params
+    try
+    {
+        Invoke-GHRestMethod @params
+    }
+    catch
+    {
+        if ($_.Exception.Message -like '*(304)*') # Not Modified
+        {
+            Write-Log -Message "Codespace selected_users not modified. Requested users already included." -Level Verbose
+        }
+        else
+        {
+            throw
+        }
+    }
 }
 
 filter Remove-GitHubCodespaceUser
@@ -1221,7 +1235,21 @@ filter Remove-GitHubCodespaceUser
     {
         return
     }
-    Invoke-GHRestMethod @params
+    try
+    {
+        Invoke-GHRestMethod @params
+    }
+    catch
+    {
+        if ($_.Exception.Message -like '*(304)*') # Not Modified
+        {
+            Write-Log -Message "Codespace selected_users not modified. Requested users already excluded." -Level Verbose
+        }
+        else
+        {
+            throw
+        }
+    }
 }
 
 filter Set-GitHubCodespaceVisibility
