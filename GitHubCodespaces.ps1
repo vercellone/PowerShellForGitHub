@@ -1273,7 +1273,9 @@ filter Set-GitHubCodespaceVisibility
         Disabled means that no users can access codespaces in the organization.
 
     .PARAMETER UserName
-        The handle for the GitHub user account(s).
+        The usernames of the organization member(s) who should have access
+        to Codespaces in the organization. Required when visibility is SelectedMembers.
+        The provided list of usernames will replace any existing value.
 
     .PARAMETER AccessToken
         If provided, this will be used as the AccessToken for authentication with the
