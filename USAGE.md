@@ -1406,7 +1406,7 @@ Add-GitHubCodespaceUser -OrganizationName microsoft -UserName octocat,heptacat
 
 #### Removing users from Codespaces billing
 ```powershell
-Remove-GitHubCodespaceUser -OrganizationName microsoft -UserName HowardWolosky,GeorgeJetson
+Remove-GitHubCodespaceUser -OrganizationName microsoft -UserName octocat,heptacat
 ```
 
 #### Getting organization Codespaces
