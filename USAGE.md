@@ -1394,7 +1394,7 @@ Set-GitHubCodespaceVisibility -Visibility disabled
 # Allow all organization members to access Codespaces.
 Set-GitHubCodespaceVisibility -Visibility all_members
 
-# Limit codespace access to a selected list of organization members.
+# Limit Codespace access to a selected list of organization members.
 # Care should be taken with this option, as the users specified will overwrite any active list.
 Set-GitHubCodespaceVisibility -Visibility selected_members -UserName FredFlintstone,BarneyRubble
 ```
