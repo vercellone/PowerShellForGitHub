@@ -363,11 +363,7 @@ filter Get-GitHubCodespaceMachine
     {
         $result = $result.machines
     }
-    foreach ($machine in $result)
-    {
-        $machine.PSObject.TypeNames.Insert(0, $Script:GitHubCodespaceMachineTypeName)
-        Write-Output $machine
-    }
+    return ($result | Add-GitHubCodespaceAdditionalProperties -TypeName $Script:GitHubCodespaceMachineTypeName)
 }
 
 function New-GitHubCodespace
@@ -1426,7 +1422,7 @@ filter Add-GitHubCodespaceAdditionalProperties
 
         if (-not (Get-GitHubConfiguration -Name DisablePipelineSupport))
         {
-            if ($item.name)
+            if ($item.name -and  $TypeName -eq $script:GitHubCodespaceTypeName)
             {
                 Add-Member -InputObject $item -Name 'CodespaceUrl' -Value "user/codespaces/$($item.name)" -MemberType NoteProperty -Force
                 Add-Member -InputObject $item -Name 'CodespaceName' -Value $item.name -MemberType NoteProperty -Force
