@@ -149,7 +149,7 @@
         *   [Starting a codespace](#starting-a-codespace)
         *   [Stopping a codespace](#stopping-a-codespace)
     *   [Codespaces/organizations](#codespaces-organizations)
-        *   [Manage access control for codespaces](#manage-organization-codespaces-billing)
+        *   [Manage access control for Codespaces](#manage-organization-codespaces-billing)
         *   [Add users to Codespaces billing](#adding-users-to-codespaces-billing)
         *   [Removes users from Codespaces billing](#removing-users-from-codespaces-billing)
         *   [Getting codespaces](#getting-organization-codespaces)
