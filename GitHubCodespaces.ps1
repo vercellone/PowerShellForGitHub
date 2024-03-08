@@ -29,7 +29,7 @@ filter Get-GitHubCodespace
 
     .PARAMETER Uri
         Uri for the Codespace.
-        The OwnerName and CodespaceName will be extracted from here instead of needing to provide
+        The OwnerName and RepositoryName will be extracted from here instead of needing to provide
         them individually.
 
     .PARAMETER OrganizationName
@@ -243,7 +243,7 @@ filter Get-GitHubCodespaceMachine
 
     .PARAMETER Uri
         Uri for the Codespace.
-        The OwnerName and CodespaceName will be extracted from here instead of needing to provide
+        The OwnerName and RepositoryName will be extracted from here instead of needing to provide
         them individually.
 
     .PARAMETER CodespaceName
@@ -391,7 +391,7 @@ function New-GitHubCodespace
 
     .PARAMETER Uri
         Uri for the Codespace.
-        The OwnerName and CodespaceName will be extracted from here instead of needing to provide
+        The OwnerName and RepositoryName will be extracted from here instead of needing to provide
         them individually.
 
     .PARAMETER PullRequest
