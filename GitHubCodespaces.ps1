@@ -3,6 +3,7 @@
 
 @{
     GitHubCodespaceTypeName = 'GitHub.Codespace'
+    GitHubCodespaceMachineTypeName = 'GitHub.CodespaceMachine'
 }.GetEnumerator() | ForEach-Object {
     Set-Variable -Scope Script -Option ReadOnly -Name $_.Key -Value $_.Value
 }
@@ -282,7 +283,7 @@ filter Get-GitHubCodespaceMachine
         https://docs.github.com/en/rest/codespaces/machines?apiVersion=2022-11-28#list-machine-types-for-a-codespace
     #>
     [CmdletBinding(DefaultParameterSetName = 'CodespaceName')]
-    [OutputType({ $script:GitHubCodespaceTypeName })]
+    [OutputType({ $Script:GitHubCodespaceMachineTypeName })]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '', Justification = 'The Uri parameter is only referenced by Resolve-RepositoryElements which get access to it from the stack via Get-Variable -Scope 1.')]
     param(
         [Parameter(
@@ -362,8 +363,11 @@ filter Get-GitHubCodespaceMachine
     {
         $result = $result.machines
     }
-
-    return $result
+    foreach ($machine in $result)
+    {
+        $machine.PSObject.TypeNames.Insert(0, $Script:GitHubCodespaceMachineTypeName)
+        Write-Output $machine
+    }
 }
 
 function New-GitHubCodespace
