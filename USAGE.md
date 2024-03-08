@@ -1401,7 +1401,7 @@ Set-GitHubCodespaceVisibility -Visibility selected_members -UserName octocat,hep
 
 #### Adding users to Codespaces billing
 ```powershell
-Add-GitHubCodespaceUser -OrganizationName microsoft -UserName HowardWolosky,GeorgeJetson
+Add-GitHubCodespaceUser -OrganizationName microsoft -UserName octocat,heptacat
 ```
 
 #### Removing users from Codespaces billing
