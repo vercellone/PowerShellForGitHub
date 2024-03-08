@@ -1282,7 +1282,7 @@ filter Set-GitHubCodespaceVisibility
         REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
 
     .EXAMPLE
-        Set-GitHubCodespaceVisibility -Visibility selected_members -User HowardWolosky -Force
+        Set-GitHubCodespaceVisibility -Visibility selected_members -User octocat -Force
 
     .NOTES
         You must authenticate using an access token with the admin:org scope to use this endpoint.
