@@ -1102,6 +1102,9 @@ function Add-GitHubCodespaceUser
     .EXAMPLE
         Add-GitHubCodespaceUser -OrganizationName microsoft -UserName octocat
 
+    .INPUTS
+        GitHub.User
+
     .OUTPUTS
         None
 
@@ -1201,6 +1204,9 @@ function Remove-GitHubCodespaceUser
 
     .EXAMPLE
         Remove-GitHubCodespaceUser -OrganizationName microsoft -UserName octocat
+
+    .INPUTS
+        GitHub.User
 
     .OUTPUTS
         None
@@ -1310,6 +1316,9 @@ filter Set-GitHubCodespaceVisibility
 
     .EXAMPLE
         Set-GitHubCodespaceVisibility -Visibility SelectedMembers -User octocat -Force
+
+    .INPUTS
+        GitHub.User
 
     .NOTES
         You must authenticate using an access token with the admin:org scope to use this endpoint.
