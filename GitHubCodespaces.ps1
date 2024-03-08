@@ -1260,6 +1260,8 @@ filter Set-GitHubCodespaceVisibility
 
     .DESCRIPTION
         Manage access control for organization codespaces.
+        Sets which users can access codespaces in an organization. This is synonymous with granting
+        or revoking Codespaces access permissions for users according to the visibility.
 
         The Git repo for this module can be found here: http://aka.ms/PowerShellForGitHub
 
