@@ -1396,7 +1396,7 @@ Set-GitHubCodespaceVisibility -Visibility all_members
 
 # Limit Codespace access to a selected list of organization members.
 # Care should be taken with this option, as the users specified will overwrite any active list.
-Set-GitHubCodespaceVisibility -Visibility selected_members -UserName FredFlintstone,BarneyRubble
+Set-GitHubCodespaceVisibility -Visibility selected_members -UserName octocat,heptacat
 ```
 
 #### Adding users to Codespaces billing
