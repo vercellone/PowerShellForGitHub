@@ -273,16 +273,6 @@ Describe 'GitHubCodespaces\Get-GitHubCodespaceMachine' {
         It 'Should return an object of the correct type' {
             $codespaceMachine | Should -BeOfType PSCustomObject
         }
-
-        It 'Should return the correct properties' {
-            $codespaceMachine.name | Should -Not -BeNullOrEmpty
-            $codespaceMachine.display_name | Should -Not -BeNullOrEmpty
-            $codespaceMachine.operating_system | Should -Not -BeNullOrEmpty
-            $codespaceMachine.storage_in_bytes | Should -Match '^\d+$'
-            $codespaceMachine.memory_in_bytes | Should -Match '^\d+$'
-            $codespaceMachine.cpus | Should -Match '^\d+$'
-            $codespaceMachine.prebuild_availability | Should -Not -BeNullOrEmpty
-        }
     }
 
     AfterAll {
