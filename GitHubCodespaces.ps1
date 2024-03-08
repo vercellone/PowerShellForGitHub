@@ -1312,7 +1312,7 @@ filter Set-GitHubCodespaceVisibility
 
     Write-InvocationLog
 
-    if ($UserName.Count -gt 0 -and $Visibility -ne 'selected_members')
+    if (($UserName.Count -gt 0) -and ($Visibility -ne 'selected_members'))
     {
         $message = 'You can only specify the UserName parameter when the Visibility is set to ''selected_members'''
         Write-Log -Message $message -Level Error
