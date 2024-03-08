@@ -1391,7 +1391,7 @@ Stop-GithubCodespace -CodespaceName $codespaceName -Wait
 # Disable Codespace access entirely in the organization.
 Set-GitHubCodespaceVisibility -Visibility disabled
 
-# Allow all organization members to access codespaces.
+# Allow all organization members to access Codespaces.
 Set-GitHubCodespaceVisibility -Visibility all_members
 
 # Limit codespace access to a selected list of organization members.
