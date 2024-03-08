@@ -1388,7 +1388,7 @@ Stop-GithubCodespace -CodespaceName $codespaceName -Wait
 #### Manage organization Codespaces billing
 ```powershell
 
-# Disable codespace access entirely in the organization.
+# Disable Codespace access entirely in the organization.
 Set-GitHubCodespaceVisibility -Visibility disabled
 
 # Allow all organization members to access codespaces.
