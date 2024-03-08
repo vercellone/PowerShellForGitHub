@@ -1103,7 +1103,7 @@ filter Add-GitHubCodespaceUser
         Add-GitHubCodespaceUser -OrganizationName microsoft -UserName HowardWolosky
 
     .OUTPUTS
-        [PSObject[]]
+        None
 
     .NOTES
         To use this endpoint, the billing settings for the organization must be set to selected_members.
@@ -1190,7 +1190,7 @@ filter Remove-GitHubCodespaceUser
         Remove-GitHubCodespaceUser -OrganizationName microsoft -UserName HowardWolosky
 
     .OUTPUTS
-        [PSObject[]]
+        None
 
     .NOTES
         To use this endpoint, the billing settings for the organization must be set to selected_members.
