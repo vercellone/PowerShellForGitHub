@@ -68,6 +68,16 @@ Describe 'GitHubCodespaces\Set-GitHubCodespaceVisibility' {
             Set-GitHubCodespaceVisibility @setVisibilityParams
         }
 
+        It 'accepts users via the pipeline for visibility ''SelectedMembers'' ' {
+            $setVisibilityParams = @{
+                Force = $true
+                OrganizationName = $script:organizationName
+                Visibility = 'SelectedMembers'
+            }
+            # At this time, the API does not offer any way to retrieve the current Visibility for a Codespace. The best we can do is validate that this function call doesn't fail.
+            $script:ownerName | Set-GitHubCodespaceVisibility @setVisibilityParams
+        }
+
     }
 }
 
