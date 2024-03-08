@@ -1290,7 +1290,8 @@ filter Set-GitHubCodespaceVisibility
     .LINK
         https://docs.github.com/en/rest/codespaces/organizations?apiVersion=2022-11-28#manage-access-control-for-organization-codespaces
     #>
-    [CmdletBinding(SupportsShouldProcess,
+    [CmdletBinding(
+        SupportsShouldProcess,
         ConfirmImpact = 'High')]
     param (
         [Parameter(Mandatory)]
