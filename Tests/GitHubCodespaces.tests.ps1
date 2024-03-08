@@ -54,7 +54,8 @@ Describe 'GitHubCodespaces\Set-GitHubCodespaceVisibility' {
             }
             Set-GitHubCodespaceVisibility @setVisibilityParams
         }
-        It 'sets the visibility successfully too ''selected_members'' ' {
+
+        It 'sets the visibility successfully to ''selected_members'' ' {
             $setVisibilityParams = @{
                 Force = $true
                 OrganizationName = $script:organizationName
