@@ -1106,8 +1106,8 @@ filter Add-GitHubCodespaceUser
         None
 
     .NOTES
-        To use this endpoint, the billing settings for the organization must be set to selected_members.
-        For information on how to change this setting please see [these docs](https://docs.github.com/rest/codespaces/organizations#manage-access-control-for-organization-codespaces)
+        To use this endpoint, the billing settings for the organization must be set to selected_members,
+        which can done using Set-GitHubCodespaceVisibility -Visibility selected_members.
 
     .NOTES
         You must authenticate using an access token with the admin:org scope to use this endpoint.
@@ -1193,8 +1193,8 @@ filter Remove-GitHubCodespaceUser
         None
 
     .NOTES
-        To use this endpoint, the billing settings for the organization must be set to selected_members.
-        For information on how to change this setting please see [these docs](https://docs.github.com/rest/codespaces/organizations#manage-access-control-for-organization-codespaces)
+        To use this endpoint, the billing settings for the organization must be set to selected_members,
+        which can done using Set-GitHubCodespaceVisibility -Visibility selected_members.
 
     .NOTES
         You must authenticate using an access token with the admin:org scope to use this endpoint.
