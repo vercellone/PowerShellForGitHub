@@ -1106,8 +1106,8 @@ function Add-GitHubCodespaceUser
         None
 
     .NOTES
-        To use this endpoint, the billing settings for the organization must be set to selected_members,
-        which can done using Set-GitHubCodespaceVisibility -Visibility selected_members.
+        To use this endpoint, the billing settings for the organization must be set to SelectedMembers,
+        which can done using Set-GitHubCodespaceVisibility -Visibility SelectedMembers.
 
     .NOTES
         You must authenticate using an access token with the admin:org scope to use this endpoint.
@@ -1206,8 +1206,8 @@ function Remove-GitHubCodespaceUser
         None
 
     .NOTES
-        To use this endpoint, the billing settings for the organization must be set to selected_members,
-        which can done using Set-GitHubCodespaceVisibility -Visibility selected_members.
+        To use this endpoint, the billing settings for the organization must be set to SelectedMembers,
+        which can done using Set-GitHubCodespaceVisibility -Visibility SelectedMembers.
 
     .NOTES
         You must authenticate using an access token with the admin:org scope to use this endpoint.
@@ -1309,7 +1309,7 @@ filter Set-GitHubCodespaceVisibility
         REST Api.  Otherwise, will attempt to use the configured value or will run unauthenticated.
 
     .EXAMPLE
-        Set-GitHubCodespaceVisibility -Visibility selected_members -User octocat -Force
+        Set-GitHubCodespaceVisibility -Visibility SelectedMembers -User octocat -Force
 
     .NOTES
         You must authenticate using an access token with the admin:org scope to use this endpoint.
@@ -1324,7 +1324,7 @@ filter Set-GitHubCodespaceVisibility
         [Parameter(Mandatory)]
         [string] $OrganizationName,
 
-        [ValidateSet('disabled', 'selected_members', 'all_members', 'all_members_and_outside_collaborators')]
+        [ValidateSet('Disabled', 'SelectedMembers', 'AllMembers', 'AllMembersAndOutsideCollaborators')]
         [string] $Visibility,
 
         [Parameter(
@@ -1339,16 +1339,22 @@ filter Set-GitHubCodespaceVisibility
 
     Write-InvocationLog
 
-    if (($UserName.Count -gt 0) -and ($Visibility -ne 'selected_members'))
+    if (($UserName.Count -gt 0) -and ($Visibility -ne 'SelectedMembers'))
     {
-        $message = 'You can only specify the UserName parameter when the Visibility is set to ''selected_members'''
+        $message = 'You can only specify the UserName parameter when the Visibility is set to ''SelectedMembers'''
         Write-Log -Message $message -Level Error
         throw $message
     }
 
-    $hashBody = @{ visibility = $Visibility }
+    $visibilityMap = @{
+        Disabled = 'disabled'
+        SelectedMembers = 'selected_members'
+        AllMembers = 'all_members'
+        AllMembersAndOutsideCollaborators = 'all_members_and_outside_collaborators'
+    }
+    $hashBody = @{ visibility = $visibilityMap[$Visibility] }
 
-    if ($Visibility -eq 'selected_members')
+    if ($Visibility -eq 'SelectedMembers')
     {
         $hashBody.Add('selected_usernames', @($UserName))
     }

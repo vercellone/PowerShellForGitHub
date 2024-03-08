@@ -37,32 +37,32 @@ BeforeAll {
 Describe 'GitHubCodespaces\Set-GitHubCodespaceVisibility' {
     Context 'When setting the visibility of a codespace' {
 
-        It 'sets the visibility successfully too ''disabled'' ' {
+        It 'sets the visibility successfully too ''Disabled'' ' {
             $setVisibilityParams = @{
                 Force = $true
                 OrganizationName = $script:organizationName
-                Visibility = 'disabled'
+                Visibility = 'Disabled'
             }
             # At this time, the API does not offer any way to retrieve the current Visibility for a Codespace. The best we can do is validate that this function call doesn't fail.
             Set-GitHubCodespaceVisibility @setVisibilityParams
         }
 
-        It 'sets the visibility successfully too ''all_members'' ' {
+        It 'sets the visibility successfully too ''AllMembers'' ' {
             $setVisibilityParams = @{
                 Force = $true
                 OrganizationName = $script:organizationName
-                Visibility = 'all_members'
+                Visibility = 'AllMembers'
             }
             # At this time, the API does not offer any way to retrieve the current Visibility for a Codespace. The best we can do is validate that this function call doesn't fail.
             Set-GitHubCodespaceVisibility @setVisibilityParams
         }
 
-        It 'sets the visibility successfully to ''selected_members'' ' {
+        It 'sets the visibility successfully to ''SelectedMembers'' ' {
             $setVisibilityParams = @{
                 Force = $true
                 OrganizationName = $script:organizationName
                 UserName = $script:ownerName
-                Visibility = 'selected_members'
+                Visibility = 'SelectedMembers'
             }
             # At this time, the API does not offer any way to retrieve the current Visibility for a Codespace. The best we can do is validate that this function call doesn't fail.
             Set-GitHubCodespaceVisibility @setVisibilityParams

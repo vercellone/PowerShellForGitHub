@@ -1389,14 +1389,14 @@ Stop-GithubCodespace -CodespaceName $codespaceName -Wait
 ```powershell
 
 # Disable Codespace access entirely in the organization.
-Set-GitHubCodespaceVisibility -Visibility disabled
+Set-GitHubCodespaceVisibility -Visibility Disabled
 
 # Allow all organization members to access Codespaces.
-Set-GitHubCodespaceVisibility -Visibility all_members
+Set-GitHubCodespaceVisibility -Visibility AllMembers
 
 # Limit Codespace access to a selected list of organization members.
 # Care should be taken with this option, as the users specified will overwrite any active list.
-Set-GitHubCodespaceVisibility -Visibility selected_members -UserName octocat,heptacat
+Set-GitHubCodespaceVisibility -Visibility SelectedMembers -UserName octocat,heptacat
 ```
 
 #### Adding users to Codespaces billing
