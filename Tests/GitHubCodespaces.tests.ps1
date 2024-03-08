@@ -43,6 +43,7 @@ Describe 'GitHubCodespaces\Set-GitHubCodespaceVisibility' {
                 OrganizationName = $script:organizationName
                 Visibility = 'disabled'
             }
+            # At this time, the API does not offer any way to retrieve the current Visibility for a Codespace. The best we can do is validate that this function call doesn't fail.
             Set-GitHubCodespaceVisibility @setVisibilityParams
         }
 
@@ -52,6 +53,7 @@ Describe 'GitHubCodespaces\Set-GitHubCodespaceVisibility' {
                 OrganizationName = $script:organizationName
                 Visibility = 'all_members'
             }
+            # At this time, the API does not offer any way to retrieve the current Visibility for a Codespace. The best we can do is validate that this function call doesn't fail.
             Set-GitHubCodespaceVisibility @setVisibilityParams
         }
 
@@ -62,6 +64,7 @@ Describe 'GitHubCodespaces\Set-GitHubCodespaceVisibility' {
                 UserName = $script:ownerName
                 Visibility = 'selected_members'
             }
+            # At this time, the API does not offer any way to retrieve the current Visibility for a Codespace. The best we can do is validate that this function call doesn't fail.
             Set-GitHubCodespaceVisibility @setVisibilityParams
         }
 
