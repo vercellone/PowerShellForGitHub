@@ -1444,7 +1444,7 @@ Stop-GithubCodespace -OrganizationName microsoft -UserName octocat -CodespaceNam
 # Get machine types a codespace can transition to use
 Get-GitHubCodespace | Select-Object -First 1 | Get-GitHubCodespaceMachine
 
-# Get all achine types available for a given repository based on its configuration
+# Get all machine types available for a given repository based on its configuration
 Get-GitHubCodespaceMachine -Owner microsoft -RepositoryName PowerShellForGitHub
 
 ```
