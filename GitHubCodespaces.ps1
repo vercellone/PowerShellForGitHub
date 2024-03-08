@@ -1203,6 +1203,7 @@ filter Remove-GitHubCodespaceUser
         https://docs.github.com/en/rest/codespaces/organizations?apiVersion=2022-11-28#removes-users-from-codespaces-billing-for-an-organization
     #>
     [CmdletBinding(SupportsShouldProcess)]
+    [Alias('Delete-GitHubCodespaceUser')]
     param (
         [Parameter(Mandatory)]
         [string] $OrganizationName,

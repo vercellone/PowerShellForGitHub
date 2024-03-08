@@ -230,6 +230,7 @@
         'Add-GitHubGistFile',
         'Delete-GitHubAsset',
         'Delete-GitHubBranch',
+        'Delete-GitHubCodespaceUser'
         'Delete-GitHubComment',
         'Delete-GitHubDeploymentEnvironment',
         'Delete-GitHubGist',
