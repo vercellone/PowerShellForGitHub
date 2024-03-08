@@ -152,9 +152,9 @@
         *   [Manage access control for Codespaces](#manage-organization-codespaces-billing)
         *   [Add users to Codespaces billing](#adding-users-to-codespaces-billing)
         *   [Removes users from Codespaces billing](#removing-users-from-codespaces-billing)
-        *   [Getting codespaces](#getting-organization-codespaces)
-        *   [Removing a codespace](#removing-an-organization-codespace)
-        *   [Stopping a codespace](#stopping-an-organization-codespace)
+        *   [Getting Codespaces](#getting-organization-codespaces)
+        *   [Removing a Codespace](#removing-an-organization-codespace)
+        *   [Stopping a Codespace](#stopping-an-organization-codespace)
     *   [Codespaces/machines](#codespaces-machines)
         *   [Getting Codespaces machines](#getting-codespaces-machines)
         
@@ -1431,7 +1431,7 @@ Remove-GitHubCodespace -OrganizationName microsoft -UserName octocat -CodespaceN
 ```powershell
 $codespaceName = 'microsoft-symmetrical-chainsaw-7q4vp6v7q3pwqq'
 
-# Stopping a codespace (wait for Shutdown)
+# Stopping a Codespace (wait for Shutdown)
 Stop-GithubCodespace -OrganizationName microsoft -UserName octocat -CodespaceName $codespaceName -Wait
 ```
 ----------
@@ -1441,7 +1441,7 @@ Stop-GithubCodespace -OrganizationName microsoft -UserName octocat -CodespaceNam
 #### Getting Codespaces machines
 ```powershell
 
-# Get machine types a codespace can transition to use
+# Get machine types a Codespace can transition to use
 Get-GitHubCodespace | Select-Object -First 1 | Get-GitHubCodespaceMachine
 
 # Get all machine types available for a given repository based on its configuration

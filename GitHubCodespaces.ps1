@@ -1139,7 +1139,7 @@ filter Add-GitHubCodespaceUser
         UriFragment = "orgs/$OrganizationName/codespaces/access/selected_users"
         Body = ConvertTo-Json -InputObject $hashBody
         Method = 'Post'
-        Description = 'Add users to GitHub codespace billing'
+        Description = 'Add users to GitHub Codespace billing'
         AccessToken = $AccessToken
         TelemetryEventName = $MyInvocation.MyCommand.Name
     }
