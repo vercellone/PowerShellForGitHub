@@ -1078,7 +1078,7 @@ function Wait-GitHubCodespaceAction
     }
 }
 
-filter Add-GitHubCodespaceUser
+function Add-GitHubCodespaceUser
 {
     <#
     .SYNOPSIS
@@ -1129,43 +1129,56 @@ filter Add-GitHubCodespaceUser
         [string] $AccessToken
     )
 
-    Write-InvocationLog
-
-    $hashBody = @{
-        selected_usernames = @($UserName)
+    begin {
+        $userNames = @()
     }
 
-    $params = @{
-        UriFragment = "orgs/$OrganizationName/codespaces/access/selected_users"
-        Body = ConvertTo-Json -InputObject $hashBody
-        Method = 'Post'
-        Description = 'Add users to GitHub Codespace billing'
-        AccessToken = $AccessToken
-        TelemetryEventName = $MyInvocation.MyCommand.Name
-    }
-
-    if (-not $PSCmdlet.ShouldProcess(($UserName -join ','), 'Add Codespace Users'))
-    {
-        return
-    }
-    try
-    {
-        $null = Invoke-GHRestMethod @params
-    }
-    catch
-    {
-        if ($_.Exception.Message -like '*(304)*') # Not Modified
+    process {
+        foreach ($name in $UserName)
         {
-            Write-Log -Message "Codespace selected_users not modified. Requested users already included." -Level Verbose
+            $userNames += $name
         }
-        else
+    }
+
+    end {
+        Write-InvocationLog
+
+        $hashBody = @{
+            selected_usernames = @($userNames)
+        }
+
+        $params = @{
+            UriFragment = "orgs/$OrganizationName/codespaces/access/selected_users"
+            Body = ConvertTo-Json -InputObject $hashBody
+            Method = 'Post'
+            Description = 'Add users to GitHub Codespace billing'
+            AccessToken = $AccessToken
+            TelemetryEventName = $MyInvocation.MyCommand.Name
+        }
+
+        if (-not $PSCmdlet.ShouldProcess(($userNames -join ','), 'Add Codespace Users'))
         {
-            throw
+            return
+        }
+        try
+        {
+            $null = Invoke-GHRestMethod @params
+        }
+        catch
+        {
+            if ($_.Exception.Message -like '*(304)*') # Not Modified
+            {
+                Write-Log -Message "Codespace selected_users not modified. Requested users already included." -Level Verbose
+            }
+            else
+            {
+                throw
+            }
         }
     }
 }
 
-filter Remove-GitHubCodespaceUser
+function Remove-GitHubCodespaceUser
 {
     <#
     .SYNOPSIS
@@ -1217,38 +1230,51 @@ filter Remove-GitHubCodespaceUser
         [string] $AccessToken
     )
 
-    Write-InvocationLog
-
-    $hashBody = @{
-        selected_usernames = @($UserName)
+    begin {
+        $userNames = @()
     }
 
-    $params = @{
-        UriFragment = "orgs/$OrganizationName/codespaces/access/selected_users"
-        Body = ConvertTo-Json -InputObject $hashBody
-        Method = 'Delete'
-        Description = 'Remove users from GitHub codespace billing'
-        AccessToken = $AccessToken
-        TelemetryEventName = $MyInvocation.MyCommand.Name
-    }
-
-    if (-not $PSCmdlet.ShouldProcess(($UserName -join ','), 'Remove Codespace Users'))
-    {
-        return
-    }
-    try
-    {
-        $null = Invoke-GHRestMethod @params
-    }
-    catch
-    {
-        if ($_.Exception.Message -like '*(304)*') # Not Modified
+    process {
+        foreach ($name in $UserName)
         {
-            Write-Log -Message "Codespace selected_users not modified. Requested users already excluded." -Level Verbose
+            $userNames += $name
         }
-        else
+    }
+
+    end {
+        Write-InvocationLog
+
+        $hashBody = @{
+            selected_usernames = $userNames
+        }
+
+        $params = @{
+            UriFragment = "orgs/$OrganizationName/codespaces/access/selected_users"
+            Body = ConvertTo-Json -InputObject $hashBody
+            Method = 'Delete'
+            Description = 'Remove users from GitHub codespace billing'
+            AccessToken = $AccessToken
+            TelemetryEventName = $MyInvocation.MyCommand.Name
+        }
+
+        if (-not $PSCmdlet.ShouldProcess(($userNames -join ','), 'Remove Codespace Users'))
         {
-            throw
+            return
+        }
+        try
+        {
+            $null = Invoke-GHRestMethod @params
+        }
+        catch
+        {
+            if ($_.Exception.Message -like '*(304)*') # Not Modified
+            {
+                Write-Log -Message "Codespace selected_users not modified. Requested users already excluded." -Level Verbose
+            }
+            else
+            {
+                throw
+            }
         }
     }
 }
