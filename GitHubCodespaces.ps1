@@ -1150,7 +1150,7 @@ filter Add-GitHubCodespaceUser
     }
     try
     {
-        Invoke-GHRestMethod @params
+        $null = Invoke-GHRestMethod @params
     }
     catch
     {
@@ -1237,7 +1237,7 @@ filter Remove-GitHubCodespaceUser
     }
     try
     {
-        Invoke-GHRestMethod @params
+        $null = Invoke-GHRestMethod @params
     }
     catch
     {
