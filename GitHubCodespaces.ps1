@@ -262,19 +262,26 @@ filter Get-GitHubCodespaceMachine
         GitHub.CodespaceMachine
 
     .EXAMPLE
-        Get-GitHubCodespaceMachine
+        Get-GitHubCodespaceMachine -OwnerName microsoft -RepositoryName PowerShellForGitHub
 
-        Gets all codespaces for the current authenticated user.
+        Gets all codespace machines for the microsoft/PowerShellForGitHub repository.
+
+        name              display_name                        operating_system storage_in_bytes memory_in_bytes cpus prebuild_availability
+        ----              ------------                        ---------------- ---------------- --------------- ---- ---------------------
+        basicLinux32gb    2 cores, 8 GB RAM, 32 GB storage    linux            34359738368      8589934592      2
+        standardLinux32gb 4 cores, 16 GB RAM, 32 GB storage   linux            34359738368      17179869184     4
+        premiumLinux      8 cores, 32 GB RAM, 64 GB storage   linux            68719476736      34359738368     8
+        largePremiumLinux 16 cores, 64 GB RAM, 128 GB storage linux            137438953472     68719476736     16
 
     .EXAMPLE
-        Get-GitHubCodespace -Uri https://github.com/microsoft/PowerShellForGitHub
+        Get-GitHubCodespaceMachine -CodespaceName laughing-chainsaw-8v6qq79wvg6f7x7x
 
-        Gets information about the microsoft/PowerShellForGitHub Codespace.
+        Gets all codespace machines available for use by an existing codespace.
 
-    .EXAMPLE
-        $repo | Get-GitHubCodespace
-
-        You can pipe in a previous Codespace to get its refreshed information.
+        name              display_name                      operating_system storage_in_bytes memory_in_bytes cpus prebuild_availability
+        ----              ------------                      ---------------- ---------------- --------------- ---- ---------------------
+        basicLinux32gb    2 cores, 8 GB RAM, 32 GB storage  linux            34359738368      8589934592      2    ready
+        standardLinux32gb 4 cores, 16 GB RAM, 32 GB storage linux            34359738368      17179869184     4    ready
 
     .LINK
         https://docs.github.com/en/rest/codespaces/machines?apiVersion=2022-11-28#list-available-machine-types-for-a-repository
@@ -454,7 +461,7 @@ function New-GitHubCodespace
         Creates a new codespace for the current authenticated user in the specified repository from a pull request.
 
     .EXAMPLE
-        New-GitHubCodespace -OwnerName marykay -RepositoryName one
+        New-GitHubCodespace -OwnerName microsoft -RepositoryName PowerShellForGitHub
 
         Creates a codespace owned by the authenticated user in the specified repository.
 
