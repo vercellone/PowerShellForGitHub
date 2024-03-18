@@ -295,7 +295,7 @@ Describe 'GitHubCodespaces\Get-GitHubCodespaceMachine' {
         }
 
         It 'Should return an object of the correct type' {
-            $codespaceMachine | Should -BeOfType PSCustomObject
+            $codespaceMachine.PSObject.TypeNames[0] | Should -Be 'GitHub.CodespaceMachine'
         }
     }
 
@@ -316,7 +316,7 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
             }
 
             It 'Should return an object of the correct type' {
-                $codespace | Should -BeOfType PSCustomObject
+                $codespace.PSObject.TypeNames[0] | Should -Be 'GitHub.Codespace'
             }
 
             It 'Should return the correct properties' {
@@ -355,7 +355,7 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
             }
 
             It 'Should return an object of the correct type' {
-                $codespace | Should -BeOfType PSCustomObject
+                $codespace.PSObject.TypeNames[0] | Should -Be 'GitHub.Codespace'
             }
 
             It 'Should return the correct properties' {
@@ -395,7 +395,7 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
             }
 
             It 'Should return an object of the correct type' {
-                $codespace | Should -BeOfType PSCustomObject
+                $codespace.PSObject.TypeNames[0] | Should -Be 'GitHub.Codespace'
             }
 
             It 'Should return the correct properties' {
@@ -431,7 +431,7 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
             }
 
             It 'Should return an object of the correct type' {
-                $codespace | Should -BeOfType PSCustomObject
+                $codespace.PSObject.TypeNames[0] | Should -Be 'GitHub.Codespace'
             }
 
             It 'Should return the correct properties' {
@@ -464,7 +464,7 @@ Describe 'GitHubCodespaces\New-GitHubCodespace' {
             }
 
             It 'Should return an object of the correct type' {
-                $codespace | Should -BeOfType PSCustomObject
+                $codespace.PSObject.TypeNames[0] | Should -Be 'GitHub.Codespace'
             }
 
             It 'Should return the correct properties' {
