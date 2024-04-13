@@ -1396,7 +1396,7 @@ filter Set-GitHubCodespaceVisibility
 
     if ($PSCmdLet.ShouldProcess($Visibility, 'Set Codespace Visibility'))
     {
-        Invoke-GHRestMethod @params
+        $null = Invoke-GHRestMethod @params
     }
 }
 
