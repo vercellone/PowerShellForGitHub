@@ -370,6 +370,7 @@ filter Get-GitHubCodespaceMachine
     {
         $result = $result.machines
     }
+
     return ($result | Add-GitHubCodespaceAdditionalProperties -TypeName $Script:GitHubCodespaceMachineTypeName)
 }
 
@@ -940,7 +941,7 @@ filter Stop-GitHubCodespace
 
         [Parameter(
             Mandatory,
-	        ParameterSetName = 'Organization')]
+            ParameterSetName = 'Organization')]
         [string] $UserName,
 
         [Parameter(
@@ -1135,18 +1136,21 @@ function Add-GitHubCodespaceUser
         [string] $AccessToken
     )
 
-    begin {
+    begin
+    {
         $userNames = @()
     }
 
-    process {
+    process
+    {
         foreach ($name in $UserName)
         {
             $userNames += $name
         }
     }
 
-    end {
+    end
+    {
         Write-InvocationLog
 
         $hashBody = @{
@@ -1166,6 +1170,7 @@ function Add-GitHubCodespaceUser
         {
             return
         }
+
         try
         {
             $null = Invoke-GHRestMethod @params
@@ -1239,18 +1244,21 @@ function Remove-GitHubCodespaceUser
         [string] $AccessToken
     )
 
-    begin {
+    begin
+    {
         $userNames = @()
     }
 
-    process {
+    process
+    {
         foreach ($name in $UserName)
         {
             $userNames += $name
         }
     }
 
-    end {
+    end
+    {
         Write-InvocationLog
 
         $hashBody = @{
@@ -1270,6 +1278,7 @@ function Remove-GitHubCodespaceUser
         {
             return
         }
+
         try
         {
             $null = Invoke-GHRestMethod @params
@@ -1429,7 +1438,7 @@ filter Add-GitHubCodespaceAdditionalProperties
 
         if (-not (Get-GitHubConfiguration -Name DisablePipelineSupport))
         {
-            if ($item.name -and  $TypeName -eq $script:GitHubCodespaceTypeName)
+            if ($item.name -and ($TypeName -eq $script:GitHubCodespaceTypeName))
             {
                 Add-Member -InputObject $item -Name 'CodespaceUrl' -Value "user/codespaces/$($item.name)" -MemberType NoteProperty -Force
                 Add-Member -InputObject $item -Name 'CodespaceName' -Value $item.name -MemberType NoteProperty -Force
