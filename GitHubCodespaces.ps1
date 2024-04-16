@@ -135,9 +135,8 @@ filter Get-GitHubCodespace
         [String] $UserName,
 
         [Parameter(
-            Mandatory,
             ValueFromPipelineByPropertyName,
-            ParameterSetName = 'CodespaceName')]
+            ParameterSetName = 'AuthenticatedUser')]
         [string] $CodespaceName,
 
         [string] $AccessToken
@@ -155,18 +154,20 @@ filter Get-GitHubCodespace
     {
         'AuthenticatedUser'
         {
-            $uriFragment = 'user/codespaces'
-            $description = 'Getting codespaces for current authenticated user'
+            if ([string]::IsNullOrWhiteSpace($CodespaceName))
+            {
+                # list-codespaces-for-the-authenticated-user
+                $uriFragment = 'user/codespaces'
+                $description = 'Getting codespaces for current authenticated user'
+            }
+            else
+            {
+                # get-a-codespace-for-the-authenticated-user
+                $telemetryProperties['CodespaceName'] = Get-PiiSafeString -PlainText $CodespaceName
 
-            break
-        }
-
-        'CodespaceName'
-        {
-            $telemetryProperties['CodespaceName'] = Get-PiiSafeString -PlainText $CodespaceName
-
-            $uriFragment = "user/codespaces/$CodespaceName"
-            $description = "Getting user/codespaces/$CodespaceName"
+                $uriFragment = "user/codespaces/$CodespaceName"
+                $description = "Getting user/codespaces/$CodespaceName"
+            }
 
             break
         }
